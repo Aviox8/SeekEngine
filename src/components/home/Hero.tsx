@@ -107,7 +107,6 @@ export default function Hero() {
 
       {/* TAGLINE */}
       <motion.div
-        style={{ opacity }}
         className="mt-8 md:mt-10 text-center space-y-2 z-20 relative max-w-2xl px-6 pointer-events-auto"
       >
         <motion.p

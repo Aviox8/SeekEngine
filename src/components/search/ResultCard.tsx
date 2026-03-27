@@ -98,18 +98,7 @@ export default memo(function ResultCard({ result, index = 0 }: { result: SearchR
       }}
       className={`block p-5 rounded-xl group relative overflow-hidden transition-all duration-300 ${shaderClass}`}
     >
-      {/* Mouse-tracking spotlight — subtle */}
-      {isHovered && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.4 }}
-          exit={{ opacity: 0 }}
-          className="pointer-events-none absolute -inset-px rounded-xl transition-opacity duration-300"
-          style={{
-            background: `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, var(--glow-soft), transparent 50%)`,
-          }}
-        />
-      )}
+      {/* Mouse-tracking spotlight removed for performance - can be re-enabled if needed */}
 
       {/* Top accent line on hover */}
       <div className="absolute top-0 left-0 right-0 h-[1px] opacity-0 group-hover:opacity-60 transition-opacity duration-300 bg-gradient-to-r from-transparent via-foreground/20 to-transparent" />
