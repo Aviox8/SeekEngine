@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useSearch } from '../../hooks/useSearch'
 import { useSearchHistory } from '../../hooks/useSearchHistory'
 import { useTheme } from 'next-themes'
-import { X, Loader2, Clock } from 'lucide-react'
+import { X, Search, Loader2, Clock } from 'lucide-react'
 import LivingIcon from '../shared/LivingIcon'
 
 export default memo(function SearchBar({ 
