@@ -384,7 +384,7 @@ export function StreamingAnswer({
   return (
     <div 
       ref={containerRef}
-      className={`relative ${className}`}
+      className={`relative overflow-x-hidden ${className}`}
       style={style}
     >
       <div className="relative">

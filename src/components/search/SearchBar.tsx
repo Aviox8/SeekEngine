@@ -212,6 +212,10 @@ export default memo(function SearchBar({
                   onKeyDown={handleKeyDown}
                   rows={1}
                   placeholder="Ask anything…"
+                  aria-label="Search query input"
+                  aria-describedby="search-hint"
+                  aria-haspopup="listbox"
+                  aria-expanded={showSuggestionsList || showHistory}
                   className="w-full bg-transparent border-none outline-none text-[15px] tracking-tight text-foreground placeholder:text-muted-foreground/25 resize-none px-3 py-[13px] min-h-[48px] max-h-[160px] leading-relaxed"
                   style={{ caretColor: 'hsl(var(--foreground))' }}
                   spellCheck={false}
@@ -226,10 +230,12 @@ export default memo(function SearchBar({
                 <AnimatePresence>
                   {!isFocused && !query && (
                     <motion.kbd
+                      id="search-hint"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       className="hidden sm:inline-flex items-center justify-center w-6 h-6 text-[11px] font-medium rounded-md border border-border/40 text-muted-foreground/25 bg-muted/20"
+                      title="Press / to focus search"
                     >
                       /
                     </motion.kbd>
@@ -307,15 +313,19 @@ export default memo(function SearchBar({
             transition={{ duration: 0.2, ease: "easeOut" }}
             className="absolute top-full left-0 right-0 z-40 overflow-hidden"
           >
-            <div className="rounded-xl overflow-hidden shadow-2xl border border-border/40 max-h-[60vh] overflow-y-auto"
+            <div 
+              role="listbox"
+              className="rounded-xl overflow-hidden shadow-2xl border border-border/40 max-h-[60vh] overflow-y-auto"
               style={{
                 background: isDark ? 'rgba(12, 12, 12, 0.95)' : 'rgba(255, 255, 255, 0.95)',
                 backdropFilter: 'blur(40px)',
               }}
             >
-               {suggestions.map((suggestion, index) => (
+               {suggestions.slice(0, 10).map((suggestion, index) => (
                  <div
                    key={index}
+                   role="option"
+                   aria-selected={index === selectedIndex}
                    onClick={() => {
                      updateQuery(suggestion)
                      handleSearch(suggestion)
@@ -326,7 +336,7 @@ export default memo(function SearchBar({
                  >
                     <Search className={`w-3.5 h-3.5 shrink-0 ${index === selectedIndex ? 'text-foreground/40' : 'text-muted-foreground/20'}`} />
                     
-                    <span className="text-foreground/70">
+                    <span className="text-foreground/70 truncate">
                       {suggestion.toLowerCase().startsWith(query.toLowerCase()) ? (
                         <>
                           <span className="text-foreground font-medium">{query}</span>
@@ -340,8 +350,8 @@ export default memo(function SearchBar({
                ))}
                
                <div className="px-4 py-2 border-t border-border/20 flex justify-between items-center">
-                  <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/25">suggestions</span>
-                  <kbd className="px-1.5 py-0.5 text-[10px] rounded border border-border/20 text-muted-foreground/25">enter</kbd>
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/25">{suggestions.length > 10 ? `${suggestions.length} suggestions` : 'suggestions'}</span>
+                  <kbd className="px-1.5 py-0.5 text-[10px] rounded border border-border/20 text-muted-foreground/25 bg-muted/30">enter</kbd>
                </div>
             </div>
           </motion.div>

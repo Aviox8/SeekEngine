@@ -19,25 +19,35 @@ const SHADER_VARIANTS = [
 
 const Favicon = memo(function Favicon({ url, fallback }: { url: string; fallback: string }) {
   const [error, setError] = useState(false)
+  const [loading, setLoading] = useState(true)
   
   if (error) {
+    // Better fallback: gradient background with letter
+    const colors = ['from-blue-500 to-cyan-500', 'from-purple-500 to-pink-500', 'from-emerald-500 to-cyan-500', 'from-orange-500 to-red-500']
+    const colorIndex = fallback.charCodeAt(0) % colors.length
     return (
-      <div className="w-5 h-5 rounded-md flex items-center justify-center font-bold text-[9px] shrink-0 bg-foreground/5 text-foreground/40">
+      <div className={`w-5 h-5 rounded-md flex items-center justify-center font-bold text-[9px] shrink-0 bg-gradient-to-br ${colors[colorIndex]} text-white shadow-sm`}>
         {fallback}
       </div>
     )
   }
 
   return (
-    <img
-      src={`https://www.google.com/s2/favicons?domain=${url}&sz=32`}
-      alt=""
-      width={20}
-      height={20}
-      className="w-5 h-5 rounded-md shrink-0"
-      onError={() => setError(true)}
-      loading="lazy"
-    />
+    <div className="relative">
+      {loading && (
+        <div className="absolute inset-0 w-5 h-5 rounded-md animate-pulse bg-foreground/10" />
+      )}
+      <img
+        src={`https://www.google.com/s2/favicons?domain=${url}&sz=32`}
+        alt=""
+        width={20}
+        height={20}
+        className="w-5 h-5 rounded-md shrink-0"
+        onError={() => setError(true)}
+        onLoad={() => setLoading(false)}
+        loading="lazy"
+      />
+    </div>
   )
 })
 
@@ -113,11 +123,14 @@ export default memo(function ResultCard({ result, index = 0 }: { result: SearchR
 
        <div className="relative z-10 space-y-3">
           {/* Source */}
-          <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/60">
+          <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/60 group">
              <Favicon url={hostname} fallback={(result.source || result.displayLink || 'W').charAt(0).toUpperCase()} />
-             <span className="truncate max-w-[240px]">{result.source || result.displayLink || hostname}</span>
+             <span className="truncate max-w-[240px] hover:text-muted-foreground/80 transition-colors" title={result.source || result.displayLink || hostname}>
+               {result.source || result.displayLink || hostname}
+             </span>
              <svg className="w-3.5 h-3.5 ml-auto opacity-0 group-hover:opacity-50 transition-opacity shrink-0"
-               viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+               aria-hidden="true">
                <path d="M7 17L17 7M17 7H7M17 7V17" />
              </svg>
           </div>

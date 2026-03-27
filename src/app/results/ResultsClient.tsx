@@ -29,6 +29,16 @@ function validateSearchResponse(data: unknown): SearchResult[] {
   })
 }
 
+// Deduplicate results by link while preserving order
+function deduplicateResults(results: SearchResult[]): SearchResult[] {
+  const seen = new Set<string>()
+  return results.filter(r => {
+    if (seen.has(r.link)) return false
+    seen.add(r.link)
+    return true
+  })
+}
+
 const TIME_OPTIONS = [
   { label: 'Any time', value: '' },
   { label: 'Past hour', value: 'h' },
@@ -42,6 +52,8 @@ export default function ResultsClient() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const query = searchParams.get('q') || ''
+  // Restore time filter from URL if present
+  const urlTime = searchParams.get('time') || ''
 
   const [aiAnswer, setAiAnswer] = useState('')
   const [copied, setCopied] = useState(false)
@@ -54,7 +66,7 @@ export default function ResultsClient() {
   const followUpInputRef = useRef<HTMLInputElement>(null)
   const searchAbortRef = useRef<AbortController | null>(null)
   const { addEntry } = useSearchHistory()
-  const [timeFilter, setTimeFilter] = useState('')
+  const [timeFilter, setTimeFilter] = useState(urlTime)
 
   const { scrollYProgress } = useScroll()
   const scaleX = useSpring(scrollYProgress, {
@@ -102,13 +114,23 @@ export default function ResultsClient() {
         
         // Validate response structure before using it
         const validatedResults = validateSearchResponse(data)
+        // Deduplicate results by link
+        const deduplicatedResults = deduplicateResults(validatedResults)
         if (!controller.signal.aborted) {
-          setResults(validatedResults)
+          setResults(deduplicatedResults)
         }
       } catch (error) {
         if ((error as Error).name === 'AbortError') return
+        const errorMsg = error instanceof Error ? error.message : ''
+        const isFetchError = errorMsg.includes('Failed to fetch')
         console.error('Error fetching results:', error)
-        if (!controller.signal.aborted) setResultsError('Could not fetch search results. Please try again.')
+        if (!controller.signal.aborted) {
+          setResultsError(
+            isFetchError 
+              ? 'Network error. Please check your connection and try again.'
+              : 'Could not fetch search results. Please try again or refine your query.'
+          )
+        }
       } finally {
         if (!controller.signal.aborted) setResultsLoading(false)
       }
@@ -295,7 +317,17 @@ export default function ResultsClient() {
                  {TIME_OPTIONS.map(opt => (
                    <button
                      key={opt.value}
-                     onClick={() => setTimeFilter(opt.value)}
+                     onClick={() => {
+                       setTimeFilter(opt.value)
+                       // Update URL with time filter for bookmarking
+                       const params = new URLSearchParams(searchParams.toString())
+                       if (opt.value) {
+                         params.set('time', opt.value)
+                       } else {
+                         params.delete('time')
+                       }
+                       router.push(`?${params.toString()}`, { scroll: false })
+                     }}
                      className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-200 border ${
                        timeFilter === opt.value
                          ? 'bg-foreground text-background border-foreground'
@@ -313,7 +345,13 @@ export default function ResultsClient() {
                     Array.from({ length: 4 }).map((_, i) => <ResultCardSkeleton key={i} />)
                   ) : resultsError ? (
                     <div className="p-6 text-center rounded-xl border border-dashed border-destructive/30">
-                        <p className="text-sm text-destructive">{resultsError}</p>
+                        <div className="flex justify-center mb-3">
+                          <svg className="w-8 h-8 text-destructive/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4v2m0-10a8 8 0 100 16 8 8 0 000-16z" />
+                          </svg>
+                        </div>
+                        <p className="text-sm text-destructive font-medium mb-1">{resultsError}</p>
+                        <p className="text-xs text-muted-foreground/60">Try a different query or check your connection.</p>
                     </div>
                   ) : results.length > 0 ? (
                     results.map((result, index) => (
@@ -329,7 +367,13 @@ export default function ResultsClient() {
                     ))
                   ) : (
                     <div className="p-6 text-center rounded-xl border border-dashed border-foreground/10">
-                        <p className="text-sm text-muted-foreground">No results found.</p>
+                        <div className="flex justify-center mb-3">
+                          <svg className="w-8 h-8 text-muted-foreground/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                        </div>
+                        <p className="text-sm font-medium text-muted-foreground mb-2">No results found for "{query}"</p>
+                        <p className="text-xs text-muted-foreground/60">Try rephrasing your query, check spelling, or try broader terms.</p>
                     </div>
                   )}
                </div>

@@ -111,6 +111,23 @@ export async function GET(request: Request) {
         snippet: r.snippet,
         source: r.source || r.displayLink || ''
       }))
+    } else {
+      // If SerpAPI has results, try to supplement with Google Custom Search (limit to avoid duplicates)
+      const webResults = await getWebSearchResults(sanitizedQuery, 1, dateRestrict)
+      const existingLinks = new Set(results.map(r => r.link))
+      
+      // Add unique results from Google that aren't in SerpAPI results
+      const uniqueWebResults = webResults
+        .filter(r => !existingLinks.has(r.link))
+        .slice(0, 2) // Only add up to 2 supplementary results
+        .map(r => ({
+          title: r.title,
+          link: r.link,
+          snippet: r.snippet,
+          source: r.source || r.displayLink || ''
+        }))
+      
+      results = [...results, ...uniqueWebResults]
     }
 
     logger.info('Search completed successfully', { 
