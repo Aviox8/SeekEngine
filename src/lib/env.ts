@@ -22,6 +22,10 @@ const envSchema = z.object({
 
 type EnvType = z.infer<typeof envSchema>
 
+// MEDIUM PRIORITY: Export type for IDE support and refactoring safety
+// Previously: EnvType was only internal, breaking IDE autocomplete
+export type { EnvType }
+
 /**
  * Validate environment variables at startup
  * Logs missing required keys but doesn't fail during build (Vercel edge runtime handling)

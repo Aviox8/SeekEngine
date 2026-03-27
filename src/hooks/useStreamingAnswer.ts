@@ -39,6 +39,20 @@ interface StreamEvent {
   sources?: { title: string; url: string; favicon?: string }[]
 }
 
+// CRITICAL FIX: Add event validation before type casting to prevent runtime errors
+// Previously: JSON.parse() returned unknown types, causing crashes on malformed API responses
+function isValidStreamEvent(data: unknown): data is StreamEvent {
+  if (typeof data !== 'object' || !data) return false
+  const event = data as Record<string, unknown>
+  const validTypes = ['token', 'thinking', 'done', 'error', 'model_selected', 'cache_hit', 'sources']
+  if (!validTypes.includes(event.type as string)) return false
+  if (event.content && typeof event.content !== 'string') return false
+  if (event.model && typeof event.model !== 'string') return false
+  if (event.modelHuman && typeof event.modelHuman !== 'string') return false
+  if (event.sources && !Array.isArray(event.sources)) return false
+  return true
+}
+
 export function useStreamingAnswer() {
   const [answer, setAnswer] = useState('')
   const [state, setState] = useState<StreamState>('idle')
@@ -100,7 +114,15 @@ export function useStreamingAnswer() {
           if (!line.startsWith('data: ')) continue
 
           try {
-            const event: StreamEvent = JSON.parse(line.slice(6))
+            const parsedData = JSON.parse(line.slice(6))
+            
+            // Validate before type casting - prevents runtime errors from malformed API responses
+            if (!isValidStreamEvent(parsedData)) {
+              console.warn('Received invalid stream event', parsedData)
+              continue
+            }
+            
+            const event: StreamEvent = parsedData
 
             switch (event.type) {
               case 'thinking':

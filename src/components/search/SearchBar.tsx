@@ -90,7 +90,9 @@ export default memo(function SearchBar({
   useEffect(() => { onTyping?.(isTyping) }, [isTyping, onTyping])
   useEffect(() => { setSelectedIndex(-1) }, [suggestions])
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+  // PERF: Memoize keydown handler to prevent textarea re-renders when parent updates
+  // Previously: handler created on every render, causing child to re-render unnecessarily
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       if (!query.trim()) return
@@ -112,7 +114,7 @@ export default memo(function SearchBar({
       e.preventDefault()
       updateQuery(prediction)
     }
-  }
+  }, [query, selectedIndex, suggestions, prediction, handleSearch, updateQuery])
 
   const ghostText = isTyping && prediction && prediction.toLowerCase().startsWith(query.toLowerCase())
     ? prediction.slice(query.length)

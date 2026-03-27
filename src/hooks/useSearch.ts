@@ -45,30 +45,27 @@ export function useSearch() {
         `/api/ai/suggest?q=${encodeURIComponent(q)}`,
         { signal: controller.signal }
       )
-      if (!response.ok) throw new Error('Failed to fetch suggestions')
-      const data = await response.json()
+      if (!response.ok) throw new Error(`Failed to fetch suggestions: HTTP ${response.status}`)
+      const data = await response.json() as { suggestions?: string[] }
       
       // Only apply if this is still the active request
       if (controller.signal.aborted) return
 
-      const newSuggestions = data.suggestions || []
+      const newSuggestions = (data.suggestions || []).filter((s): s is string => typeof s === 'string')
       setSuggestions(newSuggestions)
       
-      if (newSuggestions && newSuggestions.length > 0) {
-        const matchingSuggestion = newSuggestions.find((s: any) => 
-          typeof s === 'string' && s.toLowerCase().startsWith(q.toLowerCase())
+      if (newSuggestions.length > 0) {
+        const matchingSuggestion = newSuggestions.find(s => 
+          s.toLowerCase().startsWith(q.toLowerCase())
         )
-        if (matchingSuggestion) {
-          setPrediction(matchingSuggestion)
-        } else {
-          setPrediction('')
-        }
+        setPrediction(matchingSuggestion || '')
       } else {
         setPrediction('')
       }
     } catch (error) {
       if ((error as Error).name === 'AbortError') return // Expected cancellation
-      console.error('Error fetching suggestions:', error)
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error'
+      console.error('Error fetching suggestions:', errorMsg)
       setSuggestions([])
       setPrediction('')
       // CRITICAL FIX: Clear ref to prevent accumulating abandoned AbortControllers

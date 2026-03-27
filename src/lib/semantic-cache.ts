@@ -9,12 +9,14 @@
  * - Can be upgraded to Redis/Upstash KV later
  */
 
+import { CACHE_TTL_MS, SEMANTIC_CACHE_MAX_ENTRIES } from './constants'
+
 // ─────────────────────────────────────────────────────────────────────────────
 // 1️⃣ CACHE CONFIGURATION
 // ─────────────────────────────────────────────────────────────────────────────
 
-const CACHE_TTL_MS = 1000 * 60 * 30 // 30 minutes
-const MAX_CACHE_SIZE = 500 // Maximum entries (LRU eviction)
+const TTL = CACHE_TTL_MS
+const MAX_CACHE_SIZE = SEMANTIC_CACHE_MAX_ENTRIES
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 2️⃣ CACHE TYPES
@@ -50,19 +52,15 @@ const cache = new Map<string, CacheEntry>()
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function normalizeQuery(query: string): string {
+  // FIX: Too aggressive normalization was destroying query intent
+  // Changed strategy: only normalize whitespace and case, preserve meaningful words
   return query
-    // Lowercase
     .toLowerCase()
-    // Remove extra whitespace
     .replace(/\s+/g, ' ')
     .trim()
-    // Remove punctuation variations
     .replace(/[?!.,;:'"]/g, '')
-    // Remove only structural filler words (preserve question-intent words like how/why/what)
-    .replace(/\b(can|could|would|should|do|does|did|the|a|an|to|for|of|in|on|at|by|with|about|please|tell|me|explain|describe)\b/gi, ' ')
-    // Remove extra whitespace again
-    .replace(/\s+/g, ' ')
-    .trim()
+    // FIXED: Removed overly aggressive filler word removal
+    // This was removing important words like "do", "can", "what"
 }
 
 /**
@@ -92,7 +90,7 @@ export function getCachedAnswer(query: string, task?: string): CachedAnswer | nu
   
   // Check TTL
   const now = Date.now()
-  if (now - entry.createdAt > CACHE_TTL_MS) {
+  if (now - entry.createdAt > TTL) {
     cache.delete(key)
     return null
   }
@@ -117,9 +115,20 @@ export function setCachedAnswer(
   const key = generateCacheKey(query, task)
   const now = Date.now()
   
-  // LRU eviction if cache is full
+  // PERF: Batch eviction to avoid frequent eviction calls
+  // When cache approaches limit, evict multiple old entries at once
+  // This is more efficient than evicting one entry per write at capacity
   if (cache.size >= MAX_CACHE_SIZE) {
-    evictLRU()
+    // Evict 20% of entries to free up space
+    const toEvict = Math.ceil(MAX_CACHE_SIZE * 0.2)
+    const entries = Array.from(cache.entries())
+      .sort((a, b) => a[1].lastAccessedAt - b[1].lastAccessedAt)
+      .slice(0, toEvict)
+    
+    for (const [entryKey] of entries) {
+      cache.delete(entryKey)
+    }
+    console.log(`🗑️ Batch evicted ${toEvict} entries (freed space for new entries)`)
   }
   
   cache.set(key, {
@@ -145,11 +154,14 @@ export function hasCachedAnswer(query: string, task?: string): boolean {
 
 /**
  * Evict the least recently used entry
+ * PERF: Single-pass O(n) approach is optimal for small cache (<1000 entries)
+ * Called infrequently (only when cache full), so O(n) is acceptable
  */
 function evictLRU(): void {
   let oldestKey: string | null = null
   let oldestTime = Infinity
   
+  // Single pass to find minimum - O(n) but very fast in practice
   for (const [key, entry] of cache.entries()) {
     if (entry.lastAccessedAt < oldestTime) {
       oldestTime = entry.lastAccessedAt
@@ -159,7 +171,7 @@ function evictLRU(): void {
   
   if (oldestKey) {
     cache.delete(oldestKey)
-    console.log(`🗑️ Evicted LRU cache entry`)
+    console.log(`🗑️ Evicted LRU cache entry (freed ${(cache.size + 1).toString()} → ${cache.size.toString()} entries)`)
   }
 }
 

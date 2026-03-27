@@ -242,6 +242,19 @@ export function StreamingAnswer({
   const completed = useRef(false)
   const shouldAutoScroll = useRef(true)
 
+  // PERF: Memoize streaming content to prevent re-renders when answer updates
+  // Previously: content prop computed on every render, causing re-mount of MemoizedReasoningComplete
+  const streamingContent = useMemo(() => {
+    return metadata?.model.includes('deepseek') || metadata?.model.includes('o1') 
+      ? "Developing comprehensive response..." 
+      : undefined
+  }, [metadata?.model])
+
+  // Memoize done content
+  const doneContent = useMemo(() => {
+    return metadata?.cached ? "Result retrieved from neural search cache." : undefined
+  }, [metadata?.cached])
+
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -288,11 +301,7 @@ export function StreamingAnswer({
           <div className="w-full max-w-none animate-fade-in transition-all duration-700">
             <MemoizedReasoningComplete 
               step={STEPS.length - 1} 
-              content={
-                metadata?.model.includes('deepseek') || metadata?.model.includes('o1') 
-                  ? "Developing comprehensive response..." 
-                  : undefined
-              } 
+              content={streamingContent}
             />
             {sources && sources.length > 0 && (
               <Sources sources={sources} className="mb-6" />
@@ -308,7 +317,7 @@ export function StreamingAnswer({
           <div className="w-full animate-fade-in transition-all duration-700">
             <MemoizedReasoningComplete 
               step={STEPS.length - 1} 
-              content={metadata?.cached ? "Result retrieved from neural search cache." : undefined} 
+              content={doneContent}
             />
             {sources && sources.length > 0 && (
               <Sources sources={sources} className="mb-6" />

@@ -29,22 +29,31 @@ function cleanup() {
   // Previously cleanup only ran when a request arrived after 60s of inactivity
   // Now we always clean expired entries and warn if approaching capacity
   
-  let deleted = 0
+  // CRITICAL FIX: Collect keys first, then delete to avoid concurrent modification issues
+  // Previously: deleted during iteration could cause problems in edge runtime
+  const keysToDelete: string[] = []
   for (const [key, entry] of store.entries()) {
     if (now > entry.resetAt) {
-      store.delete(key)
-      deleted++
+      keysToDelete.push(key)
     }
+  }
+  
+  let deleted = 0
+  for (const key of keysToDelete) {
+    store.delete(key)
+    deleted++
   }
 
   // If still over limit after expiration cleanup, evict oldest entries
   if (store.size > RATE_LIMIT_MAX_ENTRIES * 0.9) { // Alert at 90%
     const excess = store.size - Math.floor(RATE_LIMIT_MAX_ENTRIES * 0.8)
-    let evicted = 0
+    const evictionKeys: string[] = []
     for (const key of store.keys()) {
-      if (evicted >= excess) break
+      if (evictionKeys.length >= excess) break
+      evictionKeys.push(key)
+    }
+    for (const key of evictionKeys) {
       store.delete(key)
-      evicted++
     }
   }
   

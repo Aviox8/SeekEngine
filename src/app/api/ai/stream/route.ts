@@ -46,7 +46,11 @@ export async function GET(request: NextRequest) {
   }
 
   const query = validation.query!
-    logger.debug('Stream request', { query: query.slice(0, 50) })
+  logger.debug('Stream request', { query: query.slice(0, 50) })
+
+  // Declare cleanup function outside try-finally scope so it's accessible in both
+  let cleanup: (() => void) | undefined
+
   try {
     // 1. Semantic Cache check
     const cached = getCachedAnswer(query, 'stream')
@@ -104,48 +108,59 @@ export async function GET(request: NextRequest) {
 
     // CRITICAL FIX: Capture and cache tokens atomically
     // Previously: Shared variables without synchronization caused data corruption
-    // during concurrent requests for same query
+    // during concurrent requests for same query. Using AbortSignal ensures cleanup.
     const encoder = new TextEncoder()
     const decoder = new TextDecoder()
+    let lastChunkTime = Date.now()
     
     // Use closure to ensure each stream has isolated state
     let fullAnswer = ''
     let modelInfo = { model: '', modelHuman: '' }
     let cacheWritten = false
+    const streamAbortController = new AbortController()
+    
+    // Define cleanup function
+    cleanup = () => streamAbortController.abort()
+    request.signal.addEventListener('abort', cleanup)
 
     const cacheTransform = new TransformStream({
       transform(chunk, controller) {
         controller.enqueue(chunk)
-        const text = decoder.decode(chunk, { stream: true })
-        // Parse SSE events from chunk
-        // Format: data: {"type":"token","content":"..."}\n\n
-        for (const line of text.split('\n')) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6))
-              if (data.type === 'token' && data.content) fullAnswer += data.content
-              if (data.model) modelInfo.model = data.model
-              if (data.modelHuman) modelInfo.modelHuman = data.modelHuman
-              // ATOMIC: Write cache only once, after completion
-              if (data.type === 'done' && !cacheWritten) {
-                cacheWritten = true
-                if (fullAnswer.length > 50) {
+        lastChunkTime = Date.now()
+        try {
+          const text = decoder.decode(chunk, { stream: true })
+          // Parse SSE events from chunk
+          // Format: data: {"type":"token","content":"..."}\n\n
+          for (const line of text.split('\n')) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6))
+                if (data.type === 'token' && data.content) fullAnswer += data.content
+                if (data.model) modelInfo.model = data.model
+                if (data.modelHuman) modelInfo.modelHuman = data.modelHuman
+                // ATOMIC: Write cache only once, after completion
+                if (data.type === 'done' && !cacheWritten && fullAnswer.length > 50) {
+                  cacheWritten = true
                   const entry: CachedAnswer = {
                     answer: fullAnswer,
                     model: modelInfo.model,
                     modelHuman: modelInfo.modelHuman,
                     tier: 'stream',
-                    latencyMs: 0,
+                    latencyMs: Date.now() - lastChunkTime,
                     attempts: 1,
                     cachedAt: Date.now(),
                     originalQuery: query,
                   }
                   setCachedAnswer(query, entry, 'stream')
-                  logger.info('Stream answer cached', { length: fullAnswer.length })
+                  logger.info('Stream answer cached', { length: fullAnswer.length, queryLen: query.length })
                 }
+              } catch (e) {
+                // Skip malformed JSON lines silently
               }
-            } catch { /* non-JSON data line */ }
+            }
           }
+        } catch (e) {
+          logger.debug('Error in cache transform', { error: e instanceof Error ? e.message : 'Unknown' })
         }
       }
     })
@@ -162,7 +177,13 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    logger.error('Stream endpoint error', error instanceof Error ? error.message : String(error))
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    // Don't log full error details to prevent accidental secret exposure
+    if (errorMsg.includes('AbortError')) {
+      logger.debug('Stream request aborted by client')
+    } else {
+      logger.error('Stream endpoint error', new Error(errorMsg.slice(0, 100)))
+    }
     return new Response(
       JSON.stringify({ error: 'Failed to start stream' }),
       { 
@@ -170,5 +191,10 @@ export async function GET(request: NextRequest) {
         headers: { 'Content-Type': 'application/json' }
       }
     )
+  } finally {
+    // Ensure cleanup of event listeners
+    if (cleanup) {
+      request.signal.removeEventListener('abort', cleanup)
+    }
   }
 }

@@ -4,6 +4,7 @@
  */
 
 import { ENV } from './env'
+import { EXTERNAL_API_TIMEOUT_MS } from './constants'
 
 const GOOGLE_API_KEY = ENV.GOOGLE_SEARCH_API_KEY
 const GOOGLE_CX = ENV.GOOGLE_SEARCH_CX
@@ -45,7 +46,7 @@ export async function getWebSearchResults(
     // MEDIUM PRIORITY FIX: Add timeout to prevent hanging requests
     // Previously: fetch() could hang indefinitely
     const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 10_000) // 10 second timeout
+    const timeout = setTimeout(() => controller.abort(), EXTERNAL_API_TIMEOUT_MS) 
     
     try {
       const response = await fetch(url.toString(), { signal: controller.signal })

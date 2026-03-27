@@ -6,11 +6,12 @@
 import { ENV } from '../env'
 import type { AITask, TaskPolicy, ModelTier } from './types'
 import { AITask as AITaskEnum } from './types'
+import { MODEL_CACHE_TTL_MS, MAX_MODEL_FAILURES_THRESHOLD } from '../constants'
 
 export const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
 export const MODELS_ENDPOINT = 'https://openrouter.ai/api/v1/models'
-export const MAX_MODEL_FAILURES = 3
-export const CACHE_TTL = 1000 * 60 * 10 // 10 minutes — free model list changes frequently
+export const MAX_MODEL_FAILURES = MAX_MODEL_FAILURES_THRESHOLD
+export const CACHE_TTL = MODEL_CACHE_TTL_MS
 
 export const BASE_SYSTEM_PROMPT = "You are SeekEngine AI. Concise markdown. Cite sources as [n]."
 

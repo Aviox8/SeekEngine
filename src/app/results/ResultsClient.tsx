@@ -14,6 +14,21 @@ import Link from 'next/link'
 import Image from 'next/image'
 import ResultsFooter from '../../components/footer/ResultsFooter'
 
+// CRITICAL FIX: Add response validation to prevent type errors from API changes
+function validateSearchResponse(data: unknown): SearchResult[] {
+  if (typeof data !== 'object' || !data) return []
+  const response = data as Record<string, unknown>
+  const results = response.results
+  if (!Array.isArray(results)) return []
+  return results.filter((r): r is SearchResult => {
+    return typeof r === 'object' && r !== null &&
+      'title' in r && 'snippet' in r && 'link' in r &&
+      typeof (r as any).title === 'string' &&
+      typeof (r as any).snippet === 'string' &&
+      typeof (r as any).link === 'string'
+  })
+}
+
 const TIME_OPTIONS = [
   { label: 'Any time', value: '' },
   { label: 'Past hour', value: 'h' },
@@ -84,7 +99,12 @@ export default function ResultsClient() {
         const response = await fetch(`/api/search?${params.toString()}`, { signal: controller.signal })
         if (!response.ok) throw new Error('Failed to fetch results')
         const data = await response.json()
-        if (!controller.signal.aborted) setResults(data.results || [])
+        
+        // Validate response structure before using it
+        const validatedResults = validateSearchResponse(data)
+        if (!controller.signal.aborted) {
+          setResults(validatedResults)
+        }
       } catch (error) {
         if ((error as Error).name === 'AbortError') return
         console.error('Error fetching results:', error)

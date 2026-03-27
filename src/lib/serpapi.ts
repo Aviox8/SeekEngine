@@ -4,6 +4,7 @@
  */
 
 import { ENV } from './env'
+import { EXTERNAL_API_TIMEOUT_MS } from './constants'
 
 const SERPAPI_KEY = ENV.SERPAPI_KEY
 const SERPAPI_URL = 'https://serpapi.com/search'
@@ -35,7 +36,7 @@ export async function getSerpResults(query: string, timeRange?: string): Promise
     // MEDIUM PRIORITY FIX: Add timeout to prevent hanging requests
     // Previously: fetch() could hang indefinitely if SerpApi was slow/unresponsive
     const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 10_000) // 10 second timeout
+    const timeout = setTimeout(() => controller.abort(), EXTERNAL_API_TIMEOUT_MS) 
     
     try {
       const response = await fetch(url.toString(), { signal: controller.signal })
