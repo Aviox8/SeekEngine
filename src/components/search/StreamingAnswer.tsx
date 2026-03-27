@@ -7,7 +7,7 @@
 
 'use client'
 
-import { useEffect, useRef, useState, CSSProperties } from 'react'
+import { useEffect, useRef, useState, CSSProperties, useMemo, memo } from 'react'
 import ReactMarkdown, { Components } from 'react-markdown'
 import { useStreamingAnswer, StreamState } from '../../hooks/useStreamingAnswer'
 
@@ -29,16 +29,33 @@ const STEPS = [
 
 function ProcessingSteps() {
   const [step, setStep] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
+  const elementRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // PERFORMANCE: Only animate when visible (IntersectionObserver)
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsPaused(!entry.isIntersecting)
+    }, { threshold: 0.1 })
+    
+    if (elementRef.current) {
+      observer.observe(elementRef.current)
+    }
+
     const interval = setInterval(() => {
-      setStep(s => (s < STEPS.length - 1 ? s + 1 : s))
+      if (!isPaused) {
+        setStep(s => (s < STEPS.length - 1 ? s + 1 : s))
+      }
     }, 900)
-    return () => clearInterval(interval)
-  }, [])
+    
+    return () => {
+      observer.disconnect()
+      clearInterval(interval)
+    }
+  }, [isPaused])
 
   return (
-    <div className="flex flex-col gap-3 py-2">
+    <div ref={elementRef} className="flex flex-col gap-3 py-2">
       {STEPS.map((text, i) => (
         <div key={i} className={`flex items-center gap-3 transition-all duration-500 ${i > step ? 'opacity-0 translate-y-1' : i === step ? 'opacity-100' : 'opacity-30'}`}>
            {i === step ? (
@@ -58,6 +75,9 @@ function ProcessingSteps() {
     </div>
   )
 }
+
+// PERFORMANCE: Memoize to prevent re-renders when parent answer updates
+const MemoizedProcessingSteps = memo(ProcessingSteps)
 
 function getTierStyles(tier: string) {
   switch (tier) {
@@ -117,6 +137,9 @@ function ModelBadge({
   )
 }
 
+// PERFORMANCE: Memoize to prevent re-renders when parent updates
+const MemoizedModelBadge = memo(ModelBadge)
+
 export function StreamingAnswer({ 
   query, 
   autoStart = true, 
@@ -139,6 +162,33 @@ export function StreamingAnswer({
   const lastStartedQuery = useRef<string | null>(null)
   const completed = useRef(false)
   const shouldAutoScroll = useRef(true)
+
+  // PERFORMANCE: Memoize markdown components to prevent recreation on every render
+  const markdownComponents = useMemo<Components>(() => ({
+    h1: (props) => <h1 className="text-2xl font-semibold mt-8 mb-4 tracking-tight text-foreground" {...props} />,
+    h2: (props) => <h2 className="text-xl font-semibold mt-8 mb-3 tracking-tight text-foreground" {...props} />,
+    h3: (props) => <h3 className="text-lg font-medium mt-6 mb-3 text-foreground/90" {...props} />,
+    a: ({ href, children }) => (
+      href && /^(https?:\/\/|\/)/.test(href)
+        ? <a href={href} target="_blank" rel="noopener noreferrer" className="underline transition-colors text-foreground hover:text-foreground/60 decoration-foreground/20" children={children} />
+        : <span children={children} />
+    ),
+    code: (props) => <code className="px-1.5 py-0.5 rounded-md font-mono text-[13px] border border-foreground/10 bg-foreground/[0.03] text-foreground/80" {...props} />,
+    pre: (props) => (
+      <div className="my-6 rounded-xl overflow-hidden border border-border/50 shadow-lg bg-card">
+        <pre className="p-4 overflow-x-auto" {...props} />
+      </div>
+    ),
+    ul: (props) => <ul className="flex flex-col gap-3 mb-3 ml-1" {...props} />,
+    li: ({ children }) => (
+      <div className="flex items-start gap-3 ml-1">
+        <span className="mt-2 w-1.5 h-1.5 rounded-full shrink-0 bg-foreground/25" />
+        <span className="text-[17px] leading-relaxed text-foreground/85">{children}</span>
+      </div>
+    ),
+    strong: (props) => <strong className="font-semibold text-foreground" {...props} />,
+    em: (props) => <em className="italic text-muted-foreground" {...props} />,
+  }), [])
 
   useEffect(() => {
     const el = containerRef.current
@@ -172,38 +222,10 @@ export function StreamingAnswer({
   }, [answer, state])
 
   const renderContent = () => {
-    // CRITICAL FIX: Custom markdown renderer using react-markdown
-    // Prevents XSS attacks through prompt injection or malicious markdown
-    const markdownComponents: Components = {
-      h1: (props) => <h1 className="text-2xl font-semibold mt-8 mb-4 tracking-tight text-foreground" {...props} />,
-      h2: (props) => <h2 className="text-xl font-semibold mt-8 mb-3 tracking-tight text-foreground" {...props} />,
-      h3: (props) => <h3 className="text-lg font-medium mt-6 mb-3 text-foreground/90" {...props} />,
-      a: ({ href, children }) => (
-        href && /^(https?:\/\/|\/)/.test(href)
-          ? <a href={href} target="_blank" rel="noopener noreferrer" className="underline transition-colors text-foreground hover:text-foreground/60 decoration-foreground/20" children={children} />
-          : <span children={children} />
-      ),
-      code: (props) => <code className="px-1.5 py-0.5 rounded-md font-mono text-[13px] border border-foreground/10 bg-foreground/[0.03] text-foreground/80" {...props} />,
-      pre: (props) => (
-        <div className="my-6 rounded-xl overflow-hidden border border-border/50 shadow-lg bg-card">
-          <pre className="p-4 overflow-x-auto" {...props} />
-        </div>
-      ),
-      ul: (props) => <ul className="flex flex-col gap-3 mb-3 ml-1" {...props} />,
-      li: ({ children }) => (
-        <div className="flex items-start gap-3 ml-1">
-          <span className="mt-2 w-1.5 h-1.5 rounded-full shrink-0 bg-foreground/25" />
-          <span className="text-[17px] leading-relaxed text-foreground/85">{children}</span>
-        </div>
-      ),
-      strong: (props) => <strong className="font-semibold text-foreground" {...props} />,
-      em: (props) => <em className="italic text-muted-foreground" {...props} />,
-    }
-
     switch (state) {
       case 'idle':
       case 'thinking':
-        return <ProcessingSteps />
+        return <MemoizedProcessingSteps />
         
       case 'streaming':
         return (
@@ -228,7 +250,7 @@ export function StreamingAnswer({
             </div>
             <div className="flex items-center justify-between flex-wrap gap-2">
               {metadata && (
-                <ModelBadge 
+                <MemoizedModelBadge 
                   modelHuman={metadata.modelHuman}
                   tier={metadata.tier}
                   latencyMs={metadata.latencyMs}
