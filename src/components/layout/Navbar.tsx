@@ -27,7 +27,7 @@ function TextRollLink({ children, href, isActive, external }: {
       rel={external ? "noopener noreferrer" : undefined}
       aria-label={children}
       aria-current={isActive ? "page" : undefined}
-      className={`group/roll relative px-3 sm:px-4 py-2 text-[11px] sm:text-xs font-medium tracking-[0.08em] uppercase rounded-xl overflow-hidden`}
+      className={`group/roll relative px-3 sm:px-4 py-2 text-[11px] sm:text-xs font-medium tracking-[0.08em] uppercase rounded-xl`}
     >
       {isActive && (
         <motion.div
@@ -37,8 +37,8 @@ function TextRollLink({ children, href, isActive, external }: {
         />
       )}
       {/* Default text */}
-      <span className="relative z-10 flex overflow-hidden h-[1.2em]">
-        <span className="flex transition-transform duration-300 ease-out group-hover/roll:-translate-y-full">
+      <span className="relative z-10 inline-flex overflow-hidden">
+        <span className="inline-flex transition-transform duration-300 ease-out group-hover/roll:-translate-y-full">
           {children.split('').map((char, i) => (
             <span
               key={i}
@@ -51,8 +51,8 @@ function TextRollLink({ children, href, isActive, external }: {
         </span>
       </span>
       {/* Rolled-up text (clone) */}
-      <span className="absolute left-3 sm:left-4 right-3 sm:right-4 z-10 flex overflow-hidden h-[1.2em]" aria-hidden="true">
-        <span className="flex translate-y-full transition-transform duration-300 ease-out group-hover/roll:translate-y-0">
+      <span className="absolute inset-x-3 sm:inset-x-4 top-2 z-10 inline-flex overflow-hidden pointer-events-none" aria-hidden="true">
+        <span className="inline-flex translate-y-full transition-transform duration-300 ease-out group-hover/roll:translate-y-0">
           {children.split('').map((char, i) => (
             <span
               key={i}
@@ -129,7 +129,7 @@ export default function Navbar() {
           </Link>
 
           {/* Separator */}
-          <div className="w-[1px] h-4 mx-1.5 bg-foreground/6" />
+          <div className="w-[1px] h-4 mx-1.5 bg-foreground/8" />
 
           {/* Nav Items with text-roll hover */}
           <div className="flex items-center relative gap-0.5 sm:gap-1 px-1">
