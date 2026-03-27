@@ -69,44 +69,46 @@ export default function ResultCard({ result, index = 0 }: { result: SearchResult
       href={result.link}
       target="_blank"
       rel="noopener noreferrer"
-      whileHover={{ y: -3 }}
-      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`block p-4 rounded-xl group relative overflow-hidden transition-all duration-400 ${shaderClass}`}
+      className={`block p-5 rounded-xl group relative overflow-hidden transition-all duration-300 ${shaderClass}`}
     >
       {/* Mouse-tracking spotlight — subtle */}
       {isHovered && (
         <div
-          className="pointer-events-none absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          className="pointer-events-none absolute -inset-px rounded-xl opacity-0 group-hover:opacity-40 transition-opacity duration-300"
           style={{
-            background: `radial-gradient(300px circle at ${mousePos.x}px ${mousePos.y}px, var(--glow-soft), transparent 40%)`,
+            background: `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, var(--glow-soft), transparent 50%)`,
           }}
         />
       )}
 
       {/* Top accent line on hover */}
-      <div className="absolute top-0 left-4 right-4 h-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-foreground/8" />
+      <div className="absolute top-0 left-0 right-0 h-[1px] opacity-0 group-hover:opacity-60 transition-opacity duration-300 bg-gradient-to-r from-transparent via-foreground/20 to-transparent" />
 
-       <div className="relative z-10 space-y-2.5">
+       <div className="relative z-10 space-y-3">
           {/* Source */}
-          <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/60">
              <Favicon url={hostname} fallback={(result.source || result.displayLink || 'W').charAt(0).toUpperCase()} />
-             <span className="truncate max-w-[200px]">{result.source || result.displayLink || hostname}</span>
-             <svg className="w-3 h-3 ml-auto opacity-0 group-hover:opacity-40 transition-opacity shrink-0"
+             <span className="truncate max-w-[240px]">{result.source || result.displayLink || hostname}</span>
+             <svg className="w-3.5 h-3.5 ml-auto opacity-0 group-hover:opacity-50 transition-opacity shrink-0"
                viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                <path d="M7 17L17 7M17 7H7M17 7V17" />
              </svg>
           </div>
 
           {/* Title */}
-          <h3 className="text-[14px] font-semibold leading-snug text-foreground/85 group-hover:text-foreground transition-colors duration-200">
+          <h3 className="text-[15px] font-semibold leading-snug text-foreground group-hover:text-foreground transition-colors duration-200 line-clamp-3">
              {result.title}
           </h3>
 
           {/* Snippet */}
-          <p className="text-[12px] leading-relaxed line-clamp-2 text-muted-foreground/70">
+          <p className="text-[13px] leading-[1.6] line-clamp-2 text-muted-foreground/70 group-hover:text-muted-foreground/80 transition-colors duration-200">
              {result.snippet}
           </p>
        </div>

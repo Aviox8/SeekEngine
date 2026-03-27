@@ -55,21 +55,33 @@ function ProcessingSteps() {
   }, [isPaused])
 
   return (
-    <div ref={elementRef} className="flex flex-col gap-3 py-2">
+    <div ref={elementRef} className="flex flex-col gap-4 py-3">
       {STEPS.map((text, i) => (
-        <div key={i} className={`flex items-center gap-3 transition-all duration-500 ${i > step ? 'opacity-0 translate-y-1' : i === step ? 'opacity-100' : 'opacity-30'}`}>
+        <div 
+          key={i} 
+          className={`flex items-center gap-3 transition-all duration-500 ${i > step ? 'opacity-0 translate-y-2' : i === step ? 'opacity-100 translate-y-0' : 'opacity-25'}`}
+          style={{
+            transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)'
+          }}
+        >
            {i === step ? (
-             <div className="flex items-center gap-1">
+             <div className="flex items-center gap-1.5 relative">
                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-dot-pulse-1" />
-               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-dot-pulse-2" />
-               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-dot-pulse-3" />
+               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-dot-pulse-2 delay-100" />
+               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-dot-pulse-3 delay-200" />
+             </div>
+           ) : i < step ? (
+             <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10">
+               <svg className="w-3.5 h-3.5 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+               </svg>
              </div>
            ) : (
-             <svg className="w-4 h-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-             </svg>
+             <div className="w-5 h-5 rounded-full border border-foreground/10" />
            )}
-           <span className={`text-sm font-medium ${i === step ? 'text-foreground' : 'text-muted-foreground/40'}`}>{text}</span>
+           <span className={`text-[13px] font-medium transition-colors duration-300 ${i === step ? 'text-foreground' : i < step ? 'text-muted-foreground/50' : 'text-muted-foreground/30'}`}>
+             {text}
+           </span>
         </div>
       ))}
     </div>
@@ -110,28 +122,28 @@ function ModelBadge({
   const tierStyle = getTierStyles(tier)
   
   return (
-    <div className="flex items-center gap-2 mt-5 pt-4 flex-wrap border-t border-border/30">
+    <div className="flex items-center gap-3 mt-7 pt-5 flex-wrap border-t border-foreground/5 animate-fade-in">
       {cached && (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-amber-500/10 text-amber-500 border border-amber-500/20">
-          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-wide bg-amber-500/8 text-amber-600 dark:text-amber-400 border border-amber-500/15 backdrop-blur-sm">
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
-          cached
+          <span>Cached</span>
         </span>
       )}
       
-      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium border ${tierStyle.className}`}>
+      <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-wide border backdrop-blur-sm ${tierStyle.className}`}>
         {tier}
       </span>
       
-      <span className="text-[11px] text-muted-foreground">
+      <span className="text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wide">
         {cached ? 'via' : 'by'}{' '}
-        <span className="font-medium text-foreground/70">{modelHuman}</span>
+        <span className="text-foreground/60 font-semibold">{modelHuman}</span>
       </span>
       
-      <span className="text-[11px] text-muted-foreground/50">
-        {cached ? 'instant' : `${latencyMs}ms`}
-        {!cached && attempts > 1 && `  ${attempts} attempts`}
+      <span className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wide ml-auto">
+        {cached ? '⚡ Instant' : `⏱ ${latencyMs}ms`}
+        {!cached && attempts > 1 && <span className="ml-1 text-muted-foreground/40">• {attempts} attempts</span>}
       </span>
     </div>
   )
@@ -225,12 +237,16 @@ export function StreamingAnswer({
     switch (state) {
       case 'idle':
       case 'thinking':
-        return <MemoizedProcessingSteps />
+        return (
+          <div className="animate-fade-in-up">
+            <MemoizedProcessingSteps />
+          </div>
+        )
         
       case 'streaming':
         return (
-          <div className="w-full max-w-none">
-            <div className="prose prose-zinc dark:prose-invert max-w-none text-[17px] leading-7 font-[inherit]">
+          <div className="w-full max-w-none animate-fade-in">
+            <div className="prose prose-zinc dark:prose-invert max-w-none text-[16px] leading-8 font-[inherit]">
               <ReactMarkdown components={markdownComponents}>
                 {answer + ' ▊'}
               </ReactMarkdown>
@@ -240,15 +256,17 @@ export function StreamingAnswer({
         
       case 'done':
         return (
-          <div className="w-full">
-            <div className="prose prose-zinc dark:prose-invert max-w-none text-[17px] leading-7 font-[inherit]">
+          <div className="w-full animate-fade-in">
+            <div className="prose prose-zinc dark:prose-invert max-w-none text-[16px] leading-8 font-[inherit]">
               {answer ? (
                 <ReactMarkdown components={markdownComponents}>{answer}</ReactMarkdown>
               ) : (
-                <p className="opacity-50 italic">No content generated.</p>
+                <div className="flex items-center justify-center py-12">
+                  <p className="text-sm text-muted-foreground/50 italic">No content generated.</p>
+                </div>
               )}
             </div>
-            <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center justify-between flex-wrap gap-4">
               {metadata && (
                 <MemoizedModelBadge 
                   modelHuman={metadata.modelHuman}
@@ -265,10 +283,10 @@ export function StreamingAnswer({
                   onRegenerate?.()
                   startStream(query)
                 }}
-                className="mt-5 pt-4 flex items-center gap-2 text-xs font-medium transition-all text-muted-foreground hover:text-primary group/regen"
+                className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-wide transition-all text-muted-foreground/70 hover:text-primary active:scale-95 group/regen"
                 title="Regenerate answer"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover/regen:rotate-180 transition-transform duration-500">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover/regen:rotate-180 transition-transform duration-700">
                   <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
                 </svg>
                 Regenerate
@@ -279,20 +297,22 @@ export function StreamingAnswer({
         
       case 'error':
         return (
-          <div className="flex items-center gap-2 text-destructive">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+          <div className="flex items-start gap-3 p-4 rounded-xl bg-destructive/5 border border-destructive/20 animate-fade-in">
+            <svg className="w-5 h-5 shrink-0 text-destructive mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
             </svg>
-            <span className="text-sm">{error || 'An error occurred'}</span>
-            <button 
-              onClick={() => {
-                completed.current = false
-                startStream(query)
-              }}
-              className="ml-2 px-3 py-1 text-xs rounded-lg transition-colors bg-destructive/10 border border-destructive/20 text-destructive hover:bg-destructive/20"
-            >
-              Retry
-            </button>
+            <div className="flex-1 flex items-center gap-3">
+              <span className="text-sm font-medium text-destructive">{error || 'An error occurred'}</span>
+              <button 
+                onClick={() => {
+                  completed.current = false
+                  startStream(query)
+                }}
+                className="ml-auto px-3 py-1.5 text-xs font-semibold uppercase tracking-wide rounded-lg transition-all active:scale-95 bg-destructive/10 border border-destructive/20 text-destructive hover:bg-destructive/15"
+              >
+                Retry
+              </button>
+            </div>
           </div>
         )
         
@@ -307,7 +327,15 @@ export function StreamingAnswer({
       className={`relative ${className}`}
       style={style}
     >
-      {renderContent()}
+      <div className="relative">
+        {/* Subtle background glow on streaming */}
+        {state === 'streaming' && (
+          <div className="absolute -inset-8 rounded-2xl bg-gradient-to-br from-primary/5 to-transparent pointer-events-none opacity-40" />
+        )}
+        <div className="relative">
+          {renderContent()}
+        </div>
+      </div>
     </div>
   )
 }

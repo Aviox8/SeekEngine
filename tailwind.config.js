@@ -119,6 +119,21 @@
       backgroundSize: {
         'gradient-xl': '200% 200%',
       },
+      transitionDelay: {
+        '0': '0ms',
+        '100': '100ms',
+        '200': '200ms',
+        '300': '300ms',
+        '500': '500ms',
+        '700': '700ms',
+      },
+      animationDelay: {
+        '0': '0ms',
+        '100': '100ms',
+        '200': '200ms',
+        '300': '300ms',
+        '500': '500ms',
+      },
     },
   },
   plugins: [

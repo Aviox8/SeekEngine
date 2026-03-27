@@ -213,6 +213,13 @@ html.theme-transition *, html.theme-transition *::before, html.theme-transition 
 .animate-delay-300 { animation-delay: 300ms; }
 .animate-delay-400 { animation-delay: 400ms; }
 
+/* Transition delays */
+.delay-100 { transition-delay: 100ms; }
+.delay-200 { transition-delay: 200ms; }
+.delay-300 { transition-delay: 300ms; }
+.delay-500 { transition-delay: 500ms; }
+.delay-700 { transition-delay: 700ms; }
+
 /*
    SCROLL FADE EFFECT — Skiper UI (skiper87)
    Uses scroll-linked animations for fade on scroll
