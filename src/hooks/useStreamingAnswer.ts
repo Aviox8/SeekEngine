@@ -27,7 +27,7 @@ export interface StreamMetadata {
 }
 
 interface StreamEvent {
-  type: 'token' | 'thinking' | 'done' | 'error' | 'model_selected' | 'cache_hit'
+  type: 'token' | 'thinking' | 'done' | 'error' | 'model_selected' | 'cache_hit' | 'sources'
   content?: string
   model?: string
   modelHuman?: string
@@ -36,6 +36,7 @@ interface StreamEvent {
   attempts?: number
   error?: string
   cachedAt?: number
+  sources?: { title: string; url: string; favicon?: string }[]
 }
 
 export function useStreamingAnswer() {
@@ -43,6 +44,7 @@ export function useStreamingAnswer() {
   const [state, setState] = useState<StreamState>('idle')
   const [metadata, setMetadata] = useState<StreamMetadata | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [sources, setSources] = useState<{ title: string; url: string; favicon?: string }[]>([])
   const abortControllerRef = useRef<AbortController | null>(null)
   const answerRef = useRef('')
 
@@ -52,6 +54,7 @@ export function useStreamingAnswer() {
     setState('idle')
     setMetadata(null)
     setError(null)
+    setSources([])
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
       abortControllerRef.current = null
@@ -104,8 +107,11 @@ export function useStreamingAnswer() {
                 setState('thinking')
                 break
 
+              case 'sources':
+                if (event.sources) setSources(event.sources)
+                break
+
               case 'model_selected':
-                // Model was selected, streaming will start soon
                 setMetadata({
                   model: event.model || '',
                   modelHuman: event.modelHuman || '',
@@ -196,8 +202,7 @@ export function useStreamingAnswer() {
     answer,
     state,
     metadata,
-    error,
-    startStream,
+    error,    sources,    startStream,
     stop,
     reset,
     isLoading: state === 'thinking' || state === 'streaming',

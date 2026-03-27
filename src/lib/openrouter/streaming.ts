@@ -377,7 +377,7 @@ export async function* streamOpenRouter(
  */
 export function createStreamingAnswerResponse(
   query: string,
-  context?: { title: string; snippet: string }[],
+  context?: { title: string; snippet: string; link: string }[],
   abortSignal?: AbortSignal
 ): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder()
@@ -392,7 +392,7 @@ export function createStreamingAnswerResponse(
     {
       role: 'system',
       content: contextText 
-        ? `${BASE_SYSTEM_PROMPT}\n\nSource base:\n${contextText}` 
+        ? `${BASE_SYSTEM_PROMPT}\n\nSearch Context:\n${contextText}` 
         : BASE_SYSTEM_PROMPT,
     },
     {
@@ -405,6 +405,19 @@ export function createStreamingAnswerResponse(
 
   return new ReadableStream({
     async start(controller) {
+      // Send grounding sources metadata immediately before starting AI stream
+      if (context && context.length > 0) {
+        const sourcesEvent: StreamEvent = {
+          type: 'sources',
+          sources: context.map(r => ({
+            title: r.title,
+            url: r.link,
+            favicon: `https://www.google.com/s2/favicons?domain=${new URL(r.link).hostname}&sz=32`
+          }))
+        }
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(sourcesEvent)}\n\n`))
+      }
+
       // Handle client cancellation (e.g., user navigates away)
       abortSignal?.addEventListener('abort', () => {
         isCancelled = true

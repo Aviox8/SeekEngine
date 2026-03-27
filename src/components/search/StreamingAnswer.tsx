@@ -15,6 +15,7 @@ import { ChevronDown, Loader2, Sparkles, AlertCircle, RefreshCw } from 'lucide-r
 import { ShimmeringText } from '../ui/shimmering-text'
 import { Response } from '../ui/response'
 import { TypingAnimation } from '../ui/typing-animation'
+import { Sources } from '../ui/sources'
 
 interface StreamingAnswerProps {
   query: string
@@ -230,6 +231,7 @@ export function StreamingAnswer({
     state, 
     metadata, 
     error, 
+    sources,
     startStream, 
     reset,
     isLoading 
@@ -292,6 +294,9 @@ export function StreamingAnswer({
                   : undefined
               } 
             />
+            {sources && sources.length > 0 && (
+              <Sources sources={sources} className="mb-6" />
+            )}
             <Response isStreaming className="min-h-[100px]">
               {answer}
             </Response>
@@ -305,6 +310,9 @@ export function StreamingAnswer({
               step={STEPS.length - 1} 
               content={metadata?.cached ? "Result retrieved from neural search cache." : undefined} 
             />
+            {sources && sources.length > 0 && (
+              <Sources sources={sources} className="mb-6" />
+            )}
             <Response className="min-h-[100px]">
               {answer}
             </Response>

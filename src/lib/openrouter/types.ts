@@ -55,7 +55,7 @@ export interface TelemetryEvent {
 }
 
 export interface StreamEvent {
-  type: 'token' | 'thinking' | 'done' | 'error' | 'model_selected'
+  type: 'token' | 'thinking' | 'done' | 'error' | 'model_selected' | 'sources' | 'cache_hit'
   content?: string
   model?: string
   modelHuman?: string
@@ -63,6 +63,8 @@ export interface StreamEvent {
   latencyMs?: number
   attempts?: number
   error?: string
+  cachedAt?: number
+  sources?: { title: string; url: string; favicon?: string }[]
 }
 
 export interface SuggestionsResult {

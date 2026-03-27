@@ -397,4 +397,4 @@ export default memo(function SearchBar({
       </AnimatePresence>
     </div>
   )
-}
+})

@@ -132,4 +132,7 @@ export default memo(function ResultCard({ result, index = 0 }: { result: SearchR
        </div>
     </motion.a>
   )
-}
+
+
+})
+
