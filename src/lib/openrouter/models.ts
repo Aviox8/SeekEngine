@@ -145,8 +145,17 @@ function isUsableModel(model: OpenRouterModel): boolean {
 }
 
 // ── Model Health Memory ──────────────────────────────────────────────────────
+/**
+ * Track model failures with timestamps for intelligent recovery
+ * Map: model ID -> { failures: count, lastFailedAt: timestamp }
+ * Allows distinguishing between old failures and recent systemic issues
+ */
+type ModelFailureInfo = {
+  failures: number
+  lastFailedAt: number
+}
 
-export const modelFailures = new Map<string, number>()
+export const modelFailures = new Map<string, ModelFailureInfo>()
 
 // ── Telemetry ────────────────────────────────────────────────────────────────
 /**
@@ -266,9 +275,11 @@ export async function getModelsForTask(task: AITask): Promise<string[]> {
   
   // Sort by health (models with fewer failures first)
   uniqueModels.sort((a, b) => {
-    const failuresA = modelFailures.get(a) || 0
-    const failuresB = modelFailures.get(b) || 0
-    return (failuresA - failuresB) || (Math.random() - 0.5)
+    const failureA = modelFailures.get(a)
+    const failureB = modelFailures.get(b)
+    const failCountA = failureA?.failures || 0
+    const failCountB = failureB?.failures || 0
+    return (failCountA - failCountB) || (Math.random() - 0.5)
   })
 
   return uniqueModels

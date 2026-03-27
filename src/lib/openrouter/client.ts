@@ -84,6 +84,11 @@ export async function callOpenRouter(
 
       if ([429, 500, 502, 503].includes(response.status)) {
         console.warn(`⚠️ Transient error ${response.status} for ${model}`)
+        const failInfo = modelFailures.get(model)
+        modelFailures.set(model, {
+          failures: (failInfo?.failures || 0) + 1,
+          lastFailedAt: Date.now()
+        })
         logTelemetry({ task, model, tier, latency, success: false, error: `HTTP ${response.status}` })
         await new Promise(r => setTimeout(r, 300))
         continue
@@ -92,7 +97,11 @@ export async function callOpenRouter(
       if (!response.ok) {
         const errorText = await response.text().catch(() => 'Unknown error')
         console.error(`❌ Model ${model} failed with ${response.status}: ${errorText}`)
-        modelFailures.set(model, (modelFailures.get(model) || 0) + 1)
+        const failInfo = modelFailures.get(model)
+        modelFailures.set(model, {
+          failures: (failInfo?.failures || 0) + 1,
+          lastFailedAt: Date.now()
+        })
         logTelemetry({ task, model, tier, latency, success: false, error: `HTTP ${response.status}` })
         continue
       }
@@ -124,7 +133,11 @@ export async function callOpenRouter(
       if (error.name === 'AbortError') {
         logTelemetry({ task, model, tier, latency, success: false, error: 'Timeout' })
       } else {
-        modelFailures.set(model, (modelFailures.get(model) || 0) + 1)
+        const failInfo = modelFailures.get(model)
+        modelFailures.set(model, {
+          failures: (failInfo?.failures || 0) + 1,
+          lastFailedAt: Date.now()
+        })
         logTelemetry({ task, model, tier, latency, success: false, error: error.message })
       }
     }

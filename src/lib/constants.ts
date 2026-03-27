@@ -24,8 +24,16 @@ export const RATE_LIMIT_MAX_ENTRIES = 10_000 // Hard cap on tracked IPs
 // ── Model Configuration ──────────────────────────────────────────────────────
 export const MAX_MODEL_FAILURES_THRESHOLD = 3
 export const MODEL_RACING_CONCURRENCY = 3 // Start N models simultaneously
-export const MAX_CONCURRENT_MODELS = 5 // Absolute maximum
+export const MAX_CONCURRENT_MODELS = 5 // Absolute maximumexport const MODEL_FAILURE_RECOVERY_WINDOW_MS = 5 * 60 * 1000 // 5 minutes
+export const SYSTEMIC_FAILURE_THRESHOLD_MS = 30_000 // 30 seconds
 
+// Validate configuration at module load
+if (MAX_CONCURRENT_MODELS <= 0) {
+  throw new Error('MAX_CONCURRENT_MODELS must be > 0 to enable model racing')
+}
+if (MAX_MODEL_FAILURES_THRESHOLD < 1) {
+  throw new Error('MAX_MODEL_FAILURES_THRESHOLD must be >= 1')
+}
 // ── Query Length & Validation ───────────────────────────────────────────────
 export const QUERY_MIN_LENGTH = 2
 export const QUERY_MAX_LENGTH = 500

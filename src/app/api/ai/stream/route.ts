@@ -19,6 +19,7 @@ import { validateSearchQuery } from '../../../../lib/validation'
 import { checkRateLimit, getClientIP, RATE_LIMITS, rateLimitResponse } from '../../../../lib/rate-limit'
 import { getCachedAnswer, setCachedAnswer, type CachedAnswer } from '../../../../lib/semantic-cache'
 import { logger } from '../../../../lib/logger'
+import { ENV } from '../../../../lib/env'
 import { NextRequest } from 'next/server'
 
 // Enable edge runtime for streaming support
@@ -26,6 +27,18 @@ export const runtime = 'edge'
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
+  // CRITICAL: Validate API key early to fail fast instead of streaming for 10+ seconds
+  if (!ENV.OPENROUTER_API_KEY) {
+    logger.error('OPENROUTER_API_KEY is missing at stream endpoint')
+    return new Response(
+      JSON.stringify({ error: 'AI service not configured. Please set OPENROUTER_API_KEY.' }),
+      { 
+        status: 503,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    )
+  }
+
   // Rate limiting
   const ip = getClientIP(request)
   const rl = checkRateLimit(`stream:${ip}`, RATE_LIMITS.stream)

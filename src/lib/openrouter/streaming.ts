@@ -17,7 +17,7 @@ import { AITask as AITaskEnum } from './types'
 import { OPENROUTER_BASE_URL, TASK_POLICIES, MAX_MODEL_FAILURES, BASE_SYSTEM_PROMPT } from './config'
 import { humanizeModel, classifyModel, modelFailures, logTelemetry, getModelsForTask } from './models'
 import { Errors } from '../errors'
-import { MODEL_RACING_TIMEOUT_MS, MAX_CONCURRENT_MODELS } from '../constants'
+import { MODEL_RACING_TIMEOUT_MS, MAX_CONCURRENT_MODELS, SYSTEMIC_FAILURE_THRESHOLD_MS } from '../constants'
 
 // ── Streaming AI Caller (SSE-Compatible) ─────────────────────────────────────
 /**
@@ -51,44 +51,46 @@ export async function* streamOpenRouter(
   const allModels = await getModelsForTask(task)
   
   // Filter out models that have failed too many times
-  let models = allModels.filter(m => (modelFailures.get(m) || 0) < MAX_MODEL_FAILURES)
+  let models = allModels.filter(m => {
+    const failInfo = modelFailures.get(m)
+    return !failInfo || failInfo.failures < MAX_MODEL_FAILURES
+  })
   
-  // HIGH PRIORITY FIX: Implement circuit breaker with exponential backoff
-  // Previously: Immediately reset all failures when all fail (API thrashing)
-  // Now: Only reset after timeout or if some models haven't failed recently
+  // CRITICAL FIX: Implement circuit breaker with proper timestamp tracking
+  // Previously: Math.max(...map(() => Date.now())) always returned Date.now(), breaking systemic failure detection
+  // Now: Correctly extract lastFailedAt from failure info to detect recent systemic issues
   if (models.length === 0) {
-    logger.warn('All models have hit failure threshold. Implementing circuit breaker.')
+    logger.warn('All models have hit failure threshold. Checking for systemic failure...')
     
-    // Clear only the oldest failures (older than 5 minutes)
-    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000
-    let anyCleaned = false
+    // Find the most recent failure timestamp across all models
+    let mostRecentFailureTime = 0
+    for (const failInfo of modelFailures.values()) {
+      if (failInfo.lastFailedAt > mostRecentFailureTime) {
+        mostRecentFailureTime = failInfo.lastFailedAt
+      }
+    }
     
-    // For now, keep strict: don't auto-reset, let the batch fail gracefully
-    // Future: Implement per-model last-failed timestamp for smarter recovery
-    const oldestFailedTime = Array.from(modelFailures.keys()).length > 0 
-      ? Math.max(...Array.from(modelFailures.entries()).map(() => Date.now()))
-      : Date.now()
-    
-    // If ALL models recently failed, we're experiencing a systemic issue (API down)
-    // Don't keep retrying - fail fast to avoid quota waste
-    if (Date.now() - oldestFailedTime < 30_000) {
-      logger.error('Systemic API failure - all models failing within last 30s')
-      yield { type: 'error', error: 'All AI models currently unavailable' }
+    // If ALL models failed within the last 30 seconds, we have a systemic issue (API down)
+    // Don't keep retrying - fail fast to avoid quota waste and rate limiting
+    const timeSinceMostRecentFailure = Date.now() - mostRecentFailureTime
+    if (timeSinceMostRecentFailure < 30_000 && modelFailures.size > 0) {
+      logger.error(`Systemic API failure detected - all models failed ${timeSinceMostRecentFailure}ms ago`, {
+        failedModels: modelFailures.size,
+        task,
+      })
+      yield { type: 'error', error: 'All AI models currently unavailable. API appears to be down.' }
       return
     }
     
-    // Try resetting only once if enough time has passed
-    const failureCount = modelFailures.size
-    if (failureCount > 0) {
-      logger.warn(`Attempting recovery - ${failureCount} failed models`)
-      modelFailures.clear()
-      models = allModels
-    }
+    // Try recovery after 30 seconds of failure-free time from oldest failed model
+    logger.warn(`Attempting recovery after ${timeSinceMostRecentFailure}ms - clearing failure history`)
+    modelFailures.clear()
+    models = allModels
   }
   
   if (models.length === 0) {
-    logger.error('No models available for racing')
-    yield { type: 'error', error: 'No models available' }
+    logger.error('No models available for racing', { task, allModelsCount: allModels.length })
+    yield { type: 'error', error: 'No models available for this task' }
     return
   }
 
@@ -136,8 +138,8 @@ export async function* streamOpenRouter(
       )
 
       if (!response.ok || !response.body) {
-        const failCount = (modelFailures.get(model) || 0) + 1
-        modelFailures.set(model, failCount)
+        const failCount = (modelFailures.get(model)?.failures || 0) + 1
+        modelFailures.set(model, { failures: failCount, lastFailedAt: Date.now() })
         logger.warn(`Model connection failed: ${model}`, { 
           status: response.status, 
           failures: failCount 
@@ -205,14 +207,20 @@ export async function* streamOpenRouter(
       }
 
     } catch (err) {
-      const failCount = (modelFailures.get(model) || 0) + 1
-      modelFailures.set(model, failCount)
+      const failCount = (modelFailures.get(model)?.failures || 0) + 1
+      modelFailures.set(model, { failures: failCount, lastFailedAt: Date.now() })
       
       const errorMsg = (err as Error).message
       if (errorMsg === 'TTFT_TIMEOUT') {
-        logger.debug(`TTFT timeout for model: ${model}`, { tier })
+        logger.debug(`TTFT timeout for model: ${model}`, { 
+          tier,
+          maxLatency: policy.maxLatency
+        })
       } else {
-        logger.debug(`Model connection error: ${model}`, { error: errorMsg })
+        logger.debug(`Model connection error: ${model}`, { 
+          error: errorMsg,
+          failCount
+        })
       }
       
       // Always abort the controller
