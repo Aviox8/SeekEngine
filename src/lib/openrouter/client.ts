@@ -85,8 +85,17 @@ export async function callOpenRouter(
       clearTimeout(timeoutId)
       const latency = Date.now() - modelStartTime
 
-      if ([429, 500, 502, 503].includes(response.status)) {
-        console.warn(`⚠️ Transient error ${response.status} for ${model}`)
+      // 429 (Rate Limit) is NOT a model failure - it's API quota exhaustion, skip without incrementing
+      if (response.status === 429) {
+        console.warn(`⚠️ Rate limited (429) for ${model} - skipping to next model`)
+        logTelemetry({ task, model, tier, latency, success: false, error: 'Rate Limited' })
+        await new Promise(r => setTimeout(r, 300))
+        continue
+      }
+
+      // 500-503 are transient server errors - mark as model failure
+      if ([500, 502, 503].includes(response.status)) {
+        console.warn(`⚠️ Transient server error ${response.status} for ${model}`)
         const failInfo = modelFailures.get(model)
         modelFailures.set(model, {
           failures: (failInfo?.failures || 0) + 1,

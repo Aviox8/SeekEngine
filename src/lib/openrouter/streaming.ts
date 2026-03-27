@@ -135,6 +135,13 @@ export async function* streamOpenRouter(
       )
 
       if (!response.ok || !response.body) {
+        // 429 (Rate Limit) is NOT a model failure - it's API quota exhaustion
+        if (response.status === 429) {
+          logger.warn(`Rate limited (429) for ${model} - moving to next model`)
+          throw new Error(`HTTP 429 - Rate Limited`)
+        }
+        
+        // For other errors, track as model failure
         const failCount = (modelFailures.get(model)?.failures || 0) + 1
         modelFailures.set(model, { failures: failCount, lastFailedAt: Date.now() })
         logger.warn(`Model connection failed: ${model} (${failCount} failures, HTTP ${response.status})`)
