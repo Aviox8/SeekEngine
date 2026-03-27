@@ -54,9 +54,10 @@ export function TypingAnimation({
 
     const timeout = setTimeout(() => {
       let i = 0
+      // PERF: Use efficient string slicing for smoother typing animation
       const typingEffect = setInterval(() => {
         if (i < children.length) {
-          setDisplayedText(children.substring(0, i + 1))
+          setDisplayedText(children.slice(0, i + 1))
           i++
         } else {
           clearInterval(typingEffect)

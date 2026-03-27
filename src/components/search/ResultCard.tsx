@@ -66,7 +66,7 @@ export default memo(function ResultCard({ result, index = 0 }: { result: SearchR
 
   // PERF: Disabled mouse move tracking - causes re-renders on every move for multiple cards
 
-  // Cycle through shader variants for visual variety
+  // PERF: Cycle through shader variants - simple modulo operation
   const shaderClass = SHADER_VARIANTS[index % SHADER_VARIANTS.length]
 
   return (
@@ -79,14 +79,14 @@ export default memo(function ResultCard({ result, index = 0 }: { result: SearchR
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ 
-        duration: 0.5, 
-        delay: index * 0.04, 
-        ease: [0.16, 1, 0.3, 1] 
+        duration: 0.3, 
+        delay: Math.min(index * 0.02, 0.2),
+        ease: 'easeOut'
       }}
       whileHover={{ 
-        y: -4, 
+        y: -2, 
         scale: 1.01,
-        transition: { duration: 0.2, ease: 'easeOut' } 
+        transition: { duration: 0.15, ease: 'easeOut' } 
       }}
       whileTap={{ scale: 0.98 }}
       onMouseEnter={() => setIsHovered(true)}

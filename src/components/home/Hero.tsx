@@ -6,51 +6,8 @@
  * Bold serif typography, atmospheric dot grid, contrast accents
  */
 
-import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-
-/* Floating abstract particles — monochrome (PERF: Reduced from 16 to 6 particles for better performance) */
-function FloatingParticles() {
-  const particles = useMemo(() =>
-    Array.from({ length: 6 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 2.5 + 1,
-      delay: Math.random() * 6,
-      duration: Math.random() * 12 + 10,
-    })), []
-  )
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map((p) => (
-        <motion.div
-          key={p.id}
-          className="absolute rounded-full bg-foreground/20"
-          style={{
-            left: `${p.x}%`,
-            top: `${p.y}%`,
-            width: p.size,
-            height: p.size,
-            willChange: 'transform, opacity',
-          }}
-          animate={{
-            y: [0, -50, 0],
-            opacity: [0, 0.5, 0],
-          }}
-          transition={{
-            duration: p.duration,
-            delay: p.delay,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        />
-      ))}
-    </div>
-  )
-}
 
 export default function Hero() {
   // PERF: Removed useScroll/useTransform scroll listeners to prevent continuous re-renders
@@ -61,9 +18,6 @@ export default function Hero() {
       
       {/* Dot grid background */}
       <div className="absolute inset-0 dot-grid opacity-40 pointer-events-none" />
-      
-      {/* Floating particles */}
-      <FloatingParticles />
 
       {/* HERO CONTENT */}
       <motion.div

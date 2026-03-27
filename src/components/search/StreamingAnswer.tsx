@@ -299,10 +299,7 @@ export function StreamingAnswer({
       case 'streaming':
         return (
           <div className="w-full max-w-none animate-fade-in transition-all duration-700">
-            <MemoizedReasoningComplete 
-              step={STEPS.length - 1} 
-              content={streamingContent}
-            />
+            {/* PERF: Hide thought process during streaming - only show sources and answer */}
             {sources && sources.length > 0 && (
               <Sources sources={sources} className="mb-6" />
             )}

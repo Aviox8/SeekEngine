@@ -79,7 +79,7 @@ export function Sources({ sources, isLoading, className, ...props }: SourcesProp
       <div 
         ref={scrollContainerRef}
         className="flex gap-3 overflow-x-auto scrollbar-thin scrollbar-thumb-foreground/20 scrollbar-track-transparent scroll-smooth snap-x snap-mandatory py-1"
-        style={{ scrollBehavior: 'smooth' }}
+        style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}
       >
         <AnimatePresence mode="popLayout">
           {sources.map((source, index) => {
