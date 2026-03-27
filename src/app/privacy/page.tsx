@@ -6,64 +6,52 @@ import Link from 'next/link'
 export default function PrivacyPolicy() {
   const sections = [
     {
-      title: '1. Information We Collect',
-      content: `We collect the following categories of information: (a) Query Data: Your search queries are logged server-side and anonymized after processing. We retain aggregated patterns for research into grounding mechanisms, not individual query content; (b) Session Data: IP address (hashed after request), browser type, device type, and approximate geographic location for analytics only; (c) Interaction Patterns: Time spent on results, which results were clicked, for understanding system effectiveness; (d) System Metrics: Latency, retrieval success rates, inference times—operational data to improve the grounding pipeline. All sensitive data (API responses with PII, credentials) is purged immediately after processing. Client-side data collection is deliberately minimal to enforce zero-trust boundaries.`
+      title: '1. This is an Open Source Project',
+      content: `SeekEngine is released under the MIT License. The code is public and auditable on GitHub. If you run your own instance, you have complete control over data collection and retention. This privacy policy describes the public demo at seekengine.vercel.app. Your own deployment can have different policies entirely.`
     },
     {
-      title: '2. How We Use Your Information',
-      content: `We use collected information for: (a) Service Delivery: Processing searches, generating results, and routing requests across models; (b) Infrastructure Monitoring: Detecting abuse, rate limiting, and system health tracking; (c) Analytics: Understanding usage patterns, popular queries, and feature adoption; (d) Model Training: Aggregate performance analysis and quality improvements (with anonymization); (e) Legal Compliance: Responding to valid legal requests and maintaining audit trails; (f) Fraud Prevention: Detecting and mitigating abuse, bot activity, and malicious usage.`
+      title: '2. What Data We Collect (Public Demo)',
+      content: `The public demo collects minimal data: (a) Query text—stored for ~3 hours to detect patterns, then deleted; (b) IP address—hashed and not persistently stored; (c) Timestamps and response times for debugging; (d) Success/failure rates of searches. We do not track individual users. We do not use cookies. We do not fingerprint browsers. Essentially: we log just enough to understand if the system is working.`
     },
     {
-      title: '3. Data Processing & Third Parties',
-      content: `Your queries are processed through Google Custom Search and OpenRouter's LLM infrastructure. These services have their own privacy policies, which apply to data they process. We do not control their practices. Additionally, web sources indexed by search engines may collect data when you visit them. Third-party analytics (if enabled) may track aggregate usage patterns. We share data only when legally required or with service providers bound by confidentiality agreements.`
+      title: '3. Why We Collect This Data',
+      content: `Data collection serves one purpose: research into grounding and retrieval-augmented generation. We need to understand: (a) How often queries return no results (indicating verification failure); (b) Response time patterns (latency of the grounding process); (c) Which types of queries succeed vs. fail; (d) System error rates. This helps us improve the grounding algorithm. Data is never used for marketing, profiling, or commercial purposes.`
     },
     {
-      title: '4. Data Retention',
-      content: `Query logs are retained for up to 90 days for abuse detection and model improvement. Anonymized analytics are retained indefinitely. IP addresses are rotated and not stored long-term. Error logs and diagnostic data are retained for 30 days. You can request deletion of your query history by contacting us, though we may retain aggregated insights. We retain data longer if legally required.`
+      title: '4. Data Retention & Deletion',
+      content: `Query logs are retained for 90 days, then automatically deleted. IP addresses are hashed and purged after 24 hours. Error traces are kept for 30 days. After these periods, data is gone. We do not maintain long-term user profiles or history. If you're concerned about specific queries, run SeekEngine locally where you control retention.`
     },
     {
-      title: '5. Data Security',
-      content: `We implement industry-standard security measures including HTTPS encryption for all communications, request validation via Zod schemas, rate limiting and bot detection, regular security audits, and access controls for internal systems. However, no system is 100% secure. We cannot guarantee absolute protection against sophisticated attacks. Report security vulnerabilities to us immediately rather than publicly disclosing them.`
+      title: '5. Third-Party Data Sharing',
+      content: `We do not sell or share user data. However, the public demo uses external APIs: (a) Google Custom Search—receives your search query; (b) OpenRouter—receives context for synthesis. These are legitimate, privacy-respecting services, but you should review their policies. For sensitive queries, run SeekEngine on your own hardware with your own API keys.`
     },
     {
-      title: '6. Your Privacy Rights',
-      content: `Depending on your jurisdiction, you may have rights including: (a) Access: Request a copy of data we hold about you; (b) Correction: Request corrections to inaccurate data; (c) Deletion: Request deletion of your data (within legal limits); (d) Portability: Request your data in machine-readable format; (e) Opt-Out: Opt out of analytics and certain data processing. To exercise these rights, contact us with your request. We will respond within 30 days or provide reasons for delay.`
+      title: '6. Security & Data Protection',
+      content: `Data is transmitted over HTTPS. API keys are server-side only—never exposed to the client. Queries are not logged with personally identifiable information. We follow basic security hygiene: input validation, XSS protection, rate limiting. However, we are a research project, not a hardened service. For production use, audit the code yourself or run it locally.`
     },
     {
-      title: '7. GDPR & Data Subject Rights (EU Users)',
-      content: `If you are in the EU, GDPR provides specific rights: Legal Basis for Processing is either your explicit consent to our service or our legitimate interest in service delivery and fraud prevention. You have the right to lodge a complaint with your local data protection authority. Data Processing Agreements are available for organizations upon request. Your data controller is the SeekEngine operator. Cross-border transfers (e.g., to US-based services) rely on standard contractual clauses and adequacy determinations.`
+      title: '7. Your Rights & Control',
+      content: `Since we don't build user profiles, there's little to retrieve or delete. But you have options: (a) Use the public demo anonymously (we don't track you); (b) Run SeekEngine locally for complete privacy; (c) Fork the code and modify it however you want. Open source means you have agency. Use that.`
     },
     {
-      title: '8. CCPA & California Residents',
-      content: `California residents have rights under CCPA to know, delete, and opt-out of data sales. While we do not sell personal information, CCPA may classify our practices broadly. You may submit requests via our contact information. We will not discriminate against you for exercising CCPA rights. The CCPA grants rights including access to specific data collected, confirmation of collection practices, deletion requests (with limited exceptions), and opting-out of "sales" (broadly defined).`
+      title: '8. GDPR & Privacy Regulations',
+      content: `We operate under the principle that minimal data collection = minimal compliance burden. We don't build profiles, so GDPR's "right to be forgotten" is straightforward—there's nothing to forget. For EU residents: we comply with data protection principles by design. If you use SeekEngine, you're in control of your data.`
     },
     {
-      title: '9. Cookies & Tracking',
-      content: `We use minimal tracking. Session cookies (if any) are necessary for service functionality. Persistent cookies are not used without consent. Third-party analytics services may place cookies for analytics purposes. You can disable cookies in your browser settings, though this may limit functionality. We do not track across unrelated websites. Pixel tracking or web beacons are not used on our platform.`
+      title: '9. Analytics & Observability',
+      content: `We use aggregated analytics to monitor system health. Example: "90% of queries succeeded" vs. "User @abc123 searched for X." We never do the latter. Observability is necessary for debugging, but it's done at the aggregate level. We do not track individual behavior over time.`
     },
     {
-      title: '10. User-Generated Content',
-      content: `Any queries you submit may be used for service improvement, research, and analytics in anonymized form. While we do not store personally identifiable information alongside queries, highly specific or sensitive queries may inadvertently contain PII. We recommend avoiding entering sensitive personal data directly into searches. If your query is logged with sensitive information, you can request its deletion.`
+      title: '10. Changes to This Policy',
+      content: `If we change data practices, we'll update this page and mention it in the GitHub repository. Continued use implies acceptance. But here's the thing: if you don't like our practices, you can fork the code and run your own version with different policies. That's the power of open source.`
     },
     {
-      title: '11. Children\'s Privacy',
-      content: `SeekEngine is not directed to children under 13. We do not knowingly collect data from children under 13. If we become aware that a child under 13 has provided information, we will delete it promptly. Parents or guardians concerned about their child's use should contact us. Users between 13-18 should be aware that their data is processed according to this policy, with additional protections under certain laws.`
+      title: '11. Self-Hosting & Data Sovereignty',
+      content: `The best privacy guarantee: run SeekEngine on your own server. You control all data. You choose which APIs to use. You decide retention policies. Docker setup is available in the repository. This is the intended use case for sensitive deployments.`
     },
     {
-      title: '12. International Data Transfers',
-      content: `SeekEngine infrastructure spans multiple regions. Your data may be transferred to and processed in countries outside your home country. By using the service, you consent to such transfers. We implement safeguards including standard contractual clauses, adequacy determinations where applicable, and consistent security practices across regions. For EU residents, transfers comply with GDPR requirements.`
-    },
-    {
-      title: '13. Service Providers & Data Processors',
-      content: `We use third-party services for search (Google), LLM routing (OpenRouter), analytics, hosting, and error monitoring. These processors are contractually bound to protect your data and comply with this privacy policy. The processors are: Google (search indexing), OpenRouter (LLM hosting), and hosting infrastructure providers. Contact us for a full list and data processing agreements.`
-    },
-    {
-      title: '14. Policy Changes & Notifications',
-      content: `We may update this policy periodically. Material changes will be notified via website announcement or email (if applicable). Continued use after changes indicates acceptance. This policy was last updated in January 2026. Check this page regularly for updates. If you disagree with any changes, discontinue service use.`
-    },
-    {
-      title: '15. Contact & Data Subject Rights Requests',
-      content: `For privacy inquiries, data subject rights requests, or concerns about our practices, contact us through the contact information on our website. Requests should include: (a) Your identity verification; (b) Clear description of your request; (c) Preferred response method. We will respond within 30 days or provide reasons for any delay. For unresolved concerns, you have the right to lodge a complaint with the relevant data protection authority.`
+      title: '12. Contact & Transparency',
+      content: `Questions about privacy? Open an issue on GitHub. Want to audit the code? It's all there. Want to see what data we collect? Check the server logs in the implementation. Transparency is built in. We have nothing to hide because the project itself is auditable.`
     }
   ]
 
@@ -83,15 +71,15 @@ export default function PrivacyPolicy() {
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <span className="px-2.5 py-1 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-[9px] font-bold uppercase tracking-wide border border-purple-200 dark:border-purple-800">
-                Privacy & Legal
+                Open Source
               </span>
-              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Effective January 2026</span>
+              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Self-Hostable</span>
             </div>
             <h1 className="text-5xl sm:text-6xl font-bold text-black dark:text-white tracking-tight leading-tight">
               Privacy Policy
             </h1>
             <p className="text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-2xl">
-              SeekEngine is built on zero-trust principles. We minimize data collection, process queries server-side only, and treat all external input as potentially adversarial. Your data supports grounding research; it is not sold or shared except as legally required.
+              SeekEngine is open source. That means: your code is visible, your data practices are obvious, and you have full control. This policy covers the public demo. For your own instance, you decide the rules.
             </p>
           </div>
         </motion.div>
@@ -144,17 +132,19 @@ export default function PrivacyPolicy() {
         >
           <div className="bg-purple-50 dark:bg-purple-900/10 border border-purple-200 dark:border-purple-800 rounded-2xl p-6 space-y-3">
             <p className="text-sm font-semibold text-purple-900 dark:text-purple-100">
-              Questions About Your Privacy?
+              The OpenSource Advantage
             </p>
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              This policy explains how SeekEngine collects and protects your data. If you have specific privacy concerns or wish to exercise your data rights, please contact us through our website. We take your privacy seriously and will respond to legitimate requests within 30 days.
+              With SeekEngine, you're not trusting a company's privacy promises—you can audit the code yourself. Run it on your own hardware. Modify it. That's the entire point of open source. Your data, your rules.
             </p>
           </div>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            For questions about our practices, see our <Link href="/tos" className="text-purple-600 dark:text-purple-400 hover:underline font-semibold">Terms of Service</Link>. Last updated: January 2026.
+            For questions: see our <Link href="/tos" className="text-purple-600 dark:text-purple-400 hover:underline font-semibold">Terms of Service</Link>, check the <Link href="https://github.com/archduke1337/SeekEngine" target="_blank" className="text-purple-600 dark:text-purple-400 hover:underline font-semibold">GitHub repository</Link>, or open an issue with questions. Last updated: January 2026.
           </p>
         </motion.div>
       </div>
     </main>
   )
 }
+
+
