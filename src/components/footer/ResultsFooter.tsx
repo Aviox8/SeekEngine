@@ -88,6 +88,8 @@ export default function ResultsFooter() {
             {[
               { label: 'Home', href: '/' },
               { label: 'About', href: '/about' },
+              { label: 'Terms', href: '/tos' },
+              { label: 'Privacy', href: '/privacy' },
               { label: 'Developer', href: 'https://archduke.is-a.dev', external: true },
               { label: 'Source', href: 'https://github.com/archduke1337/SeekEngine', external: true },
             ].map((link) => (

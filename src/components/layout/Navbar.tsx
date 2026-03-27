@@ -92,6 +92,7 @@ export default function Navbar() {
     { label: 'About', href: '/about' },
     { label: 'Research', href: 'https://archduke.is-a.dev/research/seekengine', external: true },
     { label: 'Dev', href: 'https://archduke.is-a.dev/about', external: true },
+
   ]
 
   if (!mounted) {
