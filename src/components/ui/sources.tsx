@@ -4,6 +4,7 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExternalLink, Globe, FileText, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
 
 export interface Source {
   title: string;
@@ -18,15 +19,43 @@ interface SourcesProps extends React.HTMLAttributes<HTMLDivElement> {
   isLoading?: boolean;
 }
 
+// Utility to safely extract hostname for display
+function getSafeDisplayUrl(url: string, displayUrl?: string): string {
+  if (displayUrl) return displayUrl;
+  try {
+    const hostname = new URL(url).hostname.replace('www.', '');
+    return hostname;
+  } catch {
+    return 'Source';
+  }
+}
+
 /**
  * Sources Component
  * Inspired by Vercel AI Elements (elements.ai-sdk.dev/components/sources)
- * Features: Horizontal scrolling list of search grounding sources with glassmorphism
+ * Features: Horizontal scrolling list of search grounding sources with glassmorphism,
+ * favicon error handling, and accessibility improvements
  */
 export function Sources({ sources, isLoading, className, ...props }: SourcesProps) {
+  const [faviconErrors, setFaviconErrors] = useState<Set<string>>(new Set());
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+
+  const handleFaviconError = (url: string) => {
+    setFaviconErrors(prev => new Set([...prev, url]));
+  };
+
+  if (!sources || sources.length === 0) {
+    return null;
+  }
+
   if (isLoading) {
     return (
-      <div className={cn("flex gap-3 overflow-x-auto pb-4 no-scrollbar", className)} {...props}>
+      <div 
+        className={cn("flex gap-3 overflow-x-auto scrollbar-thin scrollbar-thumb-foreground/20 scrollbar-track-transparent", className)} 
+        role="status"
+        aria-label="Loading sources"
+        {...props}
+      >
         {[1, 2, 3].map((i) => (
           <div 
             key={i} 
@@ -37,56 +66,75 @@ export function Sources({ sources, isLoading, className, ...props }: SourcesProp
     );
   }
 
-  if (!sources || sources.length === 0) return null;
-
   return (
     <div 
       className={cn(
         "group/sources relative w-full",
         className
       )} 
+      role="region"
+      aria-label="Sources and references"
       {...props}
     >
-      <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar scroll-smooth px-1">
+      <div 
+        ref={scrollContainerRef}
+        className="flex gap-3 overflow-x-auto scrollbar-thin scrollbar-thumb-foreground/20 scrollbar-track-transparent scroll-smooth snap-x snap-mandatory py-1"
+        style={{ scrollBehavior: 'smooth' }}
+      >
         <AnimatePresence mode="popLayout">
-          {sources.map((source, index) => (
-            <motion.a
-              key={source.url + index}
-              href={source.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ 
-                duration: 0.4, 
-                delay: index * 0.05,
-                ease: [0.16, 1, 0.3, 1] 
-              }}
-              whileHover={{ y: -2 }}
-              className="flex-shrink-0 w-48 p-3 rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] hover:bg-foreground/[0.04] hover:border-foreground/[0.1] transition-all group/source"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-4 h-4 rounded shadow-sm bg-white dark:bg-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
-                  {source.favicon ? (
-                    <img src={source.favicon} alt="" className="w-full h-full object-contain" />
-                  ) : (
-                    <Globe className="w-2.5 h-2.5 text-muted-foreground" />
-                  )}
+          {sources.map((source, index) => {
+            const displayUrl = getSafeDisplayUrl(source.url, source.displayUrl);
+            const faviconFailed = faviconErrors.has(source.url);
+            
+            return (
+              <motion.a
+                key={source.url + index}
+                href={source.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ 
+                  duration: 0.4, 
+                  delay: index * 0.05,
+                  ease: [0.16, 1, 0.3, 1] 
+                }}
+                whileHover={{ y: -2 }}
+                className="flex-shrink-0 w-48 p-3 rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] hover:bg-foreground/[0.04] hover:border-foreground/[0.1] transition-all group/source focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary snap-center"
+                aria-label={`${source.title} - ${displayUrl}`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-4 h-4 rounded shadow-sm bg-white dark:bg-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
+                    {source.favicon && !faviconFailed ? (
+                      <img 
+                        src={source.favicon} 
+                        alt="" 
+                        className="w-full h-full object-contain"
+                        onError={() => handleFaviconError(source.url)}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <Globe className="w-2.5 h-2.5 text-muted-foreground" aria-hidden="true" />
+                    )}
+                  </div>
+                  <span className="text-[10px] font-medium text-muted-foreground truncate uppercase tracking-tight">
+                    {displayUrl}
+                  </span>
                 </div>
-                <span className="text-[10px] font-medium text-muted-foreground truncate uppercase tracking-tight">
-                  {source.displayUrl || new URL(source.url).hostname.replace('www.', '')}
-                </span>
-              </div>
-              <h4 className="text-[12px] font-semibold text-foreground leading-tight line-clamp-2 min-h-[2em] group-hover/source:text-primary transition-colors">
-                {source.title}
-              </h4>
-            </motion.a>
-          ))}
+                <h4 className="text-[12px] font-semibold text-foreground leading-tight line-clamp-2 min-h-[2em] group-hover/source:text-primary transition-colors">
+                  {source.title || 'Untitled'}
+                </h4>
+              </motion.a>
+            );
+          })}
         </AnimatePresence>
       </div>
       
-      {/* Subtle fade edges for horizontal scroll */}
-      <div className="absolute top-0 right-0 bottom-4 w-12 bg-gradient-to-l from-background to-transparent pointer-events-none opacity-0 group-hover/sources:opacity-100 transition-opacity" />
+      {/* Subtle fade edges for horizontal scroll - positioned above scrollbar */}
+      <div 
+        className="absolute top-0 right-0 h-[calc(100%-16px)] w-12 bg-gradient-to-l from-background to-transparent pointer-events-none opacity-0 group-hover/sources:opacity-100 transition-opacity" 
+        aria-hidden="true"
+      />
     </div>
   );
 }
