@@ -79,7 +79,8 @@ export default function Navbar() {
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() ?? 0
     const diff = latest - previous
-    if (Math.abs(diff) < 5) return
+    // Increase threshold to 15px to prevent rapid toggling; ignore small scroll movements
+    if (Math.abs(diff) < 15) return
     const shouldBeVisible = !(latest > previous && latest > 200)
     setVisible(v => (v === shouldBeVisible ? v : shouldBeVisible))
     setScrolled(latest > 20)
@@ -110,7 +111,7 @@ export default function Navbar() {
           aria-label="Primary navigation"
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: visible ? 0 : -100, opacity: visible ? 1 : 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className={`flex items-center gap-1 sm:gap-1.5 p-1.5 sm:p-2 rounded-2xl pointer-events-auto transition-all duration-700 ${scrolled ? 'bg-background/60 backdrop-blur-2xl border border-foreground/[0.04] shadow-2xl' : 'bg-transparent'}`}
         >
           {/* Logo */}
