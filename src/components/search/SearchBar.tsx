@@ -168,7 +168,7 @@ export default memo(function SearchBar({
                       exit={{ opacity: 0, scale: 0.8 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <LivingIcon size="w-[18px] h-[18px]" color="#9CA3AF" />
+                      <LivingIcon size="w-[18px] h-[18px]" color="#6F6F6F" />
                     </motion.div>
                   ) : (
                     <motion.div

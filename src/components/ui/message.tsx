@@ -36,7 +36,7 @@ const Message = React.forwardRef<HTMLDivElement, MessageProps>(
           {role === 'user' ? (
             <User className="h-4 w-4" />
           ) : (
-            <LivingIcon size="w-4 h-4" color="#3B82F6" />
+            <LivingIcon size="w-4 h-4" color="#6F6F6F" />
           )}
         </motion.div>
         <motion.div 

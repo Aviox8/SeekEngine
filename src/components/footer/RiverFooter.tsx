@@ -190,7 +190,7 @@ export default function RiverFooter() {
 
         {/* Center: System Status (No Pill) */}
         <div className="absolute left-1/2 -translate-x-1/2 bottom-8 flex items-center gap-2">
-            <LivingIcon color="bg-emerald-500" size="w-1.5 h-1.5" className="mr-0.5" />
+            <LivingIcon color="#6F6F6F" size="w-1.5 h-1.5" className="mr-0.5" />
             <span className="uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-500">
                 {location}
             </span>

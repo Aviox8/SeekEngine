@@ -52,7 +52,7 @@ function ReasoningPanel({ state, step, content }: { state: StreamState, step: nu
             {state === 'thinking' ? (
               <Loader2 className="w-3 h-3 text-primary animate-spin" />
             ) : (
-              <LivingIcon size="w-5 h-5" color="#3B82F6" />
+              <LivingIcon size="w-5 h-5" color="#6F6F6F" />
             )}
           </div>
           <div className="flex flex-col items-start leading-tight">

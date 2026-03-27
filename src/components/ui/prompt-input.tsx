@@ -101,7 +101,7 @@ const PromptInput = React.forwardRef<HTMLTextAreaElement, PromptInputProps>(
                whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.04)' }}
                className="flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 hover:text-foreground/70"
              >
-                <LivingIcon size="w-3 h-3" color="#6B7280" />
+                <LivingIcon size="w-3 h-3" color="#6F6F6F" />
                 Search
              </motion.button>
              <div className="w-[1px] h-3 bg-foreground/10" />

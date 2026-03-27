@@ -225,7 +225,7 @@ export default function ResultsClient() {
                  <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
                  
                  <div className="flex items-center gap-3 mb-6 pb-4 border-b border-foreground/5">
-                    <LivingIcon color="bg-primary/60" size="w-2.5 h-2.5" />
+                    <LivingIcon color="#6F6F6F" size="w-2.5 h-2.5" />
                     <h2 className="text-sm font-bold tracking-wide text-foreground/80">
                       AI Deep Analysis
                     </h2>
@@ -300,7 +300,7 @@ export default function ResultsClient() {
             {/* RIGHT COLUMN: Web Sources with scroll fade */}
             <div className="w-full lg:w-1/3 animate-fade-in-up animate-delay-100">
                <h3 className="text-[11px] font-semibold uppercase tracking-[0.2em] mb-4 flex items-center gap-2 text-muted-foreground/40">
-                  <LivingIcon color="bg-foreground/30" size="w-1.5 h-1.5" />
+                  <LivingIcon color="#6F6F6F" size="w-1.5 h-1.5" />
                   Web Sources
                </h3>
 
