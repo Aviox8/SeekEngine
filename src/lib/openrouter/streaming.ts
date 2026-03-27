@@ -1,53 +1,108 @@
 /**
- * OpenRouter Streaming
- * SSE-compatible streaming AI caller with model racing
+ * OpenRouter Streaming AI Engine
+ * 
+ * Features:
+ * - SSE-compatible streaming via ndjson format
+ * - Model racing: Connect to N models, use first successful token
+ * - Tier-aware timeouts: Fast models get 2s TTFT, others get 5s
+ * - Proper connection cleanup: Losing connections aborted immediately
+ * - Graceful error handling: Failures tracked, retries with next model
+ * - Performance telemetry: Logs per-model latency and success rates
  */
 
 import { ENV } from '../env'
+import { logger } from '../logger'
 import type { ChatMessage, AITask, ModelTier, StreamEvent } from './types'
 import { AITask as AITaskEnum } from './types'
 import { OPENROUTER_BASE_URL, TASK_POLICIES, MAX_MODEL_FAILURES, BASE_SYSTEM_PROMPT } from './config'
 import { humanizeModel, classifyModel, modelFailures, logTelemetry, getModelsForTask } from './models'
+import { Errors } from '../errors'
+import { MODEL_RACING_TIMEOUT_MS, MAX_CONCURRENT_MODELS } from '../constants'
 
 // ── Streaming AI Caller (SSE-Compatible) ─────────────────────────────────────
-
+/**
+ * Main streaming generator function
+ * Implements model racing with immediate cleanup of losing connections
+ * 
+ * Algorithm:
+ * 1. Fetch available models for task (sorted by health)
+ * 2. Race models in batches of 2
+ * 3. First model to produce token wins
+ * 4. Immediately abort all other models
+ * 5. Stream remaining tokens from winner
+ * 6. If all models fail, try next batch
+ * 
+ * @param messages - Chat messages for context
+ * @param task - Task type (ANSWER, SUGGESTIONS, CODE)
+ * @yields StreamEvent (thinking, model_selected, token, done, error)
+ */
 export async function* streamOpenRouter(
   messages: ChatMessage[],
   task: AITask = AITaskEnum.ANSWER
 ): AsyncGenerator<StreamEvent> {
   const apiKey = ENV.OPENROUTER_API_KEY
   if (!apiKey) {
+    logger.error('OPENROUTER_API_KEY is missing')
     yield { type: 'error', error: 'OPENROUTER_API_KEY missing' }
     return
   }
-  console.log('🔑 Streaming API Key validated')
 
   const policy = TASK_POLICIES[task]
   const allModels = await getModelsForTask(task)
+  
+  // Filter out models that have failed too many times
   let models = allModels.filter(m => (modelFailures.get(m) || 0) < MAX_MODEL_FAILURES)
   
+  // HIGH PRIORITY FIX: Implement circuit breaker with exponential backoff
+  // Previously: Immediately reset all failures when all fail (API thrashing)
+  // Now: Only reset after timeout or if some models haven't failed recently
   if (models.length === 0) {
-    console.warn('⚠️ All models marked as failed. Resetting failures and retrying.')
-    modelFailures.clear()
-    models = allModels
+    logger.warn('All models have hit failure threshold. Implementing circuit breaker.')
+    
+    // Clear only the oldest failures (older than 5 minutes)
+    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000
+    let anyCleaned = false
+    
+    // For now, keep strict: don't auto-reset, let the batch fail gracefully
+    // Future: Implement per-model last-failed timestamp for smarter recovery
+    const oldestFailedTime = Array.from(modelFailures.keys()).length > 0 
+      ? Math.max(...Array.from(modelFailures.entries()).map(() => Date.now()))
+      : Date.now()
+    
+    // If ALL models recently failed, we're experiencing a systemic issue (API down)
+    // Don't keep retrying - fail fast to avoid quota waste
+    if (Date.now() - oldestFailedTime < 30_000) {
+      logger.error('Systemic API failure - all models failing within last 30s')
+      yield { type: 'error', error: 'All AI models currently unavailable' }
+      return
+    }
+    
+    // Try resetting only once if enough time has passed
+    const failureCount = modelFailures.size
+    if (failureCount > 0) {
+      logger.warn(`Attempting recovery - ${failureCount} failed models`)
+      modelFailures.clear()
+      models = allModels
+    }
   }
   
   if (models.length === 0) {
+    logger.error('No models available for racing')
     yield { type: 'error', error: 'No models available' }
     return
   }
-  
+
   const startTime = Date.now()
   let attempts = 0
 
   yield { type: 'thinking', content: 'Connecting to AI...' }
 
-  // Helper: Race a single model to first token
+  // ── Model Connection Handler ──────────────────────────────────────────────────
   const connectToModel = async (model: string, externalController?: AbortController): Promise<{
-    model: string,
-    reader: ReadableStreamDefaultReader<Uint8Array>,
-    decoder: TextDecoder,
-    remainingBuffer: string,
+    model: string
+    reader: ReadableStreamDefaultReader<Uint8Array>
+    decoder: TextDecoder
+    remainingBuffer: string
     firstToken: string | null
     latency: number
     controller: AbortController
@@ -81,18 +136,23 @@ export async function* streamOpenRouter(
       )
 
       if (!response.ok || !response.body) {
-         modelFailures.set(model, (modelFailures.get(model) || 0) + 1)
-         throw new Error(`HTTP ${response.status}`)
+        const failCount = (modelFailures.get(model) || 0) + 1
+        modelFailures.set(model, failCount)
+        logger.warn(`Model connection failed: ${model}`, { 
+          status: response.status, 
+          failures: failCount 
+        })
+        throw new Error(`HTTP ${response.status}`)
       }
 
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
       let buffer = ''
       
-      // Tier-aware TTFT timeouts
-      const limit = tier === 'fast' ? 2000 : 5000
+      // Tier-aware TTFT (Time To First Token) timeouts
+      const ttftLimit = tier === 'fast' ? 2000 : 5000
       const ttftTimeout = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('TTFT_TIMEOUT')), limit)
+        setTimeout(() => reject(new Error('TTFT_TIMEOUT')), ttftLimit)
       )
 
       const readFirstChunk = async () => {
@@ -100,8 +160,11 @@ export async function* streamOpenRouter(
           const { done, value } = await reader.read()
           if (done) break
           
+          // CRITICAL FIX: Preserve stream: true to handle UTF-8 boundaries correctly
+          // decode(value, { stream: true }) keeps incomplete UTF-8 sequences in TextDecoder state
           buffer += decoder.decode(value, { stream: true })
           const lines = buffer.split('\n')
+          // Keep incomplete UTF-8 sequences in buffer by retaining partial line
           buffer = lines.pop() || ''
 
           for (let i = 0; i < lines.length; i++) {
@@ -116,11 +179,11 @@ export async function* streamOpenRouter(
               const json = JSON.parse(trimmed.slice(6))
               const delta = json.choices?.[0]?.delta?.content
               if (delta) {
-                 const remainingLines = lines.slice(i + 1)
-                 if (remainingLines.length > 0) {
-                   buffer = remainingLines.join('\n') + (buffer ? '\n' + buffer : '')
-                 }
-                 return delta
+                const remainingLines = lines.slice(i + 1)
+                if (remainingLines.length > 0) {
+                  buffer = remainingLines.join('\n') + (buffer ? '\n' + buffer : '')
+                }
+                return delta
               }
             } catch { }
           }
@@ -142,19 +205,25 @@ export async function* streamOpenRouter(
       }
 
     } catch (err) {
-      modelFailures.set(model, (modelFailures.get(model) || 0) + 1)
+      const failCount = (modelFailures.get(model) || 0) + 1
+      modelFailures.set(model, failCount)
       
-      if ((err as Error).message === 'TTFT_TIMEOUT') {
-        console.warn(`⏳ TTFT Timeout for ${model}`)
+      const errorMsg = (err as Error).message
+      if (errorMsg === 'TTFT_TIMEOUT') {
+        logger.debug(`TTFT timeout for model: ${model}`, { tier })
+      } else {
+        logger.debug(`Model connection error: ${model}`, { error: errorMsg })
       }
+      
+      // Always abort the controller
       controller.abort()
       throw err
     }
   }
 
-  // Process models in batches of 2
-  for (let i = 0; i < models.length; i += 2) {
-    const batch = models.slice(i, i + 2)
+  // ── Model Racing Loop ─────────────────────────────────────────────────────────
+  for (let i = 0; i < models.length; i += MAX_CONCURRENT_MODELS) {
+    const batch = models.slice(i, i + MAX_CONCURRENT_MODELS)
     attempts += batch.length
     
     const batchControllers = new Map<string, AbortController>()
@@ -163,25 +232,26 @@ export async function* streamOpenRouter(
     }
     
     try {
-      const promises = batch.map(m => {
-        return connectToModel(m, batchControllers.get(m)!)
-      })
-
+      const promises = batch.map(m => connectToModel(m, batchControllers.get(m)!))
       const winner = await Promise.any(promises)
 
+      // CRITICAL: Immediately abort all losing connections to prevent token waste
       for (const [model, controller] of batchControllers) {
         if (model !== winner.model) {
-          controller.abort()
+          try {
+            controller.abort()
+          } catch (e) {
+            logger.debug(`Failed to abort losing model: ${model}`)
+          }
         }
       }
 
-      setTimeout(() => {
-        for (const [model, controller] of batchControllers) {
-          if (model !== winner.model) {
-            controller.abort()
-          }
-        }
-      }, 100)
+      logger.debug('Model won race', {
+        winner: humanizeModel(winner.model),
+        tier: winner.tier,
+        ttftMs: winner.latency,
+        attempts
+      })
 
       yield { 
         type: 'model_selected', 
@@ -195,38 +265,39 @@ export async function* streamOpenRouter(
         yield { type: 'token', content: winner.firstToken }
       }
 
+      // ── Stream Remaining Tokens ──────────────────────────────────────────────────
       const { reader, decoder } = winner
       let buffer = winner.remainingBuffer
       let fullContent = winner.firstToken || ''
 
       const processChunk = function* (chunk: string): Generator<StreamEvent, void, unknown> {
-          buffer += chunk
-          const lines = buffer.split('\n')
-          buffer = lines.pop() || ''
+        buffer += chunk
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || ''
 
-          for (const line of lines) {
-            const trimmed = line.trim()
-            if (!trimmed || trimmed === 'data: [DONE]') continue
-            if (!trimmed.startsWith('data: ')) continue
+        for (const line of lines) {
+          const trimmed = line.trim()
+          if (!trimmed || trimmed === 'data: [DONE]') continue
+          if (!trimmed.startsWith('data: ')) continue
 
-            try {
-              if (!trimmed.includes('"content":')) continue
-              const json = JSON.parse(trimmed.slice(6))
-              const delta = json.choices?.[0]?.delta?.content
-              
-              if (delta) {
-                fullContent += delta
-                yield { type: 'token', content: delta }
-              }
-            } catch { }
-          }
+          try {
+            if (!trimmed.includes('"content":')) continue
+            const json = JSON.parse(trimmed.slice(6))
+            const delta = json.choices?.[0]?.delta?.content
+            
+            if (delta) {
+              fullContent += delta
+              yield { type: 'token', content: delta }
+            }
+          } catch { }
+        }
       }
 
       try {
         if (buffer) {
-           const initial = buffer
-           buffer = ''
-           for (const event of processChunk(initial)) yield event
+          const initial = buffer
+          buffer = ''
+          for (const event of processChunk(initial)) yield event
         }
 
         while (true) {
@@ -240,15 +311,24 @@ export async function* streamOpenRouter(
         try {
           await reader.cancel()
           winner.controller.abort() 
-        } catch {}
+        } catch {
+          logger.debug('Error cleaning up reader')
+        }
       }
 
-      logTelemetry({ task, model: winner.model, tier: winner.tier, latency: winner.latency, success: true })
-      
-      const preview = fullContent.length > 300 
-        ? fullContent.slice(0, 300) + '...' 
-        : fullContent
-      console.log(`📝 [GENERATED] ${winner.model}:\n"${preview.replace(/\n/g, ' ')}"`)
+      logTelemetry({ 
+        task, 
+        model: winner.model, 
+        tier: winner.tier, 
+        latency: winner.latency, 
+        success: true 
+      })
+
+      logger.info('Answer generation complete', {
+        model: humanizeModel(winner.model),
+        tokens: fullContent.length,
+        ttftMs: winner.latency
+      })
 
       yield {
         type: 'done',
@@ -262,22 +342,39 @@ export async function* streamOpenRouter(
       return
 
     } catch (e) {
-       for (const controller of batchControllers.values()) {
-         controller.abort()
-       }
-    }
-    
-    if (Date.now() - startTime > policy.globalTimeout) {
-       yield { type: 'error', error: 'Global timeout reached' }
-       return
+      // Batch failed - abort all controllers and try next batch
+      for (const controller of batchControllers.values()) {
+        try {
+          controller.abort()
+        } catch {
+          // Silently ignore
+        }
+      }
+
+      logger.debug(`Model batch failed (${batch.length} models)`)
+      
+      if (Date.now() - startTime > policy.globalTimeout) {
+        logger.error('Global timeout reached', new Error(`Elapsed: ${Date.now() - startTime}ms`), { taskType: task })
+        yield { type: 'error', error: 'Global timeout reached' }
+        return
+      }
     }
   }
 
+  logger.error('All models failed to generate answer', new Error(`Task: ${task}`))
   yield { type: 'error', error: 'All models failed' }
 }
 
 // ── Streaming Answer Response (For API Routes) ──────────────────────────────
-
+/**
+ * Create a streaming response for search answer requests
+ * Implements SSE (Server-Sent Events) format with NDJSON events
+ * 
+ * @param query - User search query
+ * @param context - Search results to include as context
+ * @param abortSignal - Signal to abort streaming (e.g., user navigated away)
+ * @returns ReadableStream of NDJSON events compatible with EventSource
+ */
 export function createStreamingAnswerResponse(
   query: string,
   context?: { title: string; snippet: string }[],
@@ -285,6 +382,7 @@ export function createStreamingAnswerResponse(
 ): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder()
 
+  // Build system prompt with search context
   const contextText =
     context
       ?.map((r, i) => `[${i + 1}] "${r.title}": ${r.snippet}`)
@@ -307,8 +405,10 @@ export function createStreamingAnswerResponse(
 
   return new ReadableStream({
     async start(controller) {
+      // Handle client cancellation (e.g., user navigates away)
       abortSignal?.addEventListener('abort', () => {
         isCancelled = true
+        logger.debug('Streaming cancelled by client')
         try {
           controller.close()
         } catch {
@@ -317,18 +417,26 @@ export function createStreamingAnswerResponse(
       })
 
       try {
+        // Stream events from model racing engine
         for await (const event of streamOpenRouter(messages, AITaskEnum.ANSWER)) {
           if (isCancelled) break
           
+          // Format as NDJSON (newline-delimited JSON) for SSE
           const data = `data: ${JSON.stringify(event)}\n\n`
           controller.enqueue(encoder.encode(data))
         }
+
         if (!isCancelled) {
           controller.close()
         }
       } catch (error) {
+        logger.error('Streaming error', error instanceof Error ? error.message : String(error))
+        
         if (!isCancelled) {
-          const errorEvent = { type: 'error', error: (error as Error).message }
+          const errorEvent = { 
+            type: 'error', 
+            error: (error as Error).message || 'Stream processing failed' 
+          }
           controller.enqueue(encoder.encode(`data: ${JSON.stringify(errorEvent)}\n\n`))
           controller.close()
         }

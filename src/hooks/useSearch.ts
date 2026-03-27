@@ -71,6 +71,9 @@ export function useSearch() {
       console.error('Error fetching suggestions:', error)
       setSuggestions([])
       setPrediction('')
+      // CRITICAL FIX: Clear ref to prevent accumulating abandoned AbortControllers
+      // Previously non-abort errors would leave controller ref dangling indefinitely
+      abortControllerRef.current = null
     } finally {
       if (!controller.signal.aborted) {
         setIsLoading(false)

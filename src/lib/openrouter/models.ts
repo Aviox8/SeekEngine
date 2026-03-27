@@ -4,6 +4,7 @@
  */
 
 import type { ModelTier, OpenRouterModel, AITask, TelemetryEvent } from './types'
+import { logger } from '../logger'
 import {
   MODEL_TIER_PATTERNS,
   MODELS_ENDPOINT,
@@ -13,80 +14,104 @@ import {
   TASK_POLICIES,
 } from './config'
 
-// ── Human-Friendly Model Name Mapper ─────────────────────────────────────────
-
-export function humanizeModel(model: string): string {
-  const lower = model.toLowerCase()
+// ── Model Name Registry ──────────────────────────────────────────────────────
+/**
+ * Map of model ID patterns to human-readable names
+ * Ordered from most specific to least specific for accurate matching
+ */
+const MODEL_NAME_REGISTRY = [
+  // Google Gemma models
+  { pattern: /gemma-3n-e2b/i, name: 'Gemma 3N 2B' },
+  { pattern: /gemma-3n-e4b/i, name: 'Gemma 3N 4B' },
+  { pattern: /gemma-3-27b/i, name: 'Gemma 3 27B' },
+  { pattern: /gemma-3-12b/i, name: 'Gemma 3 12B' },
+  { pattern: /gemma-3-4b/i, name: 'Gemma 3 4B' },
+  { pattern: /gemma-3n/i, name: 'Gemma 3N' },
+  { pattern: /gemma/i, name: 'Gemma' },
+  { pattern: /gemini/i, name: 'Gemini' },
   
-  // Google models
-  if (lower.includes('gemma-3n-e2b')) return 'Gemma 3N 2B'
-  if (lower.includes('gemma-3n-e4b')) return 'Gemma 3N 4B'
-  if (lower.includes('gemma-3n')) return 'Gemma 3N'
-  if (lower.includes('gemma-3-27b')) return 'Gemma 3 27B'
-  if (lower.includes('gemma-3-12b')) return 'Gemma 3 12B'
-  if (lower.includes('gemma-3-4b')) return 'Gemma 3 4B'
-  if (lower.includes('gemma')) return 'Gemma'
-  if (lower.includes('gemini')) return 'Gemini'
-  
-  // Meta models
-  if (lower.includes('llama-3.3-70b')) return 'LLaMA 3.3 70B'
-  if (lower.includes('llama-3.2-3b')) return 'LLaMA 3.2 3B'
-  if (lower.includes('llama-3.1-405b')) return 'LLaMA 3.1 405B'
-  if (lower.includes('llama')) return 'LLaMA'
+  // Meta LLaMA models
+  { pattern: /llama-3\.3-70b/i, name: 'LLaMA 3.3 70B' },
+  { pattern: /llama-3\.2-3b/i, name: 'LLaMA 3.2 3B' },
+  { pattern: /llama-3\.1-405b/i, name: 'LLaMA 3.1 405B' },
+  { pattern: /llama/i, name: 'LLaMA' },
   
   // Mistral models
-  if (lower.includes('dolphin-mistral')) return 'Dolphin Mistral'
-  if (lower.includes('devstral')) return 'Devstral'
-  if (lower.includes('mistral-small')) return 'Mistral Small'
-  if (lower.includes('mistral')) return 'Mistral'
+  { pattern: /dolphin-mistral/i, name: 'Dolphin Mistral' },
+  { pattern: /mistral-small/i, name: 'Mistral Small' },
+  { pattern: /devstral/i, name: 'Devstral' },
+  { pattern: /mistral/i, name: 'Mistral' },
   
   // Qwen models
-  if (lower.includes('qwen3-coder')) return 'Qwen3 Coder'
-  if (lower.includes('qwen3-next-80b')) return 'Qwen3 Next 80B'
-  if (lower.includes('qwen3-4b')) return 'Qwen3 4B'
-  if (lower.includes('qwen')) return 'Qwen'
+  { pattern: /qwen3-coder/i, name: 'Qwen3 Coder' },
+  { pattern: /qwen3-next-80b/i, name: 'Qwen3 Next 80B' },
+  { pattern: /qwen3-4b/i, name: 'Qwen3 4B' },
+  { pattern: /qwen/i, name: 'Qwen' },
   
   // DeepSeek models
-  if (lower.includes('deepseek-r1')) return 'DeepSeek R1'
-  if (lower.includes('deepseek-chat')) return 'DeepSeek Chat'
-  if (lower.includes('deepseek')) return 'DeepSeek'
+  { pattern: /deepseek-r1/i, name: 'DeepSeek R1' },
+  { pattern: /deepseek-chat/i, name: 'DeepSeek Chat' },
+  { pattern: /deepseek/i, name: 'DeepSeek' },
   
-  // NVIDIA models
-  if (lower.includes('nemotron-3-super')) return 'Nemotron 3 Super'
-  if (lower.includes('nemotron-3-nano')) return 'Nemotron 3 Nano'
-  if (lower.includes('nemotron-nano')) return 'Nemotron Nano'
-  if (lower.includes('nemotron')) return 'Nemotron'
+  // NVIDIA Nemotron models
+  { pattern: /nemotron-3-super/i, name: 'Nemotron 3 Super' },
+  { pattern: /nemotron-3-nano/i, name: 'Nemotron 3 Nano' },
+  { pattern: /nemotron-nano/i, name: 'Nemotron Nano' },
+  { pattern: /nemotron/i, name: 'Nemotron' },
   
-  // StepFun
-  if (lower.includes('step-3.5-flash')) return 'Step 3.5 Flash'
+  // StepFun models
+  { pattern: /step-3\.5-flash/i, name: 'Step 3.5 Flash' },
   
-  // Liquid
-  if (lower.includes('lfm-2.5') && lower.includes('thinking')) return 'LFM 2.5 Thinking'
-  if (lower.includes('lfm-2.5')) return 'LFM 2.5'
+  // Liquid models
+  { pattern: /lfm-2\.5.*thinking/i, name: 'LFM 2.5 Thinking' },
+  { pattern: /lfm-2\.5/i, name: 'LFM 2.5' },
   
   // OpenRouter models
-  if (lower.includes('hunter-alpha')) return 'Hunter Alpha'
-  if (lower.includes('healer-alpha')) return 'Healer Alpha'
+  { pattern: /hunter-alpha/i, name: 'Hunter Alpha' },
+  { pattern: /healer-alpha/i, name: 'Healer Alpha' },
   
   // Other notable models
-  if (lower.includes('hermes')) return 'Hermes 405B'
-  if (lower.includes('trinity-large')) return 'Trinity Large'
-  if (lower.includes('trinity')) return 'Trinity'
-  if (lower.includes('gpt-oss-120b')) return 'GPT-OSS 120B'
-  if (lower.includes('gpt-oss')) return 'GPT-OSS'
-  if (lower.includes('glm-4.5')) return 'GLM 4.5'
-  
-  // Fallback: extract provider/model name
+  { pattern: /hermes.*405b/i, name: 'Hermes 405B' },
+  { pattern: /trinity-large/i, name: 'Trinity Large' },
+  { pattern: /trinity/i, name: 'Trinity' },
+  { pattern: /gpt-oss-120b/i, name: 'GPT-OSS 120B' },
+  { pattern: /gpt-oss/i, name: 'GPT-OSS' },
+  { pattern: /glm-4\.5/i, name: 'GLM 4.5' },
+] as const
+
+// ── Human-Friendly Model Name Mapper ─────────────────────────────────────────
+/**
+ * Convert OpenRouter model ID to human-readable name
+ * Uses registry for efficient, maintainable lookups
+ */
+export function humanizeModel(model: string): string {
+  if (!model) return 'Unknown Model'
+
+  // Check registry first (most specific patterns first)
+  for (const entry of MODEL_NAME_REGISTRY) {
+    if (entry.pattern.test(model)) {
+      return entry.name
+    }
+  }
+
+  // Fallback: extract provider/model name from ID (e.g., "openai/gpt-4" -> "GPT 4")
   const parts = model.split('/')
   if (parts.length === 2) {
-    return parts[1].replace(/:free$/, '').replace(/-/g, ' ')
+    return parts[1]
+      .replace(/:free$/, '') // Remove :free suffix
+      .replace(/-/g, ' ')     // Replace hyphens with spaces
+      .replace(/\b\w/g, char => char.toUpperCase()) // Title case
   }
-  
+
   return model
 }
 
 // ── Model Tier Classification ────────────────────────────────────────────────
-
+/**
+ * Determine the performance tier of a model
+ * @param modelId - OpenRouter model ID
+ * @returns ModelTier classification (fast, balanced, heavy, code)
+ */
 export function classifyModel(modelId: string): ModelTier {
   const id = modelId.replace(/:free$/, '').toLowerCase()
   
@@ -124,14 +149,18 @@ function isUsableModel(model: OpenRouterModel): boolean {
 export const modelFailures = new Map<string, number>()
 
 // ── Telemetry ────────────────────────────────────────────────────────────────
-
+/**
+ * Log model performance metrics
+ * @param event - TelemetryEvent with model performance data
+ */
 export function logTelemetry(event: TelemetryEvent): void {
   const emoji = event.success ? '✅' : '❌'
-  console.log(
-    `${emoji} [${event.task.toUpperCase()}] ${event.model} | ` +
-    `tier=${event.tier} latency=${event.latency}ms success=${event.success}` +
-    (event.error ? ` error="${event.error}"` : '')
-  )
+  logger.info(`${emoji} [${event.task.toUpperCase()}] ${event.model}`, {
+    tier: event.tier,
+    latencyMs: event.latency,
+    success: event.success,
+    error: event.error || undefined,
+  })
 }
 
 // ── Model Cache (Edge-Safe, In-Memory) ───────────────────────────────────────
@@ -139,9 +168,15 @@ export function logTelemetry(event: TelemetryEvent): void {
 let cachedModels: Record<ModelTier, string[]> | null = null
 let lastFetchTime = 0
 
+/**
+ * Fetch and cache models from OpenRouter API
+ * Falls back to static list if API fetch fails
+ * @returns Map of model tiers to model IDs
+ */
 export async function getModelsByTier(): Promise<Record<ModelTier, string[]>> {
   const now = Date.now()
 
+  // Return cached models if still fresh
   if (cachedModels && now - lastFetchTime < CACHE_TTL) {
     return cachedModels
   }
@@ -161,10 +196,10 @@ export async function getModelsByTier(): Promise<Record<ModelTier, string[]>> {
 
     const data = await res.json()
     const models: OpenRouterModel[] = data?.data ?? []
-    console.log(`🌐 Fetched ${models.length} raw models from OpenRouter`)
+    logger.debug(`Fetched ${models.length} raw models from OpenRouter`)
 
     const freeTextModels = models.filter(isFree).filter(supportsText).filter(isUsableModel)
-    console.log(`🆓 Found ${freeTextModels.length} free text-capable models`)
+    logger.debug(`Found ${freeTextModels.length} free text-capable models`)
 
     const tieredModels: Record<ModelTier, string[]> = {
       fast: [],
@@ -173,8 +208,8 @@ export async function getModelsByTier(): Promise<Record<ModelTier, string[]>> {
       code: [],
     }
 
+    // Classify each model by tier
     for (const model of freeTextModels) {
-      // Use model ID as-is — some free models don't use :free suffix
       const tier = classifyModel(model.id)
       tieredModels[tier].push(model.id)
     }
@@ -192,35 +227,44 @@ export async function getModelsByTier(): Promise<Record<ModelTier, string[]>> {
     lastFetchTime = now
 
     const totalCount = Object.values(tieredModels).flat().length
-    console.log(`📡 Loaded ${totalCount} free models across ${Object.keys(tieredModels).length} tiers`)
+    logger.info(`Loaded ${totalCount} free models across ${Object.keys(tieredModels).length} tiers`)
 
     return tieredModels
   } catch (err) {
-    console.warn('⚠️ Falling back to static models:', (err as Error).message)
+    logger.warn(`Failed to fetch models from OpenRouter: ${(err as Error).message}. Using static fallback.`)
     return STATIC_FALLBACK_MODELS
   }
 }
 
 // ── Task-Aware Model Selector ────────────────────────────────────────────────
-
+/**
+ * Get models ordered by preference for a specific task
+ * Prioritizes preferred tiers, then sorts by health (failure count)
+ * @param task - AI task type (ANSWER, SUGGESTIONS, CODE)
+ * @returns Array of model IDs ordered by preference
+ */
 export async function getModelsForTask(task: AITask): Promise<string[]> {
   const policy = TASK_POLICIES[task]
   const tieredModels = await getModelsByTier()
 
   const orderedModels: string[] = []
 
+  // Add models from preferred tiers first
   for (const tier of policy.preferredTiers) {
     orderedModels.push(...(tieredModels[tier] || []))
   }
 
+  // Add remaining models from other tiers
   for (const tier of ['fast', 'balanced', 'heavy', 'code'] as ModelTier[]) {
     if (!policy.preferredTiers.includes(tier)) {
       orderedModels.push(...(tieredModels[tier] || []))
     }
   }
 
+  // Remove duplicates
   const uniqueModels = [...new Set(orderedModels)]
   
+  // Sort by health (models with fewer failures first)
   uniqueModels.sort((a, b) => {
     const failuresA = modelFailures.get(a) || 0
     const failuresB = modelFailures.get(b) || 0

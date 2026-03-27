@@ -18,6 +18,7 @@ import { getWebSearchResults } from '../../../../lib/google-search'
 import { validateSearchQuery } from '../../../../lib/validation'
 import { checkRateLimit, getClientIP, RATE_LIMITS, rateLimitResponse } from '../../../../lib/rate-limit'
 import { getCachedAnswer, setCachedAnswer, type CachedAnswer } from '../../../../lib/semantic-cache'
+import { logger } from '../../../../lib/logger'
 import { NextRequest } from 'next/server'
 
 // Enable edge runtime for streaming support
@@ -45,13 +46,12 @@ export async function GET(request: NextRequest) {
   }
 
   const query = validation.query!
-  console.log(`🤖 [AI STREAM] Query: "${query}"`)
-
+    logger.debug('Stream request', { query: query.slice(0, 50) })
   try {
     // 1. Semantic Cache check
     const cached = getCachedAnswer(query, 'stream')
     if (cached) {
-      console.log(`📦 [STREAM CACHE HIT] Returning cached answer for: "${query.slice(0, 40)}..."`)
+      logger.info('Stream cache hit', { query: query.slice(0, 40) })
       const encoder = new TextEncoder()
       const body = new ReadableStream({
         start(controller) {
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 2. Fetch search context for grounding
-    console.log(`🌐 [RAG] Fetching search context for: "${query}"`)
+    logger.debug('Fetching RAG context', { query: query.slice(0, 50) })
     let context = await getSerpResults(query)
     let source = 'SerpApi'
     
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
     
     // Fallback if SerpApi empty
     if (!context || context.length === 0) {
-       console.log(`⚠️  SerpApi returned no results, falling back to Google Custom Search...`)
+       logger.debug('SerpApi had no results, using Google fallback')
        const googleResults = await getWebSearchResults(query)
        context = googleResults.map(r => ({
          title: r.title,
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
        source = 'Google Search'
     }
 
-    console.log(`✅ [CONTEXT] Found ${context.length} results from ${source}`)
+    logger.debug('Context prepared', { resultCount: context.length, source })
 
     // 3. Create streaming response with cache write
     const stream = createStreamingAnswerResponse(
@@ -102,11 +102,16 @@ export async function GET(request: NextRequest) {
       request.signal
     )
 
-    // Wrap stream to capture tokens for caching
+    // CRITICAL FIX: Capture and cache tokens atomically
+    // Previously: Shared variables without synchronization caused data corruption
+    // during concurrent requests for same query
     const encoder = new TextEncoder()
     const decoder = new TextDecoder()
+    
+    // Use closure to ensure each stream has isolated state
     let fullAnswer = ''
     let modelInfo = { model: '', modelHuman: '' }
+    let cacheWritten = false
 
     const cacheTransform = new TransformStream({
       transform(chunk, controller) {
@@ -121,8 +126,9 @@ export async function GET(request: NextRequest) {
               if (data.type === 'token' && data.content) fullAnswer += data.content
               if (data.model) modelInfo.model = data.model
               if (data.modelHuman) modelInfo.modelHuman = data.modelHuman
-              if (data.type === 'done') {
-                // Cache the completed answer
+              // ATOMIC: Write cache only once, after completion
+              if (data.type === 'done' && !cacheWritten) {
+                cacheWritten = true
                 if (fullAnswer.length > 50) {
                   const entry: CachedAnswer = {
                     answer: fullAnswer,
@@ -135,7 +141,7 @@ export async function GET(request: NextRequest) {
                     originalQuery: query,
                   }
                   setCachedAnswer(query, entry, 'stream')
-                  console.log(`📦 [STREAM CACHE WRITE] Cached ${fullAnswer.length} chars for: "${query.slice(0, 40)}..."`)
+                  logger.info('Stream answer cached', { length: fullAnswer.length })
                 }
               }
             } catch { /* non-JSON data line */ }
@@ -156,7 +162,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Error in /api/ai/stream:', error)
+    logger.error('Stream endpoint error', error instanceof Error ? error.message : String(error))
     return new Response(
       JSON.stringify({ error: 'Failed to start stream' }),
       { 

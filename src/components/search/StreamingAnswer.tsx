@@ -8,6 +8,7 @@
 'use client'
 
 import { useEffect, useRef, useState, CSSProperties } from 'react'
+import ReactMarkdown, { Components } from 'react-markdown'
 import { useStreamingAnswer, StreamState } from '../../hooks/useStreamingAnswer'
 
 interface StreamingAnswerProps {
@@ -171,6 +172,34 @@ export function StreamingAnswer({
   }, [answer, state])
 
   const renderContent = () => {
+    // CRITICAL FIX: Custom markdown renderer using react-markdown
+    // Prevents XSS attacks through prompt injection or malicious markdown
+    const markdownComponents: Components = {
+      h1: (props) => <h1 className="text-2xl font-semibold mt-8 mb-4 tracking-tight text-foreground" {...props} />,
+      h2: (props) => <h2 className="text-xl font-semibold mt-8 mb-3 tracking-tight text-foreground" {...props} />,
+      h3: (props) => <h3 className="text-lg font-medium mt-6 mb-3 text-foreground/90" {...props} />,
+      a: ({ href, children }) => (
+        href && /^(https?:\/\/|\/)/.test(href)
+          ? <a href={href} target="_blank" rel="noopener noreferrer" className="underline transition-colors text-foreground hover:text-foreground/60 decoration-foreground/20" children={children} />
+          : <span children={children} />
+      ),
+      code: (props) => <code className="px-1.5 py-0.5 rounded-md font-mono text-[13px] border border-foreground/10 bg-foreground/[0.03] text-foreground/80" {...props} />,
+      pre: (props) => (
+        <div className="my-6 rounded-xl overflow-hidden border border-border/50 shadow-lg bg-card">
+          <pre className="p-4 overflow-x-auto" {...props} />
+        </div>
+      ),
+      ul: (props) => <ul className="flex flex-col gap-3 mb-3 ml-1" {...props} />,
+      li: ({ children }) => (
+        <div className="flex items-start gap-3 ml-1">
+          <span className="mt-2 w-1.5 h-1.5 rounded-full shrink-0 bg-foreground/25" />
+          <span className="text-[17px] leading-relaxed text-foreground/85">{children}</span>
+        </div>
+      ),
+      strong: (props) => <strong className="font-semibold text-foreground" {...props} />,
+      em: (props) => <em className="italic text-muted-foreground" {...props} />,
+    }
+
     switch (state) {
       case 'idle':
       case 'thinking':
@@ -179,24 +208,24 @@ export function StreamingAnswer({
       case 'streaming':
         return (
           <div className="w-full max-w-none">
-            <div 
-              className="prose prose-zinc dark:prose-invert max-w-none text-[17px] leading-7 font-[inherit]"
-              dangerouslySetInnerHTML={{ 
-                __html: formatMarkdown(answer) + '<span class="inline-block w-2 h-4 ml-0.5 animate-pulse rounded-sm align-middle bg-primary"></span>'
-              }}
-            />
+            <div className="prose prose-zinc dark:prose-invert max-w-none text-[17px] leading-7 font-[inherit]">
+              <ReactMarkdown components={markdownComponents}>
+                {answer + ' ▊'}
+              </ReactMarkdown>
+            </div>
           </div>
         )
         
       case 'done':
         return (
           <div className="w-full">
-            <div 
-              className="prose prose-zinc dark:prose-invert max-w-none text-[17px] leading-7 font-[inherit]"
-              dangerouslySetInnerHTML={{ 
-                 __html: formatMarkdown(answer) || '<p class="opacity-50 italic">No content generated.</p>' 
-              }}
-            />
+            <div className="prose prose-zinc dark:prose-invert max-w-none text-[17px] leading-7 font-[inherit]">
+              {answer ? (
+                <ReactMarkdown components={markdownComponents}>{answer}</ReactMarkdown>
+              ) : (
+                <p className="opacity-50 italic">No content generated.</p>
+              )}
+            </div>
             <div className="flex items-center justify-between flex-wrap gap-2">
               {metadata && (
                 <ModelBadge 
@@ -261,68 +290,4 @@ export function StreamingAnswer({
   )
 }
 
-function escapeHTML(str: string) {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-}
-
-function formatMarkdown(text: string): string {
-  let formatted = escapeHTML(text)
-
-  const codeBlocks: string[] = []
-  formatted = formatted.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
-    const placeholder = `\x00CODEBLOCK_${codeBlocks.length}\x00`
-    const codeId = `codeblock-${codeBlocks.length}`
-    codeBlocks.push(
-      `<div class="my-6 rounded-xl overflow-hidden border border-border/50 shadow-lg bg-card"><div class="px-4 py-2 border-b border-border/30 text-[11px] font-mono flex justify-between items-center uppercase tracking-wider text-muted-foreground"><span>${lang || 'CODE'}</span><button onclick="(function(){var c=document.getElementById('${codeId}');navigator.clipboard.writeText(c.textContent);var b=event.target;b.textContent='Copied!';setTimeout(function(){b.textContent='Copy'},1500)})()" class="text-[10px] hover:text-primary transition-colors cursor-pointer normal-case tracking-normal">Copy</button></div><div class="p-4 overflow-x-auto"><pre><code id="${codeId}" class="font-mono text-sm leading-relaxed text-foreground/80">${code.trim()}</code></pre></div></div>`
-    )
-    return placeholder
-  })
-
-  const inlineCodes: string[] = []
-  formatted = formatted.replace(/`([^`]+)`/g, (_, code) => {
-    const placeholder = `\x00INLINECODE_${inlineCodes.length}\x00`
-    inlineCodes.push(
-      `<code class="px-1.5 py-0.5 rounded-md font-mono text-[13px] border border-foreground/10 bg-foreground/[0.03] text-foreground/80">${code}</code>`
-    )
-    return placeholder
-  })
-
-  formatted = formatted.replace(/^# (.*$)/gm, '<h1 class="text-2xl font-semibold mt-8 mb-4 tracking-tight text-foreground" style="font-family:var(--font-display)">$1</h1>')
-  formatted = formatted.replace(/^## (.*$)/gm, '<h2 class="text-xl font-semibold mt-8 mb-3 tracking-tight text-foreground" style="font-family:var(--font-display)">$1</h2>')
-  formatted = formatted.replace(/^### (.*$)/gm, '<h3 class="text-lg font-medium mt-6 mb-3 text-foreground/90" style="font-family:var(--font-display)">$1</h3>')
-
-  formatted = formatted.replace(/^\s*[-*]\s+(.*)$/gm, '<div class="flex items-start gap-3 mb-3 ml-1 group"><span class="mt-2 w-1.5 h-1.5 rounded-full shrink-0 bg-foreground/25"></span><span class="text-[17px] leading-relaxed text-foreground/85">$1</span></div>')
-  
-  formatted = formatted.replace(/^\s*(\d+)\.\s+(.*)$/gm, '<div class="flex items-start gap-3 mb-3 ml-1"><span class="text-sm font-mono mt-1 select-none text-foreground/30">$1.</span><span class="text-[17px] leading-relaxed text-foreground/85">$2</span></div>')
-
-  formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-foreground">$1</strong>')
-  formatted = formatted.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em class="italic text-muted-foreground">$1</em>')
-
-  formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, url) => {
-    const trimmedUrl = url.trim()
-    if (/^(https?:\/\/|\/)/.test(trimmedUrl)) {
-      return `<a href="${trimmedUrl}" target="_blank" rel="noopener noreferrer" class="underline transition-colors text-foreground hover:text-foreground/60 decoration-foreground/20">${text}</a>`
-    }
-    return `${text} (${trimmedUrl})`
-  })
-
-  formatted = formatted.replace(/(?<!\="|&gt;\")\s?\[(\d+)\](?![^<]*<\/a>)/g, '<sup data-citation="$1" onclick="(function(){var el=document.querySelector(\x27[data-result-index=\"\x27+$1+\x27\"]\x27);if(el){el.scrollIntoView({behavior:\x27smooth\x27,block:\x27center\x27});el.classList.add(\x27ring-2\x27,\x27ring-foreground/30\x27);setTimeout(function(){el.classList.remove(\x27ring-2\x27,\x27ring-foreground/30\x27)},2000)}})()"\ class="ml-0.5 text-[10px] font-bold font-mono px-1.5 py-0.5 rounded cursor-pointer transition-colors select-none text-foreground/60 bg-foreground/[0.04]">[$1]</sup>')
-
-  formatted = formatted.replace(/\n\n/g, '<div class="h-6"></div>')
-  formatted = formatted.replace(/([^\n])\n([^\n])/g, '$1<br class="md:hidden" /> $2') 
-
-  inlineCodes.forEach((html, i) => {
-    formatted = formatted.replace(`\x00INLINECODE_${i}\x00`, html)
-  })
-  codeBlocks.forEach((html, i) => {
-    formatted = formatted.replace(`\x00CODEBLOCK_${i}\x00`, html)
-  })
-
-  return formatted
-}
-
-export { formatMarkdown }
 export type { StreamState }

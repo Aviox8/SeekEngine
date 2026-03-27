@@ -22,17 +22,23 @@ export function useLocation() {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 1200)
 
-    fetch('https://ipapi.co/json/', { signal: controller.signal })
-      .then(res => res.json())
-      .then(data => {
-        clearTimeout(timeoutId)
+    // CRITICAL FIX: Use try-finally to guarantee timeout cleanup
+    // Previously timer could leak if fetch promise never settled
+    ;(async () => {
+      try {
+        const res = await fetch('https://ipapi.co/json/', { signal: controller.signal })
+        if (!res.ok) throw new Error('Location fetch failed')
+        const data = await res.json()
         if (controller.signal.aborted) return
         if (data.city) setLocation(data.city)
         else if (data.region) setLocation(data.region)
-      })
-      .catch(() => {
+      } catch {
+        // Expected if aborted or network error - silently fail
+      } finally {
+        // GUARANTEE: Timer always cleared regardless of fetch outcome
         clearTimeout(timeoutId)
-      })
+      }
+    })()
 
     return () => {
       clearInterval(timeInterval)

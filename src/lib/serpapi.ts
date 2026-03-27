@@ -32,27 +32,40 @@ export async function getSerpResults(query: string, timeRange?: string): Promise
     url.searchParams.append('num', '8')
     if (timeRange) url.searchParams.append('tbs', timeRange)
 
-    const response = await fetch(url.toString())
+    // MEDIUM PRIORITY FIX: Add timeout to prevent hanging requests
+    // Previously: fetch() could hang indefinitely if SerpApi was slow/unresponsive
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 10_000) // 10 second timeout
     
-    if (!response.ok) {
-      console.error(`❌ SerpApi Error: ${response.status}`)
-      return []
+    try {
+      const response = await fetch(url.toString(), { signal: controller.signal })
+      
+      if (!response.ok) {
+        console.error(`❌ SerpApi Error: ${response.status}`)
+        return []
+      }
+
+      const data = await response.json()
+
+      if (!data.organic_results) {
+        return []
+      }
+
+      return data.organic_results.map((item: any) => ({
+        title: item.title,
+        link: item.link,
+        snippet: item.snippet || item.about_this_result?.source?.description || '',
+        source: item.source || item.display_link || ''
+      }))
+    } finally {
+      clearTimeout(timeout)
     }
-
-    const data = await response.json()
-
-    if (!data.organic_results) {
-      return []
-    }
-
-    return data.organic_results.map((item: any) => ({
-      title: item.title,
-      link: item.link,
-      snippet: item.snippet || item.about_this_result?.source?.description || '',
-      source: item.source || item.display_link || ''
-    }))
   } catch (error) {
-    console.error('Error fetching SerpApi results:', error)
+    if ((error as Error).name === 'AbortError') {
+      console.error('SerpApi request timeout')
+    } else {
+      console.error('Error fetching SerpApi results:', error)
+    }
     return []
   }
 }

@@ -1,7 +1,16 @@
 import { z } from 'zod'
+import { logger } from './logger'
 
 /**
  * Environment Variables Validation Schema
+ * 
+ * Required:
+ * - OPENROUTER_API_KEY: OpenRouter API authentication
+ * 
+ * Optional:
+ * - GOOGLE_SEARCH_API_KEY: Google Custom Search API key
+ * - GOOGLE_SEARCH_CX: Google Custom Search engine ID
+ * - SERPAPI_KEY: SerpAPI key for web search
  */
 const envSchema = z.object({
   OPENROUTER_API_KEY: z.string().min(1, 'OPENROUTER_API_KEY is required'),
@@ -11,18 +20,36 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 })
 
-// Validate environment variables
-const env = envSchema.safeParse({
-  OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
-  GOOGLE_SEARCH_API_KEY: process.env.GOOGLE_SEARCH_API_KEY,
-  GOOGLE_SEARCH_CX: process.env.GOOGLE_SEARCH_CX,
-  SERPAPI_KEY: process.env.SERPAPI_KEY,
-  NODE_ENV: process.env.NODE_ENV,
-})
+type EnvType = z.infer<typeof envSchema>
 
-if (!env.success) {
-  console.error('❌ Invalid environment variables:', env.error.flatten().fieldErrors)
-  // Don't throw during build — env vars are injected at runtime on Vercel edge
+/**
+ * Validate environment variables at startup
+ * Logs missing required keys but doesn't fail during build (Vercel edge runtime handling)
+ */
+function validateEnv(): EnvType {
+  const env = envSchema.safeParse({
+    OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+    GOOGLE_SEARCH_API_KEY: process.env.GOOGLE_SEARCH_API_KEY,
+    GOOGLE_SEARCH_CX: process.env.GOOGLE_SEARCH_CX,
+    SERPAPI_KEY: process.env.SERPAPI_KEY,
+    NODE_ENV: process.env.NODE_ENV,
+  })
+
+  if (!env.success) {
+    const errors = env.error.flatten().fieldErrors
+    logger.warn('Environment validation failed', { errors })
+    if (process.env.NODE_ENV === 'production') {
+      logger.error('Production environment validation failure', Object.keys(errors).join(', '))
+    }
+  }
+
+  return env.success ? env.data : ({} as EnvType)
 }
 
-export const ENV = env.success ? env.data : ({} as z.infer<typeof envSchema>)
+export const ENV = validateEnv()
+
+/**
+ * Helper to check if optional API keys are configured
+ */
+export const hasGoogleSearch = () => !!ENV.GOOGLE_SEARCH_API_KEY && !!ENV.GOOGLE_SEARCH_CX
+export const hasSerpAPI = () => !!ENV.SERPAPI_KEY

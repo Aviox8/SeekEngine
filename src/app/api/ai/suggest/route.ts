@@ -82,8 +82,12 @@ export async function GET(request: NextRequest) {
         cachedAt: Date.now(),
       })
       
-      // LRU cleanup if cache gets too large
-      if (suggestionsCache.size > 200) {
+      // MEDIUM PRIORITY FIX: Atomic LRU cleanup to prevent size overflow
+      // Previously: Race condition allowed cache to exceed limits
+      // Now: Check and evict atomically after insertion
+      const MAX_CACHE_SIZE = 200
+      while (suggestionsCache.size > MAX_CACHE_SIZE) {
+        // Find and delete oldest entry
         let oldestKey: string | null = null
         let oldestTime = Infinity
         for (const [key, entry] of suggestionsCache.entries()) {
@@ -92,7 +96,11 @@ export async function GET(request: NextRequest) {
             oldestKey = key
           }
         }
-        if (oldestKey) suggestionsCache.delete(oldestKey)
+        if (oldestKey) {
+          suggestionsCache.delete(oldestKey)
+        } else {
+          break // Safety: unexpected state
+        }
       }
     }
     

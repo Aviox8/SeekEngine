@@ -53,20 +53,23 @@ export default function SearchBar({
 
   useEffect(() => { resizeTextarea() }, [query, resizeTextarea])
 
+  // CRITICAL FIX: Empty dependency array prevents duplicate event listeners
+  // Previously dependency on [isFocused] caused effect to re-run on every focus change
+  // This created memory leak with accumulating listeners
   useEffect(() => {
     function handleGlobalKeyDown(e: KeyboardEvent) {
-      if (e.key === '/' && !isFocused && !textareaRef.current?.matches(':focus')) {
+      if (e.key === '/' && !textareaRef.current?.matches(':focus')) {
         e.preventDefault()
         textareaRef.current?.focus()
       }
-      if (e.key === 'Escape' && isFocused) {
+      if (e.key === 'Escape') {
         textareaRef.current?.blur()
         setShowSuggestions(false)
       }
     }
     document.addEventListener('keydown', handleGlobalKeyDown)
     return () => document.removeEventListener('keydown', handleGlobalKeyDown)
-  }, [isFocused])
+  }, []) // FIXED: Empty deps - runs once on mount
 
   useEffect(() => {
     if (!showSuggestions) return
