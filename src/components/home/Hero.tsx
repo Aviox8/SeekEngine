@@ -7,13 +7,13 @@
  */
 
 import { useMemo } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion } from 'framer-motion'
 import Image from 'next/image'
 
-/* Floating abstract particles — monochrome */
+/* Floating abstract particles — monochrome (PERF: Reduced from 16 to 6 particles for better performance) */
 function FloatingParticles() {
   const particles = useMemo(() =>
-    Array.from({ length: 16 }, (_, i) => ({
+    Array.from({ length: 6 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
@@ -34,6 +34,7 @@ function FloatingParticles() {
             top: `${p.y}%`,
             width: p.size,
             height: p.size,
+            willChange: 'transform, opacity',
           }}
           animate={{
             y: [0, -50, 0],
@@ -52,11 +53,9 @@ function FloatingParticles() {
 }
 
 export default function Hero() {
-  const { scrollY } = useScroll()
-
-  const y1 = useTransform(scrollY, [0, 500], [0, 80])
-  const opacity = useTransform(scrollY, [0, 300], [1, 0])
-
+  // PERF: Removed useScroll/useTransform scroll listeners to prevent continuous re-renders
+  // Static positioning uses less CPU than scroll-based animations
+  
   return (
     <section className="w-full flex flex-col items-center justify-center relative overflow-visible pointer-events-none py-8 sm:py-12">
       
@@ -68,7 +67,6 @@ export default function Hero() {
 
       {/* HERO CONTENT */}
       <motion.div
-        style={{ y: y1 }}
         className="relative z-10 text-center px-4 pointer-events-auto flex flex-col items-center"
       >
         {/* Logo */}

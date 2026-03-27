@@ -53,7 +53,8 @@ const Favicon = memo(function Favicon({ url, fallback }: { url: string; fallback
 
 export default memo(function ResultCard({ result, index = 0 }: { result: SearchResult; index?: number }) {
   const cardRef = useRef<HTMLAnchorElement>(null)
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  // PERF: Disabled expensive mouse position tracking to prevent state updates on every move
+  // const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [isHovered, setIsHovered] = useState(false)
   
   // PERF: Memoize hostname extraction to avoid expensive URL parsing on every render
@@ -63,14 +64,7 @@ export default memo(function ResultCard({ result, index = 0 }: { result: SearchR
     catch { return result.displayLink || '' }
   }, [result.link, result.displayLink])
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!cardRef.current) return
-    const rect = cardRef.current.getBoundingClientRect()
-    setMousePos({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    })
-  }, [])
+  // PERF: Disabled mouse move tracking - causes re-renders on every move for multiple cards
 
   // Cycle through shader variants for visual variety
   const shaderClass = SHADER_VARIANTS[index % SHADER_VARIANTS.length]
@@ -90,12 +84,11 @@ export default memo(function ResultCard({ result, index = 0 }: { result: SearchR
         ease: [0.16, 1, 0.3, 1] 
       }}
       whileHover={{ 
-        y: -6, 
+        y: -4, 
         scale: 1.01,
-        transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } 
+        transition: { duration: 0.2, ease: 'easeOut' } 
       }}
-      whileTap={{ scale: 0.99 }}
-      onMouseMove={handleMouseMove}
+      whileTap={{ scale: 0.98 }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{ 
