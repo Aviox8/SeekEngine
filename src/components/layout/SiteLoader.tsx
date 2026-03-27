@@ -15,7 +15,7 @@ export default function SiteLoader() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false)
-    }, 2800)
+    }, 600)
     return () => clearTimeout(timer)
   }, [])
 

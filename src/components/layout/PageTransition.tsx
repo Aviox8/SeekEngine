@@ -26,24 +26,18 @@ function TransitionInner({ children }: { children: ReactNode }) {
         aria-live="polite"
         initial={{ 
           opacity: 0, 
-          y: prefersReducedMotion ? 0 : 15, 
-          scale: prefersReducedMotion ? 1 : 0.99,
-          filter: prefersReducedMotion ? 'none' : 'blur(10px)'
+          y: prefersReducedMotion ? 0 : 8
         }}
         animate={{ 
           opacity: 1, 
-          y: 0, 
-          scale: 1, 
-          filter: 'blur(0px)' 
+          y: 0
         }}
         exit={{ 
           opacity: 0, 
-          y: prefersReducedMotion ? 0 : -10,
-          scale: prefersReducedMotion ? 1 : 1.01,
-          filter: prefersReducedMotion ? 'none' : 'blur(5px)'
+          y: prefersReducedMotion ? 0 : -8
         }}
         transition={{
-          duration: 0.6,
+          duration: 0.4,
           ease: [0.16, 1, 0.3, 1],
         }}
       >
