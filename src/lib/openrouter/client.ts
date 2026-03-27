@@ -31,7 +31,10 @@ export async function callOpenRouter(
   const policy = TASK_POLICIES[task]
   const allModels = await getModelsForTask(task)
   
-  let models = allModels.filter(m => (modelFailures.get(m) || 0) < MAX_MODEL_FAILURES)
+  let models = allModels.filter(m => {
+    const failInfo = modelFailures.get(m)
+    return !failInfo || failInfo.failures < MAX_MODEL_FAILURES
+  })
   
   if (models.length === 0) {
     console.warn(`⚠️ All models failed for ${task}. Resetting failures.`)
