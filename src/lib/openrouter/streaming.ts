@@ -74,10 +74,7 @@ export async function* streamOpenRouter(
     // Don't keep retrying - fail fast to avoid quota waste and rate limiting
     const timeSinceMostRecentFailure = Date.now() - mostRecentFailureTime
     if (timeSinceMostRecentFailure < 30_000 && modelFailures.size > 0) {
-      logger.error(`Systemic API failure detected - all models failed ${timeSinceMostRecentFailure}ms ago`, {
-        failedModels: modelFailures.size,
-        task,
-      })
+      logger.error(`Systemic API failure detected - all ${modelFailures.size} models failed ${timeSinceMostRecentFailure}ms ago`)
       yield { type: 'error', error: 'All AI models currently unavailable. API appears to be down.' }
       return
     }
@@ -89,7 +86,7 @@ export async function* streamOpenRouter(
   }
   
   if (models.length === 0) {
-    logger.error('No models available for racing', { task, allModelsCount: allModels.length })
+    logger.error(`No models available for racing (all: ${allModels.length})`)
     yield { type: 'error', error: 'No models available for this task' }
     return
   }
@@ -140,10 +137,7 @@ export async function* streamOpenRouter(
       if (!response.ok || !response.body) {
         const failCount = (modelFailures.get(model)?.failures || 0) + 1
         modelFailures.set(model, { failures: failCount, lastFailedAt: Date.now() })
-        logger.warn(`Model connection failed: ${model}`, { 
-          status: response.status, 
-          failures: failCount 
-        })
+        logger.warn(`Model connection failed: ${model} (${failCount} failures, HTTP ${response.status})`)
         throw new Error(`HTTP ${response.status}`)
       }
 
@@ -212,15 +206,9 @@ export async function* streamOpenRouter(
       
       const errorMsg = (err as Error).message
       if (errorMsg === 'TTFT_TIMEOUT') {
-        logger.debug(`TTFT timeout for model: ${model}`, { 
-          tier,
-          maxLatency: policy.maxLatency
-        })
+        logger.debug(`TTFT timeout for ${model} (maxLatency: ${policy.maxLatency}ms)`)
       } else {
-        logger.debug(`Model connection error: ${model}`, { 
-          error: errorMsg,
-          failCount
-        })
+        logger.debug(`Model connection error: ${model} - ${errorMsg} (failures: ${failCount})`)
       }
       
       // Always abort the controller
