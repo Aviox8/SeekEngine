@@ -5,6 +5,7 @@
 
 import { ENV } from './env'
 import { EXTERNAL_API_TIMEOUT_MS } from './constants'
+import { fetchWithTimeout } from './http-utils'
 
 const GOOGLE_API_KEY = ENV.GOOGLE_SEARCH_API_KEY
 const GOOGLE_CX = ENV.GOOGLE_SEARCH_CX
@@ -43,34 +44,27 @@ export async function getWebSearchResults(
     url.searchParams.append('num', '10')
     if (dateRestrict) url.searchParams.append('dateRestrict', dateRestrict)
 
-    // MEDIUM PRIORITY FIX: Add timeout to prevent hanging requests
-    // Previously: fetch() could hang indefinitely
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), EXTERNAL_API_TIMEOUT_MS) 
+    // IMPROVED: Use shared fetchWithTimeout helper to prevent hanging requests
+    // Centralizes timeout logic and reduces code duplication
+    const response = await fetchWithTimeout(url)
     
-    try {
-      const response = await fetch(url.toString(), { signal: controller.signal })
-      
-      if (!response.ok) {
-        console.error(`❌ Google Search Error: ${response.status}`)
-        return []
-      }
-
-      const data = await response.json()
-
-      if (!data.items) {
-        return []
-      }
-
-      return data.items.map((item: any) => ({
-        title: item.title,
-        link: item.link,
-        snippet: item.snippet,
-        displayLink: item.displayLink,
-      }))
-    } finally {
-      clearTimeout(timeout)
+    if (!response.ok) {
+      console.error(`❌ Google Search Error: ${response.status}`)
+      return []
     }
+
+    const data = await response.json()
+
+    if (!data.items) {
+      return []
+    }
+
+    return data.items.map((item: any) => ({
+      title: item.title,
+      link: item.link,
+      snippet: item.snippet,
+      displayLink: item.displayLink,
+    }))
   } catch (error) {
     if ((error as Error).name === 'AbortError') {
       console.error('Google Search request timeout')

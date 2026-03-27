@@ -6,6 +6,7 @@ import { sanitizeSearchQuery, isValidUTF8 } from '@/lib/sanitize'
 import { logger } from '@/lib/logger'
 import { createErrorResponse, Errors } from '@/lib/errors'
 import { validateSearchQuery } from '@/lib/validation'
+import { TIME_RANGES, type TimeRangeCode } from '@/lib/constants'
 
 export const runtime = 'edge'
 
@@ -76,27 +77,25 @@ export async function GET(request: Request) {
     })
 
     // Parse optional time filter
-    const timeRange = searchParams.get('time') || undefined
-    // HIGH PRIORITY FIX: Validate time parameter against allowed values
-    // Previously accepted arbitrary values silently without validation
-    if (timeRange) {
-      const validTimes = new Set(['h', 'd', 'w', 'm', 'y'])
-      if (!validTimes.has(timeRange)) {
-        logger.warn('Invalid time range parameter', { timeRange })
-        const { error, status } = createErrorResponse(
-          Errors.invalidQuery(`Invalid time range: ${timeRange}. Valid values: h, d, w, m, y`)
-        )
-        return NextResponse.json(error, { status })
-      }
+    const timeRange = searchParams.get('time') as TimeRangeCode | null || undefined
+    
+    // IMPROVED: Single source of truth for time ranges
+    // Previously: Maintained separate tbsMap and dateRestrictMap, causing duplication and divergence
+    // Now: All time filters in one place (TIME_RANGES constant)
+    let tbs: string | undefined
+    let dateRestrict: string | undefined
+    
+    if (timeRange && timeRange in TIME_RANGES) {
+      const range = TIME_RANGES[timeRange as TimeRangeCode]
+      tbs = range.tbs
+      dateRestrict = range.dateRestrict
+    } else if (timeRange) {
+      logger.warn('Invalid time range parameter', { timeRange })
+      const { error, status } = createErrorResponse(
+        Errors.invalidQuery(`Invalid time range: ${timeRange}. Valid values: ${Object.keys(TIME_RANGES).join(', ')}`)
+      )
+      return NextResponse.json(error, { status })
     }
-    const tbsMap: Record<string, string> = { 
-      h: 'qdr:h', d: 'qdr:d', w: 'qdr:w', m: 'qdr:m', y: 'qdr:y' 
-    }
-    const dateRestrictMap: Record<string, string> = { 
-      h: 'd1', d: 'd1', w: 'w1', m: 'm1', y: 'y1' 
-    }
-    const tbs = timeRange ? tbsMap[timeRange] : undefined
-    const dateRestrict = timeRange ? dateRestrictMap[timeRange] : undefined
 
     // Try SerpAPI first, fall back to Google Custom Search
     let results = await getSerpResults(sanitizedQuery, tbs)

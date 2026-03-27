@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import ReactMarkdown, { Components } from 'react-markdown'
+import rehypeSanitize from 'rehype-sanitize'
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -71,7 +72,10 @@ const Response = React.forwardRef<HTMLDivElement, ResponseProps>(
         {...props}
       >
         <div className="prose prose-zinc dark:prose-invert max-w-none">
-          <ReactMarkdown components={markdownComponents}>
+          <ReactMarkdown 
+            components={markdownComponents}
+            rehypePlugins={[rehypeSanitize]}
+          >
             {isStreaming ? children + ' ▊' : children}
           </ReactMarkdown>
         </div>

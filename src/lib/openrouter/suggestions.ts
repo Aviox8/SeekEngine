@@ -7,6 +7,7 @@ import type { ChatMessage, SuggestionsResult } from './types'
 import { AITask } from './types'
 import { suggestionsResponseSchema } from '../validation'
 import { callOpenRouter, extractJsonArray } from './client'
+import { MAX_SUGGESTIONS } from '../constants'
 
 // ── Fallback Generator ───────────────────────────────────────────────────────
 
@@ -27,7 +28,7 @@ export async function getSearchSuggestions(query: string): Promise<SuggestionsRe
     {
       role: 'system',
       content:
-        'You are SeekEngine Intelligence Optimizer. Output EXACTLY 5 high-value search paths as a pure JSON array of strings.',
+        `You are SeekEngine Intelligence Optimizer. Output EXACTLY ${MAX_SUGGESTIONS} high-value search paths as a pure JSON array of strings.`,
     },
     {
       role: 'user',
@@ -56,7 +57,7 @@ export async function getSearchSuggestions(query: string): Promise<SuggestionsRe
 
     return {
       suggestions: validated.success
-        ? validated.data.suggestions.slice(0, 5)
+        ? validated.data.suggestions.slice(0, MAX_SUGGESTIONS)
         : generateFallbackSuggestions(query),
       model: result.model,
       modelHuman: result.modelHuman,

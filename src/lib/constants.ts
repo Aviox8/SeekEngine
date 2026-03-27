@@ -57,6 +57,19 @@ export const NODE_ENVIRONMENTS = {
   TEST: 'test',
 } as const
 
+// ── Time Range Filters (Single Source of Truth) ──────────────────────────────
+// Maps short codes (h/d/w/m/y) to API-specific parameters
+// Used by Google Custom Search (dateRestrict) and SerpAPI (tbs)
+export const TIME_RANGES = {
+  h: { label: 'Past Hour', tbs: 'qdr:h', dateRestrict: 'd1' },
+  d: { label: 'Past Day', tbs: 'qdr:d', dateRestrict: 'd1' },
+  w: { label: 'Past Week', tbs: 'qdr:w', dateRestrict: 'w1' },
+  m: { label: 'Past Month', tbs: 'qdr:m', dateRestrict: 'm1' },
+  y: { label: 'Past Year', tbs: 'qdr:y', dateRestrict: 'y1' },
+} as const
+
+export type TimeRangeCode = keyof typeof TIME_RANGES
+
 // ── Patterns & Formats ──────────────────────────────────────────────────────
 export const UNSAFE_CHARS_REGEX = /[<>\"'];/g
 export const NEWLINE_REGEX = /[\n\r]/g
