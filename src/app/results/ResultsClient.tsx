@@ -145,10 +145,10 @@ export default function ResultsClient() {
               </span>
             </Link>
 
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
                <button 
                  onClick={shareResults}
-                 className="px-4 py-2 rounded-xl text-xs font-medium transition-all active:scale-95 border border-border/40 text-muted-foreground hover:text-foreground hover:border-foreground/20"
+                 className="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all active:scale-95 border border-border/60 text-muted-foreground hover:text-foreground hover:bg-accent/5 hover:border-foreground/20"
                >
                  Share
                </button>
@@ -156,14 +156,14 @@ export default function ResultsClient() {
         </header>
 
         {/* Query Title */}
-        <div className="mb-10 animate-fade-in-up">
-           <div className="flex items-center gap-2 mb-3">
-             <div className="w-[3px] h-4 rounded-full bg-foreground/20" />
-             <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground/40">
+        <div className="mb-12 animate-fade-in-up">
+           <div className="flex items-center gap-3 mb-4">
+             <div className="w-1 h-5 rounded-full bg-primary/[0.4] dark:bg-primary/[0.3]" />
+             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
                Search Results
              </span>
            </div>
-           <h1 className="font-display text-3xl md:text-5xl tracking-tight leading-tight text-foreground">
+           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl tracking-tight leading-tight text-foreground break-words">
              {query}
            </h1>
         </div>
@@ -172,26 +172,26 @@ export default function ResultsClient() {
             
             {/* LEFT COLUMN: Synthesis */}
             <div className="w-full lg:w-2/3 animate-fade-in-up">
-              <div className="relative group p-6 md:p-8 rounded-2xl overflow-hidden mb-10 shader-card">
+              <div className="relative group p-6 md:p-8 rounded-xl overflow-hidden mb-10 shader-card">
                  
                  {/* Top accent line */}
-                 <div className="absolute top-0 left-0 right-0 h-[1px] bg-foreground/6" />
+                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
                  
-                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-foreground/[0.06]">
-                    <LivingIcon color="bg-foreground/50" size="w-2 h-2" />
-                    <span className="text-sm font-semibold tracking-tight text-foreground/70">
-                      Deep Analysis
-                    </span>
+                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-foreground/5">
+                    <LivingIcon color="bg-primary/60" size="w-2.5 h-2.5" />
+                    <h2 className="text-sm font-bold tracking-wide text-foreground/80">
+                      AI Deep Analysis
+                    </h2>
                     <div className="ml-auto flex items-center gap-2">
                       <button 
                         onClick={copyToClipboard}
-                        className="flex items-center gap-1.5 text-xs font-medium transition-colors px-2 py-1 rounded-lg text-muted-foreground hover:text-foreground"
+                        className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide transition-all px-2.5 py-1.5 rounded-lg text-muted-foreground/70 hover:text-foreground hover:bg-accent/10 active:scale-95"
                       >
-                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
                          </svg>
-                         {copied ? 'Copied!' : 'Copy'}
+                         {copied ? 'Copied' : 'Copy'}
                       </button>
                     </div>
                  </div>
@@ -209,10 +209,13 @@ export default function ResultsClient() {
                      <motion.div 
                        initial={{ opacity: 0, height: 0 }}
                        animate={{ opacity: 1, height: 'auto' }}
-                       className="mt-6 pt-6 border-t border-foreground/[0.06]"
+                       className="mt-8 pt-6 border-t border-foreground/5"
                      >
-                        <div className="relative">
-                           <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/25" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <label className="block text-xs font-bold uppercase tracking-wide text-muted-foreground/60 mb-3">
+                          Follow-up Question
+                        </label>
+                        <div className="relative group">
+                           <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40 group-focus-within:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
                            </svg>
                            <input 
@@ -224,18 +227,18 @@ export default function ResultsClient() {
                                 if (e.key === 'Enter') handleFollowUp()
                                 if (e.key === 'Escape') followUpInputRef.current?.blur()
                               }}
-                              placeholder="Ask a follow-up\u2026"
-                              className="w-full rounded-xl py-3 pl-10 pr-14 text-sm transition-all outline-none bg-foreground/[0.02] border border-foreground/[0.06] text-foreground placeholder:text-muted-foreground/25 focus:border-foreground/15"
-                              style={{ caretColor: 'hsl(var(--foreground))' }}
+                              placeholder="Ask a follow-up question..."
+                              className="w-full rounded-lg py-3 pl-11 pr-14 text-sm font-medium transition-all outline-none bg-accent/5 border border-border/50 text-foreground placeholder:text-muted-foreground/40 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-border/80"
+                              style={{ caretColor: 'hsl(var(--primary))' }}
                            />
-                           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-                             <kbd className="hidden sm:inline-flex items-center justify-center px-1.5 py-0.5 text-[9px] rounded border border-foreground/[0.06] text-muted-foreground/25">/</kbd>
+                           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                             <kbd className="hidden sm:inline-flex items-center justify-center px-2 py-1 text-[9px] font-semibold rounded border border-border/50 text-muted-foreground/40 bg-muted/30">/</kbd>
                              <button 
                                onClick={handleFollowUp}
                                disabled={!followUpQuery.trim()}
-                               className="p-1.5 rounded-lg transition-all active:scale-95 disabled:opacity-30 bg-foreground text-background"
+                               className="p-2 rounded-lg transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed bg-primary text-primary-foreground hover:brightness-110 shadow-md hover:shadow-lg"
                              >
-                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                 </svg>
                              </button>
