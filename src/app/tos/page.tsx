@@ -7,7 +7,7 @@ export default function TermsOfService() {
   const sections = [
     {
       title: '1. Service Description',
-      content: `SeekEngine is a search discovery platform that provides AI-augmented search results powered by multiple search indices and language models. Our service synthesizes information from public sources to deliver contextual answers alongside web search results. You acknowledge that SeekEngine operates using third-party APIs, and service availability depends on external provider reliability.`
+      content: `SeekEngine is an independent research system that synthesizes search results using hybrid retrieval and inference. The service operates under a grounding-first philosophy: all responses must be tethered to retrieved web sources or we remain silent. We do not optimize for eloquence; we optimize for verifiability. The system relies on Google Custom Search (retrieval) and OpenRouter (inference), and our service quality depends on their availability. We accept a truth penalty—approximately 300ms additional latency—to verify outputs before returning them. By using SeekEngine, you acknowledge that this grounded approach may return fewer results or shorter answers than unfiltered systems.`
     },
     {
       title: '2. Acceptable Use',
@@ -79,7 +79,7 @@ export default function TermsOfService() {
               Terms of Service
             </h1>
             <p className="text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-2xl">
-              Please read these terms carefully before using SeekEngine. By accessing or using our service, you agree to be bound by these terms and conditions.
+              SeekEngine is a grounded research system for hybrid search and synthesis. These terms govern your use. We prioritize accuracy over eloquence—when we cannot verify something, we remain silent.
             </p>
           </div>
         </motion.div>

@@ -7,7 +7,7 @@ export default function PrivacyPolicy() {
   const sections = [
     {
       title: '1. Information We Collect',
-      content: `We collect the following categories of information: (a) Query Data: Your search queries are logged and anonymized for analytics and model improvement; (b) Session Data: IP address, browser type, device type, and approximate geographic location (via IP geolocation); (c) Interaction Patterns: Clicks on search results, time spent on results, and feature interactions; (d) Request Metadata: Timestamps, query timestamps, and reference data for performance monitoring.`
+      content: `We collect the following categories of information: (a) Query Data: Your search queries are logged server-side and anonymized after processing. We retain aggregated patterns for research into grounding mechanisms, not individual query content; (b) Session Data: IP address (hashed after request), browser type, device type, and approximate geographic location for analytics only; (c) Interaction Patterns: Time spent on results, which results were clicked, for understanding system effectiveness; (d) System Metrics: Latency, retrieval success rates, inference times—operational data to improve the grounding pipeline. All sensitive data (API responses with PII, credentials) is purged immediately after processing. Client-side data collection is deliberately minimal to enforce zero-trust boundaries.`
     },
     {
       title: '2. How We Use Your Information',
@@ -91,7 +91,7 @@ export default function PrivacyPolicy() {
               Privacy Policy
             </h1>
             <p className="text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-2xl">
-              We respect your privacy and are committed to maintaining transparency about how we collect, process, and protect your data. This policy explains our practices in detail.
+              SeekEngine is built on zero-trust principles. We minimize data collection, process queries server-side only, and treat all external input as potentially adversarial. Your data supports grounding research; it is not sold or shared except as legally required.
             </p>
           </div>
         </motion.div>
