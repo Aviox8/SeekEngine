@@ -1,9 +1,9 @@
 ﻿'use client'
 
 /**
- * Search Bar — Premium AI Chat Input with Theme-Integrated Design
- * Features: Smooth focus animations, theme-aware gradients, enhanced visual hierarchy,
- * smooth transitions, integrated LivingIcon indicators, polished dropdown design
+ * Search Bar — Ultra-Minimal Text Input
+ * Features: No visual form appearance, organic text input feeling, 
+ * understated controls, living icon feedback, natural conversational interface
  */
 
 import { useEffect, useRef, useState, useCallback, memo } from 'react'
@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useSearch } from '../../hooks/useSearch'
 import { useSearchHistory } from '../../hooks/useSearchHistory'
 import { useTheme } from 'next-themes'
-import { ArrowRight, X, Search, Loader2, Clock } from 'lucide-react'
+import { X, Loader2, Clock } from 'lucide-react'
 import LivingIcon from '../shared/LivingIcon'
 
 export default memo(function SearchBar({ 
@@ -121,18 +121,14 @@ export default memo(function SearchBar({
   return (
     <div className="relative w-full z-[100]" ref={suggestionsRef}>
       {/* Main search container */}
-      <motion.div 
-        layout
+      <div 
         className="relative z-50"
-        initial={false}
-        animate={isFocused ? { scale: 1.00 } : { scale: 1 }}
-        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
       >
         {/* Animated background gradient backdrop */}
         <motion.div
           className="absolute -inset-x-2 -bottom-2 opacity-0 pointer-events-none"
           animate={{ 
-            opacity: isFocused ? 0.05 : 0,
+            opacity: 0,
           }}
           transition={{ duration: 0.3 }}
           style={{
@@ -141,29 +137,34 @@ export default memo(function SearchBar({
           }}
         />
 
-        {/* Main container - minimal, text-like appearance */}
+        {/* Main container - ultra minimal text appearance */}
         <div 
-          className="relative overflow-hidden transition-all duration-300"
+          className="relative overflow-visible transition-all duration-300"
           style={{
             background: 'transparent',
             borderBottom: isFocused 
-              ? `2px solid hsl(var(--primary) / 0.6)`
-              : `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+              ? `1.5px solid hsl(var(--primary))`
+              : 'none',
           }}
         >
-          <div className="relative flex items-start min-h-[52px]">
-            {/* Left icon area */}
-            <div className="pl-0 pt-4 flex items-center justify-center relative z-10 shrink-0 pr-2">
+          <div className="relative flex items-baseline min-h-[48px]">
+            {/* Left icon area - hidden unless active */}
+            <motion.div 
+              className="pt-1 flex items-center justify-center relative z-10 shrink-0"
+              animate={{ width: isTyping ? 24 : 0, marginRight: isTyping ? 8 : 0 }}
+              transition={{ duration: 0.2 }}
+              style={{ overflow: 'hidden' }}
+            >
               <AnimatePresence mode="wait">
                 {isLoading ? (
                   <motion.div
                     key="loading"
-                    initial={{ opacity: 0, scale: 0.8, rotate: -90 }}
-                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.8 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <Loader2 className="w-[18px] h-[18px] text-primary/60 animate-spin" />
+                    <Loader2 className="w-4 h-4 text-primary/60 animate-spin flex-shrink-0" />
                   </motion.div>
                 ) : isTyping ? (
                   <motion.div
@@ -173,27 +174,17 @@ export default memo(function SearchBar({
                     exit={{ opacity: 0, scale: 0.8 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <LivingIcon size="w-[18px] h-[18px]" color="#6F6F6F" />
+                    <LivingIcon size="w-4 h-4" color="#6F6F6F" />
                   </motion.div>
-                ) : (
-                  <motion.div
-                    key="search"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Search className={`w-[18px] h-[18px] transition-all duration-300 ${isFocused ? 'text-primary/60' : 'text-muted-foreground/40'}`} />
-                  </motion.div>
-                )}
+                ) : null}
               </AnimatePresence>
-            </div>
+            </motion.div>
 
             {/* Textarea with auto-resize */}
             <div className="relative flex-1 z-10">
               {/* Ghost text prediction */}
               {ghostText && (
-                <div className="absolute inset-0 flex items-center pointer-events-none text-[15px] tracking-tight overflow-hidden whitespace-pre px-3 py-[16px]">
+                <div className="absolute inset-0 flex items-baseline pointer-events-none text-[17px] tracking-normal overflow-hidden whitespace-pre">
                   <span className="opacity-0">{query}</span>
                   <span className="text-muted-foreground/20">{ghostText}</span>
                 </div>
@@ -222,7 +213,7 @@ export default memo(function SearchBar({
                 aria-describedby="search-hint"
                 aria-haspopup="listbox"
                 aria-expanded={showSuggestionsList || showHistory}
-                className="w-full bg-transparent border-none outline-none text-[16px] font-normal tracking-normal text-foreground placeholder:text-muted-foreground/35 resize-none px-0 py-4 min-h-[52px] max-h-[160px] leading-relaxed"
+                className="w-full bg-transparent border-none outline-none text-[17px] font-normal tracking-normal text-foreground placeholder:text-muted-foreground/30 resize-none px-0 py-2 min-h-[48px] max-h-[160px] leading-normal"
                 style={{ caretColor: 'hsl(var(--primary))' }}
                 spellCheck={false}
                 autoComplete="off"
@@ -230,25 +221,9 @@ export default memo(function SearchBar({
               />
             </div>
 
-            {/* Right action buttons */}
-            <div className="pr-0 pt-4 flex items-center gap-2 relative z-10 shrink-0">
-              {/* Keyboard hint */}
-              <AnimatePresence>
-                {!isFocused && !query && (
-                  <motion.kbd
-                    id="search-hint"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="hidden sm:inline-flex items-center justify-center w-6 h-6 text-[11px] font-semibold rounded-md border border-muted-foreground/15 text-muted-foreground/40 bg-muted/30 hover:bg-muted/50 transition-colors"
-                    title="Press / to focus search"
-                  >
-                    /
-                  </motion.kbd>
-                )}
-              </AnimatePresence>
-              
-              {/* Clear */}
+            {/* Right action buttons - minimal */}
+            <div className="pl-1 pt-1 flex items-baseline gap-0.5 relative z-10 shrink-0">
+              {/* Clear - very subtle */}
               <AnimatePresence>
                 {query && (
                   <motion.button
@@ -259,26 +234,27 @@ export default memo(function SearchBar({
                       updateQuery('')
                       textareaRef.current?.focus()
                     }}
-                    className="p-1.5 rounded-lg transition-all text-muted-foreground/40 hover:text-muted-foreground hover:bg-muted/40"
+                    className="p-1 transition-opacity text-muted-foreground/40 hover:text-muted-foreground"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-4 h-4" />
                   </motion.button>
                 )}
               </AnimatePresence>
               
-              {/* Submit */}
+              {/* Submit - text only, minimal */}
               <AnimatePresence>
                 {query && (
                   <motion.button
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.8, opacity: 0 }}
-                    whileHover={{ scale: 1.08 }}
-                    whileTap={{ scale: 0.92 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    whileHover={{ opacity: 1 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => handleSearch(query)}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br from-primary to-primary/80 text-primary-foreground transition-all shadow-lg hover:shadow-xl"
+                    className="px-2 py-1 transition-all text-muted-foreground/50 hover:text-foreground text-xs font-medium"
+                    title="Press Enter to search"
                   >
-                    <ArrowRight className="w-3.5 h-3.5" />
+                    ↵
                   </motion.button>
                 )}
               </AnimatePresence>
@@ -307,7 +283,7 @@ export default memo(function SearchBar({
             )}
           </AnimatePresence>
         </div>
-      </motion.div>
+      </div>
 
       {/* Suggestions Dropdown */}
       <AnimatePresence>
