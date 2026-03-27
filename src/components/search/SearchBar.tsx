@@ -130,41 +130,30 @@ export default memo(function SearchBar({
       >
         {/* Animated background gradient backdrop */}
         <motion.div
-          className="absolute inset-0 opacity-0 rounded-2xl pointer-events-none"
+          className="absolute -inset-x-2 -bottom-2 opacity-0 pointer-events-none"
           animate={{ 
-            opacity: isFocused ? 0.1 : 0,
-            scale: isFocused ? 1 : 0.95
+            opacity: isFocused ? 0.05 : 0,
           }}
           transition={{ duration: 0.3 }}
           style={{
-            background: 'radial-gradient(circle at 40% 20%, hsl(var(--primary) / 0.3), transparent 50%)',
-            filter: 'blur(40px)'
+            background: `linear-gradient(90deg, hsl(var(--primary) / 0.1) 0%, hsl(var(--primary) / 0.05) 50%, hsl(var(--primary) / 0.1) 100%)`,
+            height: '1px'
           }}
         />
 
-        {/* Main container */}
+        {/* Main container - minimal, text-like appearance */}
         <div 
-          className="relative overflow-hidden rounded-2xl transition-all duration-300"
+          className="relative overflow-hidden transition-all duration-300"
           style={{
-            background: isDark 
-              ? isFocused 
-                ? 'rgba(15, 15, 15, 0.98)'
-                : 'rgba(10, 10, 10, 0.95)'
-              : isFocused 
-              ? 'rgba(255, 255, 255, 0.98)'
-              : 'rgba(250, 250, 250, 0.95)',
-            backdropFilter: 'blur(40px) saturate(180%)',
-            border: isFocused 
-              ? `1.5px solid hsl(var(--primary) / 0.3)`
-              : `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
-            boxShadow: isFocused 
-              ? '0 8px 32px hsl(var(--primary) / 0.08), inset 0 1px 1px rgba(255,255,255,0.05)'
-              : `0 2px 8px ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.08)'}`,
+            background: 'transparent',
+            borderBottom: isFocused 
+              ? `2px solid hsl(var(--primary) / 0.6)`
+              : `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
           }}
         >
-          <div className="relative flex items-start min-h-[56px]">
+          <div className="relative flex items-start min-h-[52px]">
             {/* Left icon area */}
-            <div className="pl-4 pt-[16px] flex items-center justify-center relative z-10 shrink-0">
+            <div className="pl-0 pt-4 flex items-center justify-center relative z-10 shrink-0 pr-2">
               <AnimatePresence mode="wait">
                 {isLoading ? (
                   <motion.div
@@ -233,7 +222,7 @@ export default memo(function SearchBar({
                 aria-describedby="search-hint"
                 aria-haspopup="listbox"
                 aria-expanded={showSuggestionsList || showHistory}
-                className="w-full bg-transparent border-none outline-none text-[15px] font-medium tracking-tight text-foreground placeholder:text-muted-foreground/30 resize-none px-3 py-[16px] min-h-[56px] max-h-[160px] leading-relaxed"
+                className="w-full bg-transparent border-none outline-none text-[16px] font-normal tracking-normal text-foreground placeholder:text-muted-foreground/35 resize-none px-0 py-4 min-h-[52px] max-h-[160px] leading-relaxed"
                 style={{ caretColor: 'hsl(var(--primary))' }}
                 spellCheck={false}
                 autoComplete="off"
@@ -242,7 +231,7 @@ export default memo(function SearchBar({
             </div>
 
             {/* Right action buttons */}
-            <div className="pr-3 pt-[10px] flex items-center gap-1.5 relative z-10 shrink-0">
+            <div className="pr-0 pt-4 flex items-center gap-2 relative z-10 shrink-0">
               {/* Keyboard hint */}
               <AnimatePresence>
                 {!isFocused && !query && (
@@ -295,22 +284,6 @@ export default memo(function SearchBar({
               </AnimatePresence>
             </div>
           </div>
-
-          {/* Bottom accent line */}
-          <AnimatePresence>
-            {isFocused && (
-              <motion.div
-                initial={{ opacity: 0, scaleX: 0 }}
-                animate={{ opacity: 1, scaleX: 1 }}
-                exit={{ opacity: 0, scaleX: 0 }}
-                transition={{ duration: 0.3 }}
-                className="absolute bottom-0 left-1/2 h-[2px] w-1/2 -translate-x-1/2 origin-center rounded-full"
-                style={{
-                  background: 'linear-gradient(90deg, transparent, hsl(var(--primary) / 0.4), transparent)',
-                }}
-              />
-            )}
-          </AnimatePresence>
 
           {/* Loading indicator */}
           <AnimatePresence>
