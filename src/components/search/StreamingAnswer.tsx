@@ -10,6 +10,11 @@
 import { useEffect, useRef, useState, CSSProperties, useMemo, memo } from 'react'
 import ReactMarkdown, { Components } from 'react-markdown'
 import { useStreamingAnswer, StreamState } from '../../hooks/useStreamingAnswer'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ChevronDown, Loader2, Sparkles, AlertCircle, RefreshCw } from 'lucide-react'
+import { ShimmeringText } from '../ui/shimmering-text'
+import { Response } from '../ui/response'
+import { TypingAnimation } from '../ui/typing-animation'
 
 interface StreamingAnswerProps {
   query: string
@@ -26,6 +31,92 @@ const STEPS = [
   "Synthesizing grounded answer...",
   "Verifying source citations..."
 ]
+
+function ReasoningPanel({ state, step, content }: { state: StreamState, step: number, content?: string }) {
+  const [isOpen, setIsOpen] = useState(true)
+
+  return (
+    <div className="mb-6 rounded-xl border border-foreground/[0.04] bg-foreground/[0.01] overflow-hidden transition-all duration-300">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-4 py-3 hover:bg-foreground/[0.02] transition-colors group"
+      >
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10">
+            {state === 'thinking' ? (
+              <Loader2 className="w-3 h-3 text-primary animate-spin" />
+            ) : (
+              <Sparkles className="w-3 h-3 text-primary" />
+            )}
+          </div>
+          <div className="flex flex-col items-start leading-tight">
+            <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 group-hover:text-foreground/70 transition-colors">
+              {state === 'thinking' ? (
+                <ShimmeringText text={`Thinking: ${STEPS[step]}`} duration={1.8} spread={1.5} />
+              ) : 'Thought Process'}
+            </span>
+            {state === 'thinking' && (
+              <span className="text-[9px] text-primary/40 font-medium uppercase tracking-tight">Processing Reasoning Stream</span>
+            )}
+          </div>
+        </div>
+        <ChevronDown 
+          className={`w-3.5 h-3.5 text-muted-foreground/40 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} 
+        />
+      </button>
+      
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+          >
+            <div className="px-4 pb-4 space-y-4">
+              {/* Vercel-style Reasoning Content Block */}
+              {content && (
+                <div className="text-[13px] leading-relaxed text-muted-foreground/80 border-l-2 border-primary/20 pl-4 py-1 italic bg-primary/[0.01]">
+                   <ReactMarkdown components={{
+                     p: ({children}) => <p className="mb-2 last:mb-0">{children}</p>
+                   }}>
+                     {content}
+                   </ReactMarkdown>
+                </div>
+              )}
+
+              <div className="space-y-3 pt-2">
+                {STEPS.map((text, i) => (
+                  <div 
+                    key={i} 
+                    className={`flex items-center gap-3 transition-opacity duration-500 ${i > step ? 'opacity-20' : i === step ? 'opacity-100' : 'opacity-40'}`}
+                  >
+                    <div className="flex items-center justify-center w-4 h-4 rounded-full border border-foreground/10 shrink-0">
+                      {i < step ? (
+                        <svg className="w-2.5 h-2.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : i === step ? (
+                        <div className="w-1 h-1 rounded-full bg-primary animate-pulse" />
+                      ) : null}
+                    </div>
+                    <TypingAnimation 
+                      as="span"
+                      duration={30}
+                      className={`text-[12px] font-medium ${i === step ? 'text-foreground' : 'text-muted-foreground'}`}
+                    >
+                      {text}
+                    </TypingAnimation>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
 
 function ProcessingSteps() {
   const [step, setStep] = useState(0)
@@ -54,42 +145,16 @@ function ProcessingSteps() {
     }
   }, [isPaused])
 
-  return (
-    <div ref={elementRef} className="flex flex-col gap-4 py-3">
-      {STEPS.map((text, i) => (
-        <div 
-          key={i} 
-          className={`flex items-center gap-3 transition-all duration-500 ${i > step ? 'opacity-0 translate-y-2' : i === step ? 'opacity-100 translate-y-0' : 'opacity-25'}`}
-          style={{
-            transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)'
-          }}
-        >
-           {i === step ? (
-             <div className="flex items-center gap-1.5 relative">
-               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-dot-pulse-1" />
-               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-dot-pulse-2 delay-100" />
-               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-dot-pulse-3 delay-200" />
-             </div>
-           ) : i < step ? (
-             <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10">
-               <svg className="w-3.5 h-3.5 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-               </svg>
-             </div>
-           ) : (
-             <div className="w-5 h-5 rounded-full border border-foreground/10" />
-           )}
-           <span className={`text-[13px] font-medium transition-colors duration-300 ${i === step ? 'text-foreground' : i < step ? 'text-muted-foreground/50' : 'text-muted-foreground/30'}`}>
-             {text}
-           </span>
-        </div>
-      ))}
-    </div>
-  )
+  return <ReasoningPanel state="thinking" step={step} />
 }
 
 // PERFORMANCE: Memoize to prevent re-renders when parent answer updates
 const MemoizedProcessingSteps = memo(ProcessingSteps)
+
+function ReasoningComplete({ step, content }: { step: number, content?: string }) {
+  return <ReasoningPanel state="streaming" step={step} content={content} />
+}
+const MemoizedReasoningComplete = memo(ReasoningComplete)
 
 function getTierStyles(tier: string) {
   switch (tier) {
@@ -175,33 +240,6 @@ export function StreamingAnswer({
   const completed = useRef(false)
   const shouldAutoScroll = useRef(true)
 
-  // PERFORMANCE: Memoize markdown components to prevent recreation on every render
-  const markdownComponents = useMemo<Components>(() => ({
-    h1: (props) => <h1 className="text-2xl font-semibold mt-8 mb-4 tracking-tight text-foreground" {...props} />,
-    h2: (props) => <h2 className="text-xl font-semibold mt-8 mb-3 tracking-tight text-foreground" {...props} />,
-    h3: (props) => <h3 className="text-lg font-medium mt-6 mb-3 text-foreground/90" {...props} />,
-    a: ({ href, children }) => (
-      href && /^(https?:\/\/|\/)/.test(href)
-        ? <a href={href} target="_blank" rel="noopener noreferrer" className="underline transition-colors text-foreground hover:text-foreground/60 decoration-foreground/20" children={children} />
-        : <span children={children} />
-    ),
-    code: (props) => <code className="px-1.5 py-0.5 rounded-md font-mono text-[13px] border border-foreground/10 bg-foreground/[0.03] text-foreground/80" {...props} />,
-    pre: (props) => (
-      <div className="my-6 rounded-xl overflow-hidden border border-border/50 shadow-lg bg-card">
-        <pre className="p-4 overflow-x-auto" {...props} />
-      </div>
-    ),
-    ul: (props) => <ul className="flex flex-col gap-3 mb-3 ml-1" {...props} />,
-    li: ({ children }) => (
-      <div className="flex items-start gap-3 ml-1">
-        <span className="mt-2 w-1.5 h-1.5 rounded-full shrink-0 bg-foreground/25" />
-        <span className="text-[17px] leading-relaxed text-foreground/85">{children}</span>
-      </div>
-    ),
-    strong: (props) => <strong className="font-semibold text-foreground" {...props} />,
-    em: (props) => <em className="italic text-muted-foreground" {...props} />,
-  }), [])
-
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -245,28 +283,33 @@ export function StreamingAnswer({
         
       case 'streaming':
         return (
-          <div className="w-full max-w-none animate-fade-in">
-            <div className="prose prose-zinc dark:prose-invert max-w-none text-[16px] leading-8 font-[inherit]">
-              <ReactMarkdown components={markdownComponents}>
-                {answer + ' ▊'}
-              </ReactMarkdown>
-            </div>
+          <div className="w-full max-w-none animate-fade-in transition-all duration-700">
+            <MemoizedReasoningComplete 
+              step={STEPS.length - 1} 
+              content={
+                metadata?.model.includes('deepseek') || metadata?.model.includes('o1') 
+                  ? "Developing comprehensive response..." 
+                  : undefined
+              } 
+            />
+            <Response isStreaming className="min-h-[100px]">
+              {answer}
+            </Response>
           </div>
         )
         
       case 'done':
         return (
-          <div className="w-full animate-fade-in">
-            <div className="prose prose-zinc dark:prose-invert max-w-none text-[16px] leading-8 font-[inherit]">
-              {answer ? (
-                <ReactMarkdown components={markdownComponents}>{answer}</ReactMarkdown>
-              ) : (
-                <div className="flex items-center justify-center py-12">
-                  <p className="text-sm text-muted-foreground/50 italic">No content generated.</p>
-                </div>
-              )}
-            </div>
-            <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="w-full animate-fade-in transition-all duration-700">
+            <MemoizedReasoningComplete 
+              step={STEPS.length - 1} 
+              content={metadata?.cached ? "Result retrieved from neural search cache." : undefined} 
+            />
+            <Response className="min-h-[100px]">
+              {answer}
+            </Response>
+
+            <div className="flex items-center justify-between flex-wrap gap-4 mt-6">
               {metadata && (
                 <MemoizedModelBadge 
                   modelHuman={metadata.modelHuman}

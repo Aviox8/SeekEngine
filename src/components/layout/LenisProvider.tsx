@@ -11,13 +11,14 @@ import { ReactNode } from 'react'
 
 export default function LenisProvider({ children }: { children: ReactNode }) {
   const options = {
-    duration: 1.2,
+    duration: 1.4,
     easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     smoothWheel: true,
-    wheelMultiplier: 1,
-    touchMultiplier: 2,
+    wheelMultiplier: 0.9,
+    touchMultiplier: 1.5,
     infinite: false,
-    lerp: 0.1, // Smooth linear interpolation
+    lerp: 0.08,
+    syncTouch: true,
   }
 
   return (

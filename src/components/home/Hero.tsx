@@ -90,10 +90,10 @@ export default function Hero() {
 
         {/* Title — Instrument Serif */}
         <motion.h1
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          className="font-display text-[14vw] sm:text-[9vw] md:text-[7.5vw] leading-[0.88] tracking-[-0.03em] select-none text-foreground"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          className="font-display text-[14vw] sm:text-[9vw] md:text-[7.5vw] leading-[0.88] tracking-[-0.03em] select-none text-foreground mix-blend-difference"
         >
           Seek<span className="font-display-italic text-muted-foreground/60">Engine</span>
         </motion.h1>

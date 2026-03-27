@@ -109,8 +109,8 @@ export default function Navbar() {
           aria-label="Primary navigation"
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: visible ? 0 : -100, opacity: visible ? 1 : 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className={`flex items-center gap-1 sm:gap-1.5 p-1.5 sm:p-2 rounded-2xl pointer-events-auto transition-all duration-500 ${scrolled ? 'bg-background/80 backdrop-blur-2xl border border-foreground/[0.06] shadow-lg' : 'bg-transparent'}`}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className={`flex items-center gap-1 sm:gap-1.5 p-1.5 sm:p-2 rounded-2xl pointer-events-auto transition-all duration-700 ${scrolled ? 'bg-background/60 backdrop-blur-2xl border border-foreground/[0.04] shadow-2xl' : 'bg-transparent'}`}
         >
           {/* Logo */}
           <Link

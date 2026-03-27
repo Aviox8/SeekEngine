@@ -7,14 +7,14 @@
  * Apple Intelligence rotating gradient border on typing/focus
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSearch } from '../../hooks/useSearch'
 import { useSearchHistory } from '../../hooks/useSearchHistory'
 import { useTheme } from 'next-themes'
 import { Sparkles, ArrowRight, X, Search, Loader2 } from 'lucide-react'
 
-export default function SearchBar({ 
+export default memo(function SearchBar({ 
   autoFocus = false, 
   onTyping,
 }: { 

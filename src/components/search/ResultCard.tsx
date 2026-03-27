@@ -9,7 +9,7 @@
 
 import { SearchResult } from '../../lib/google-search'
 import { motion } from 'framer-motion'
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, memo } from 'react'
 
 const SHADER_VARIANTS = [
   'shader-card',
@@ -17,7 +17,7 @@ const SHADER_VARIANTS = [
   'shader-card-3',
 ]
 
-function Favicon({ url, fallback }: { url: string; fallback: string }) {
+const Favicon = memo(function Favicon({ url, fallback }: { url: string; fallback: string }) {
   const [error, setError] = useState(false)
   
   if (error) {
@@ -39,9 +39,9 @@ function Favicon({ url, fallback }: { url: string; fallback: string }) {
       loading="lazy"
     />
   )
-}
+})
 
-export default function ResultCard({ result, index = 0 }: { result: SearchResult; index?: number }) {
+export default memo(function ResultCard({ result, index = 0 }: { result: SearchResult; index?: number }) {
   const cardRef = useRef<HTMLAnchorElement>(null)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [isHovered, setIsHovered] = useState(false)
@@ -69,19 +69,37 @@ export default function ResultCard({ result, index = 0 }: { result: SearchResult
       href={result.link}
       target="_blank"
       rel="noopener noreferrer"
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
-      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      exit={{ opacity: 0, scale: 0.98 }}
+      transition={{ 
+        duration: 0.5, 
+        delay: index * 0.04, 
+        ease: [0.16, 1, 0.3, 1] 
+      }}
+      whileHover={{ 
+        y: -6, 
+        scale: 1.01,
+        transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } 
+      }}
+      whileTap={{ scale: 0.99 }}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      style={{ 
+        willChange: 'transform, opacity',
+        backfaceVisibility: 'hidden',
+        WebkitFontSmoothing: 'antialiased'
+      }}
       className={`block p-5 rounded-xl group relative overflow-hidden transition-all duration-300 ${shaderClass}`}
     >
       {/* Mouse-tracking spotlight — subtle */}
       {isHovered && (
-        <div
-          className="pointer-events-none absolute -inset-px rounded-xl opacity-0 group-hover:opacity-40 transition-opacity duration-300"
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.4 }}
+          exit={{ opacity: 0 }}
+          className="pointer-events-none absolute -inset-px rounded-xl transition-opacity duration-300"
           style={{
             background: `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, var(--glow-soft), transparent 50%)`,
           }}

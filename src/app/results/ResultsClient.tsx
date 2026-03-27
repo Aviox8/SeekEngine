@@ -8,7 +8,7 @@ import { ResultCardSkeleton } from '../../components/search/Skeleton'
 import { SearchResult } from '../../lib/google-search'
 import { StreamingAnswer } from '../../components/search/StreamingAnswer'
 import { useSearchHistory } from '../../hooks/useSearchHistory'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion'
 import LivingIcon from '../../components/shared/LivingIcon'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -40,6 +40,13 @@ export default function ResultsClient() {
   const searchAbortRef = useRef<AbortController | null>(null)
   const { addEntry } = useSearchHistory()
   const [timeFilter, setTimeFilter] = useState('')
+
+  const { scrollYProgress } = useScroll()
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 40,
+    restDelta: 0.001
+  })
 
   useEffect(() => {
     if (query) addEntry(query)
@@ -131,7 +138,13 @@ export default function ResultsClient() {
   }
 
   return (
-    <main className="w-full flex-1 pt-24 pb-16 bg-background flex flex-col">
+    <main className="w-full flex-1 pt-24 pb-16 bg-background flex flex-col relative">
+      {/* Scroll Progress Indicator */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-[2px] bg-primary z-[100] origin-left"
+        style={{ scaleX }}
+      />
+
       {/* Noise */}
       <div className="fixed inset-0 pointer-events-none z-[1] noise" />
 
