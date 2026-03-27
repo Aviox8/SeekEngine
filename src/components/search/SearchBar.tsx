@@ -12,7 +12,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useSearch } from '../../hooks/useSearch'
 import { useSearchHistory } from '../../hooks/useSearchHistory'
 import { useTheme } from 'next-themes'
-import { Sparkles, ArrowRight, X, Search, Loader2 } from 'lucide-react'
+import { ArrowRight, X, Search, Loader2 } from 'lucide-react'
+import LivingIcon from '../shared/LivingIcon'
 
 export default memo(function SearchBar({ 
   autoFocus = false, 
@@ -167,7 +168,7 @@ export default memo(function SearchBar({
                       exit={{ opacity: 0, scale: 0.8 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <Sparkles className="w-[18px] h-[18px] text-foreground/40" />
+                      <LivingIcon size="w-[18px] h-[18px]" color="#9CA3AF" />
                     </motion.div>
                   ) : (
                     <motion.div

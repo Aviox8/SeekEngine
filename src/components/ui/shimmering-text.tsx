@@ -15,12 +15,13 @@ interface ShimmeringTextProps {
   once?: boolean
   inViewMargin?: string
   spread?: number
+  disabled?: boolean
 }
 
 /**
  * ShimmeringText Component
  * Inspired by ElevenLabs UI (ui.elevenlabs.io)
- * Features: Animated gradient text shimmer with viewport detection
+ * Features: Smooth animated gradient shimmer with viewport detection and optimized rendering
  */
 export const ShimmeringText = ({
   text,
@@ -33,6 +34,7 @@ export const ShimmeringText = ({
   once = false,
   inViewMargin = "0px 0px -10% 0px",
   spread = 2,
+  disabled = false,
 }: ShimmeringTextProps) => {
   const ref = React.useRef(null)
   const isInView = useInView(ref, { 
@@ -41,15 +43,28 @@ export const ShimmeringText = ({
     amount: 0.1
   })
 
+  // Memoize style object to prevent recreation on every render
+  const shimmerStyle = useMemo(() => ({
+    backgroundClip: "text" as const,
+    WebkitBackgroundClip: "text",
+    backgroundSize: `${spread * 100}% 100%`,
+    color: "transparent" as const,
+    backgroundPosition: disabled || (startOnView && !isInView) ? "-200% 0" : "200% 0",
+  }), [spread, disabled, startOnView, isInView])
+
+  if (disabled) {
+    return <span className={className}>{text}</span>
+  }
+
   return (
     <motion.span
       ref={ref}
       className={cn(
         "relative inline-block transition-colors duration-300",
-        "bg-gradient-to-r from-muted-foreground/40 via-foreground to-muted-foreground/40 bg-no-repeat",
+        "bg-gradient-to-r from-muted-foreground/30 via-foreground to-muted-foreground/30 bg-no-repeat",
         className
       )}
-      animate={(!startOnView || isInView) ? { backgroundPosition: "200% 0" } : { backgroundPosition: "-200% 0" }}
+      animate={{ backgroundPosition: (startOnView && !isInView) ? "-200% 0" : "200% 0" }}
       initial={{ backgroundPosition: "-200% 0" }}
       transition={{
         duration,
@@ -58,12 +73,7 @@ export const ShimmeringText = ({
         repeatDelay,
         ease: "linear",
       }}
-      style={{
-        backgroundClip: "text",
-        WebkitBackgroundClip: "text",
-        backgroundSize: `${spread * 100}% 100%`,
-        color: "transparent",
-      }}
+      style={shimmerStyle}
     >
       {text}
     </motion.span>

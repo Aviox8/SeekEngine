@@ -92,15 +92,16 @@ export function Sources({ sources, isLoading, className, ...props }: SourcesProp
                 href={source.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, x: 20, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
                 transition={{ 
-                  duration: 0.4, 
-                  delay: index * 0.05,
+                  duration: 0.3, 
+                  delay: index * 0.06,
                   ease: [0.16, 1, 0.3, 1] 
                 }}
-                whileHover={{ y: -2 }}
-                className="flex-shrink-0 w-48 p-3 rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] hover:bg-foreground/[0.04] hover:border-foreground/[0.1] transition-all group/source focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary snap-center"
+                whileHover={{ y: -4, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex-shrink-0 w-48 p-3 rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] hover:bg-foreground/[0.05] hover:border-foreground/[0.12] transition-all group/source focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary snap-center shadow-sm hover:shadow-md"
                 aria-label={`${source.title} - ${displayUrl}`}
               >
                 <div className="flex items-center gap-2 mb-2">
@@ -121,7 +122,7 @@ export function Sources({ sources, isLoading, className, ...props }: SourcesProp
                     {displayUrl}
                   </span>
                 </div>
-                <h4 className="text-[12px] font-semibold text-foreground leading-tight line-clamp-2 min-h-[2em] group-hover/source:text-primary transition-colors">
+                <h4 className="text-[12px] font-semibold text-foreground leading-tight line-clamp-2 min-h-[2em] group-hover/source:text-primary transition-colors duration-300">
                   {source.title || 'Untitled'}
                 </h4>
               </motion.a>

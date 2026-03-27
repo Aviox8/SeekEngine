@@ -38,23 +38,42 @@ const Response = React.forwardRef<HTMLDivElement, ResponseProps>(
       code: ({ inline, className, children, ...props }: any) => {
         const match = /language-(\w+)/.exec(className || '')
         return !inline ? (
-          <div className="my-6 rounded-xl overflow-hidden border border-foreground/10 bg-foreground/[0.03] p-4 font-mono text-sm">
+          <motion.div 
+            className="my-6 rounded-xl overflow-hidden border border-foreground/10 bg-foreground/[0.03] p-4 font-mono text-sm"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
             <code className={cn(className, "block overflow-x-auto")} {...props}>
               {children}
             </code>
-          </div>
+          </motion.div>
         ) : (
-          <code className="px-1.5 py-0.5 rounded-md font-mono text-[13px] bg-foreground/[0.05] text-foreground/80" {...props}>
+          <motion.code 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="px-1.5 py-0.5 rounded-md font-mono text-[13px] bg-primary/5 text-primary border border-primary/20"
+            {...props}
+          >
             {children}
-          </code>
+          </motion.code>
         )
       },
-      ul: (props) => <ul className="flex flex-col gap-2 mb-4 ml-1 list-none" {...props} />,
+      ul: (props) => <ul className="flex flex-col gap-3 mb-4 ml-1 list-none" {...props} />,
       li: ({ children }) => (
-        <div className="flex items-start gap-3">
-          <span className="mt-2.5 w-1 h-1 rounded-full shrink-0 bg-primary/40" />
+        <motion.div 
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex items-start gap-3"
+        >
+          <motion.span 
+            className="mt-2 w-1.5 h-1.5 rounded-full shrink-0 bg-primary/50"
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ repeat: Infinity, duration: 2, delay: 0.5 }}
+          />
           <span className="text-[15px] leading-relaxed text-foreground/85">{children}</span>
-        </div>
+        </motion.div>
       ),
       blockquote: (props) => (
         <blockquote className="border-l-2 border-primary/20 pl-4 py-1 my-4 italic text-muted-foreground" {...props} />
@@ -63,22 +82,20 @@ const Response = React.forwardRef<HTMLDivElement, ResponseProps>(
     }), [])
 
     return (
-      <div
-        ref={ref}
-        className={cn(
-          "w-full max-w-none animate-in fade-in duration-500",
-          className
-        )}
-        {...props}
-      >
-        <div className="prose prose-zinc dark:prose-invert max-w-none">
+      <div className="w-full max-w-none">
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="prose prose-zinc dark:prose-invert max-w-none"
+        >
           <ReactMarkdown 
             components={markdownComponents}
             rehypePlugins={[rehypeSanitize]}
           >
-            {isStreaming ? children + ' ▊' : children}
+            {isStreaming ? children + '▊' : children}
           </ReactMarkdown>
-        </div>
+        </motion.div>
       </div>
     )
   }

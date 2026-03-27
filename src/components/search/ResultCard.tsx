@@ -9,7 +9,7 @@
 
 import { SearchResult } from '../../lib/google-search'
 import { motion } from 'framer-motion'
-import { useState, useRef, useCallback, memo, useMemo } from 'react'
+import { memo, useMemo } from 'react'
 
 const SHADER_VARIANTS = [
   'shader-card',
@@ -17,61 +17,51 @@ const SHADER_VARIANTS = [
   'shader-card-3',
 ]
 
-const Favicon = memo(function Favicon({ url, fallback }: { url: string; fallback: string }) {
-  const [error, setError] = useState(false)
-  const [loading, setLoading] = useState(true)
-  
-  if (error) {
-    // Better fallback: gradient background with letter
-    const colors = ['from-blue-500 to-cyan-500', 'from-purple-500 to-pink-500', 'from-emerald-500 to-cyan-500', 'from-orange-500 to-red-500']
-    const colorIndex = fallback.charCodeAt(0) % colors.length
-    return (
-      <div className={`w-5 h-5 rounded-md flex items-center justify-center font-bold text-[9px] shrink-0 bg-gradient-to-br ${colors[colorIndex]} text-white shadow-sm`}>
-        {fallback}
-      </div>
-    )
-  }
+const COLORS = ['from-blue-500 to-cyan-500', 'from-purple-500 to-pink-500', 'from-emerald-500 to-cyan-500', 'from-orange-500 to-red-500']
 
+const Favicon = memo(function Favicon({ url, fallback }: { url: string; fallback: string }) {
+  const colorIndex = useMemo(() => fallback.charCodeAt(0) % COLORS.length, [fallback])
+  const faviconUrl = useMemo(() => `https://www.google.com/s2/favicons?domain=${url}&sz=32`, [url])
+  
   return (
     <div className="relative">
-      {loading && (
-        <div className="absolute inset-0 w-5 h-5 rounded-md animate-pulse bg-foreground/10" />
-      )}
       <img
-        src={`https://www.google.com/s2/favicons?domain=${url}&sz=32`}
+        src={faviconUrl}
         alt=""
         width={20}
         height={20}
         className="w-5 h-5 rounded-md shrink-0"
-        onError={() => setError(true)}
-        onLoad={() => setLoading(false)}
+        onError={(e) => {
+          (e.target as HTMLImageElement).style.display = 'none'
+        }}
         loading="lazy"
+        decoding="async"
       />
+      <div 
+        className={`absolute inset-0 w-5 h-5 rounded-md flex items-center justify-center font-bold text-[9px] shrink-0 bg-gradient-to-br ${COLORS[colorIndex]} text-white shadow-sm pointer-events-none`}
+        style={{ display: 'none' }}
+        onLoad={(e) => {
+          ((e.target as any).previousElementSibling as HTMLImageElement | null)?.style.removeProperty('display')
+        }}
+      >
+        {fallback}
+      </div>
     </div>
   )
 })
 
 export default memo(function ResultCard({ result, index = 0 }: { result: SearchResult; index?: number }) {
-  const cardRef = useRef<HTMLAnchorElement>(null)
-  // PERF: Disabled expensive mouse position tracking to prevent state updates on every move
-  // const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
-  const [isHovered, setIsHovered] = useState(false)
-  
   // PERF: Memoize hostname extraction to avoid expensive URL parsing on every render
-  // Previously: ~0.5ms per card × 10 cards = 5ms+ per results render
   const hostname = useMemo(() => {
     try { return new URL(result.link).hostname || result.displayLink || '' } 
     catch { return result.displayLink || '' }
   }, [result.link, result.displayLink])
-
-  // PERF: Disabled mouse move tracking - causes re-renders on every move for multiple cards
 
   // PERF: Cycle through shader variants - simple modulo operation
   const shaderClass = SHADER_VARIANTS[index % SHADER_VARIANTS.length]
 
   return (
     <motion.a 
-      ref={cardRef}
       href={result.link}
       target="_blank"
       rel="noopener noreferrer"
@@ -89,8 +79,6 @@ export default memo(function ResultCard({ result, index = 0 }: { result: SearchR
         transition: { duration: 0.15, ease: 'easeOut' } 
       }}
       whileTap={{ scale: 0.98 }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       style={{ 
         willChange: 'transform, opacity',
         backfaceVisibility: 'hidden',
