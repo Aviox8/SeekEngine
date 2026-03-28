@@ -73,7 +73,17 @@ export async function GET(request: NextRequest) {
       const body = new ReadableStream({
         start(controller) {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'cache_hit', content: cached.answer, model: cached.model, modelHuman: cached.modelHuman })}\n\n`))
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done', cached: true })}\n\n`))
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+            type: 'done',
+            content: cached.answer,
+            model: cached.model,
+            modelHuman: cached.modelHuman,
+            tier: 'cached',
+            latencyMs: 0,
+            attempts: 0,
+            cached: true,
+            cachedAt: cached.cachedAt,
+          })}\n\n`))
           controller.close()
         }
       })

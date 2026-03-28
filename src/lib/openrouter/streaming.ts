@@ -140,11 +140,9 @@ export async function* streamOpenRouter(
           logger.warn(`Rate limited (429) for ${model} - moving to next model`)
           throw new Error(`HTTP 429 - Rate Limited`)
         }
-        
-        // For other errors, track as model failure
-        const failCount = (modelFailures.get(model)?.failures || 0) + 1
-        modelFailures.set(model, { failures: failCount, lastFailedAt: Date.now() })
-        logger.warn(`Model connection failed: ${model} (${failCount} failures, HTTP ${response.status})`)
+
+        // Let catch block handle failure accounting to avoid double counting.
+        logger.warn(`Model connection failed: ${model} (HTTP ${response.status})`)
         throw new Error(`HTTP ${response.status}`)
       }
 
@@ -208,12 +206,19 @@ export async function* streamOpenRouter(
       }
 
     } catch (err) {
-      const failCount = (modelFailures.get(model)?.failures || 0) + 1
-      modelFailures.set(model, { failures: failCount, lastFailedAt: Date.now() })
-      
       const errorMsg = (err as Error).message
+      const isRateLimited = errorMsg.includes('HTTP 429')
+
+      let failCount = modelFailures.get(model)?.failures || 0
+      if (!isRateLimited) {
+        failCount += 1
+        modelFailures.set(model, { failures: failCount, lastFailedAt: Date.now() })
+      }
+
       if (errorMsg === 'TTFT_TIMEOUT') {
         logger.debug(`TTFT timeout for ${model} (maxLatency: ${policy.maxLatency}ms)`)
+      } else if (isRateLimited) {
+        logger.debug(`Rate limited for ${model} (not counted as model failure)`)
       } else {
         logger.debug(`Model connection error: ${model} - ${errorMsg} (failures: ${failCount})`)
       }

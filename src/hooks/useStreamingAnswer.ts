@@ -35,6 +35,7 @@ interface StreamEvent {
   latencyMs?: number
   attempts?: number
   error?: string
+  cached?: boolean
   cachedAt?: number
   sources?: { title: string; url: string; favicon?: string }[]
 }
@@ -90,7 +91,29 @@ export function useStreamingAnswer() {
       )
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
+        let errorMessage = `Request failed (HTTP ${response.status})`
+
+        try {
+          const contentType = response.headers.get('content-type') || ''
+
+          if (contentType.includes('application/json')) {
+            const body = await response.json() as { error?: string | { message?: string } }
+            if (typeof body?.error === 'string') {
+              errorMessage = body.error
+            } else if (typeof body?.error?.message === 'string') {
+              errorMessage = body.error.message
+            }
+          } else {
+            const text = (await response.text()).trim()
+            if (text) {
+              errorMessage = text.slice(0, 200)
+            }
+          }
+        } catch {
+          // Keep default fallback message.
+        }
+
+        throw new Error(errorMessage)
       }
 
       if (!response.body) {
@@ -101,6 +124,7 @@ export function useStreamingAnswer() {
       const decoder = new TextDecoder()
       let buffer = ''
       let receivedDone = false
+      let seenCacheHit = false
 
       while (true) {
         const { done, value } = await reader.read()
@@ -145,6 +169,7 @@ export function useStreamingAnswer() {
                 break
 
               case 'cache_hit':
+                seenCacheHit = true
                 answerRef.current = event.content || ''
                 setAnswer(answerRef.current)
                 setMetadata({
@@ -178,7 +203,7 @@ export function useStreamingAnswer() {
                   tier: event.tier || 'balanced',
                   latencyMs: event.latencyMs || 0,
                   attempts: event.attempts || 1,
-                  cached: event.cachedAt !== undefined,
+                  cached: event.cached === true || event.cachedAt !== undefined || seenCacheHit,
                 })
                 break
 

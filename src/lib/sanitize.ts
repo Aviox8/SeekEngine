@@ -20,7 +20,8 @@ export function sanitizeSearchQuery(query: string): string {
   return query
     .replace(NEWLINE_REGEX, ' ') // Replace newlines with spaces
     .replace(WHITESPACE_COLLAPSE_REGEX, ' ') // Collapse multiple spaces
-    .replace(UNSAFE_CHARS_REGEX, '') // Remove dangerous chars (but allow quotes for phrases)
+    .replace(UNSAFE_CHARS_REGEX, '') // Remove dangerous chars
+    .replace(/[?!]/g, '') // Normalize trailing query punctuation
     .trim()
 }
 
@@ -51,7 +52,7 @@ export function sanitizeUrlParam(param: string): string {
  * Validate domain is legitimate
  */
 export function isValidDomain(domain: string): boolean {
-  const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+  const domainRegex = /^(?=.{1,253}$)(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$/
   return domainRegex.test(domain)
 }
 

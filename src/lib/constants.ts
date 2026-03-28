@@ -24,7 +24,8 @@ export const RATE_LIMIT_MAX_ENTRIES = 10_000 // Hard cap on tracked IPs
 // ── Model Configuration ──────────────────────────────────────────────────────
 export const MAX_MODEL_FAILURES_THRESHOLD = 3
 export const MODEL_RACING_CONCURRENCY = 3 // Start N models simultaneously
-export const MAX_CONCURRENT_MODELS = 5 // Absolute maximumexport const MODEL_FAILURE_RECOVERY_WINDOW_MS = 5 * 60 * 1000 // 5 minutes
+export const MAX_CONCURRENT_MODELS = 5 // Absolute maximum
+export const MODEL_FAILURE_RECOVERY_WINDOW_MS = 5 * 60 * 1000 // 5 minutes
 export const SYSTEMIC_FAILURE_THRESHOLD_MS = 30_000 // 30 seconds
 
 // Validate configuration at module load
@@ -79,6 +80,6 @@ export const TIME_RANGES = {
 export type TimeRangeCode = keyof typeof TIME_RANGES
 
 // ── Patterns & Formats ──────────────────────────────────────────────────────
-export const UNSAFE_CHARS_REGEX = /[<>\"'];/g
+export const UNSAFE_CHARS_REGEX = /[<>\"';]/g
 export const NEWLINE_REGEX = /[\n\r]/g
 export const WHITESPACE_COLLAPSE_REGEX = /\s+/g

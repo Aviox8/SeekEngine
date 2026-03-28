@@ -63,6 +63,7 @@ export interface StreamEvent {
   latencyMs?: number
   attempts?: number
   error?: string
+  cached?: boolean
   cachedAt?: number
   sources?: { title: string; url: string; favicon?: string }[]
 }

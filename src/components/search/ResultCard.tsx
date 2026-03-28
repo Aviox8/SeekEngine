@@ -24,28 +24,24 @@ const Favicon = memo(function Favicon({ url, fallback }: { url: string; fallback
   const faviconUrl = useMemo(() => `https://www.google.com/s2/favicons?domain=${url}&sz=32`, [url])
   
   return (
-    <div className="relative">
+    <div className="relative w-5 h-5 shrink-0">
+      <div
+        className={`absolute inset-0 rounded-md flex items-center justify-center font-bold text-[9px] bg-gradient-to-br ${COLORS[colorIndex]} text-white shadow-sm pointer-events-none`}
+      >
+        {fallback}
+      </div>
       <img
         src={faviconUrl}
         alt=""
         width={20}
         height={20}
-        className="w-5 h-5 rounded-md shrink-0"
+        className="absolute inset-0 w-5 h-5 rounded-md"
         onError={(e) => {
-          (e.target as HTMLImageElement).style.display = 'none'
+          e.currentTarget.style.display = 'none'
         }}
         loading="lazy"
         decoding="async"
       />
-      <div 
-        className={`absolute inset-0 w-5 h-5 rounded-md flex items-center justify-center font-bold text-[9px] shrink-0 bg-gradient-to-br ${COLORS[colorIndex]} text-white shadow-sm pointer-events-none`}
-        style={{ display: 'none' }}
-        onLoad={(e) => {
-          ((e.target as any).previousElementSibling as HTMLImageElement | null)?.style.removeProperty('display')
-        }}
-      >
-        {fallback}
-      </div>
     </div>
   )
 })
