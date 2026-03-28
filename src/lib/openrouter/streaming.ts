@@ -280,16 +280,20 @@ export async function* streamOpenRouter(
   }
 
   // ── Model Racing Loop ─────────────────────────────────────────────────────────
+  const raceBatchSize = apiKeys.length > 1
+    ? Math.max(1, Math.min(MAX_CONCURRENT_MODELS, 2))
+    : MAX_CONCURRENT_MODELS
+
   keyLoop:
   for (let keyIndex = 0; keyIndex < apiKeys.length; keyIndex++) {
     const apiKey = apiKeys[keyIndex]
     const keyLabel = `${keyIndex + 1}/${apiKeys.length}`
     const keyStartTime = Date.now()
 
-    logger.info(`Starting model race using OpenRouter key ${keyLabel}`)
+    logger.info(`Starting model race using OpenRouter key ${keyLabel}`, { raceBatchSize })
 
-    for (let i = 0; i < models.length; i += MAX_CONCURRENT_MODELS) {
-      const batch = models.slice(i, i + MAX_CONCURRENT_MODELS)
+    for (let i = 0; i < models.length; i += raceBatchSize) {
+      const batch = models.slice(i, i + raceBatchSize)
       attempts += batch.length
 
       const batchControllers = new Map<string, AbortController>()
@@ -485,12 +489,17 @@ export async function* streamOpenRouter(
         const allRateLimited = messages.length > 0 && messages.every(msg => msg === 'RATE_LIMITED' || msg.includes('HTTP 429'))
         if (allRateLimited) {
           if (keyIndex < apiKeys.length - 1) {
-            logger.warn(`Rate limited across raced models on key ${keyLabel}; trying next key`)
+            const backoffMs = 250 + (keyIndex * 200) + Math.floor(Math.random() * 250)
+            logger.warn(`Rate limited across raced models on key ${keyLabel}; trying next key after ${backoffMs}ms backoff`)
+            await new Promise(resolve => setTimeout(resolve, backoffMs))
             continue keyLoop
           }
 
-          logger.warn('OpenRouter rate limit reached across raced models')
-          yield { type: 'error', error: 'OpenRouter rate limit reached. Please retry shortly.' }
+          logger.warn('OpenRouter rate limit reached across raced models for all configured keys')
+          yield {
+            type: 'error',
+            error: 'OpenRouter rate limit reached across all configured API keys. Please retry shortly.'
+          }
           return
         }
 
