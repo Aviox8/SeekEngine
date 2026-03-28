@@ -375,11 +375,13 @@ function ReasoningPanel({
   step,
   content,
   script,
+  compact = false,
 }: {
   state: StreamState
   step: number
   content?: string
   script: ReasoningScript
+  compact?: boolean
 }) {
   const activeStep = Math.min(Math.max(step, 0), script.steps.length - 1)
   const heading = state === 'thinking'
@@ -395,22 +397,28 @@ function ReasoningPanel({
 
   return (
     <motion.div 
-      className="mb-6 rounded-2xl border border-foreground/[0.08] bg-background/80 px-4 py-4 sm:px-5 sm:py-5"
+      className={compact
+        ? 'mb-4 rounded-xl border border-foreground/[0.07] bg-background/75 px-3 py-2.5 sm:px-4 sm:py-3'
+        : 'mb-6 rounded-2xl border border-foreground/[0.08] bg-background/80 px-4 py-4 sm:px-5 sm:py-5'}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="flex items-start gap-3.5">
-        <div className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border border-foreground/10">
+      <div className={compact ? 'flex items-start gap-2.5' : 'flex items-start gap-3.5'}>
+        <div className={compact
+          ? 'mt-[1px] flex h-4 w-4 items-center justify-center rounded-full border border-foreground/10'
+          : 'mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border border-foreground/10'}>
           {state === 'thinking' || state === 'streaming' ? (
-            <Loader2 className="h-3 w-3 text-primary animate-spin" />
+            <Loader2 className={compact ? 'h-2.5 w-2.5 text-primary animate-spin' : 'h-3 w-3 text-primary animate-spin'} />
           ) : (
-            <span className="h-2 w-2 rounded-full bg-primary/60" aria-hidden="true" />
+            <span className={compact ? 'h-1.5 w-1.5 rounded-full bg-primary/60' : 'h-2 w-2 rounded-full bg-primary/60'} aria-hidden="true" />
           )}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/80">
+            <p className={compact
+              ? 'text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/80'
+              : 'text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/80'}>
               {heading}
             </p>
             {state === 'thinking' && (
@@ -419,12 +427,20 @@ function ReasoningPanel({
               </span>
             )}
           </div>
-          <p className="mt-1.5 text-[13px] leading-relaxed text-foreground/85">
+          <p className={compact
+            ? 'mt-1 text-[12px] leading-relaxed text-foreground/80'
+            : 'mt-1.5 text-[13px] leading-relaxed text-foreground/85'}>
             {leadText}
           </p>
+          {compact && content && (
+            <p className="mt-1 text-[11px] text-muted-foreground/75">
+              {content}
+            </p>
+          )}
         </div>
       </div>
 
+      {!compact && (
       <div className="mt-4 space-y-2.5 border-l border-foreground/10 pl-3.5">
         {script.steps.map((text, i) => {
           const isDone = state === 'done' || i < activeStep
@@ -459,8 +475,9 @@ function ReasoningPanel({
           )
         })}
       </div>
+      )}
 
-      {content && (
+      {content && !compact && (
         <motion.div
           className="mt-4 rounded-xl border border-primary/15 bg-primary/[0.04] px-3.5 py-3 text-[12px] leading-relaxed text-foreground/85"
           initial={{ opacity: 0 }}
@@ -519,8 +536,8 @@ function ProcessingSteps({ script, runCycle }: { script: ReasoningScript, runCyc
 // PERFORMANCE: Memoize to prevent re-renders when parent answer updates
 const MemoizedProcessingSteps = memo(ProcessingSteps)
 
-function ReasoningComplete({ step, content, script }: { step: number, content?: string, script: ReasoningScript }) {
-  return <ReasoningPanel state="done" step={step} content={content} script={script} />
+function ReasoningComplete({ step, content, script, compact = false }: { step: number, content?: string, script: ReasoningScript, compact?: boolean }) {
+  return <ReasoningPanel state="done" step={step} content={content} script={script} compact={compact} />
 }
 const MemoizedReasoningComplete = memo(ReasoningComplete)
 
@@ -675,7 +692,7 @@ export function StreamingAnswer({
       case 'streaming':
         return (
           <div className="w-full max-w-none animate-fade-in transition-all duration-700">
-            <ReasoningPanel state="streaming" step={streamingStep} script={reasoningScript} />
+            <ReasoningPanel state="streaming" step={streamingStep} script={reasoningScript} compact />
             {sources && sources.length > 0 && (
               <Sources sources={sources} className="mb-6" />
             )}
@@ -692,6 +709,7 @@ export function StreamingAnswer({
               step={reasoningScript.steps.length - 1}
               content={doneContent}
               script={reasoningScript}
+              compact
             />
             {sources && sources.length > 0 && (
               <Sources sources={sources} className="mb-6" />
