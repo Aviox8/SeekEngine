@@ -25,22 +25,22 @@ export const TASK_POLICIES: Record<AITask, TaskPolicy> = {
     temperature: 0.8,
     maxTokens: 200,
     preferredTiers: ['fast', 'balanced'],
-    maxLatency: 3000,
-    globalTimeout: 6000,
+    maxLatency: 3500,
+    globalTimeout: 7500,
   },
   [AITaskEnum.ANSWER]: {
     temperature: 0.35,
     maxTokens: 800,
     preferredTiers: ['fast', 'balanced', 'heavy'],
-    maxLatency: 5000,
-    globalTimeout: 12000,
+    maxLatency: 6500,
+    globalTimeout: 20000,
   },
   [AITaskEnum.CODE]: {
     temperature: 0.2,
     maxTokens: 1200,
     preferredTiers: ['code', 'balanced'],
-    maxLatency: 6000,
-    globalTimeout: 15000,
+    maxLatency: 7500,
+    globalTimeout: 22000,
   },
 }
 

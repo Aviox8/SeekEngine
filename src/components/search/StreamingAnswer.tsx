@@ -8,9 +8,8 @@
 'use client'
 
 import { useEffect, useRef, useState, CSSProperties, useMemo, memo } from 'react'
-import ReactMarkdown from 'react-markdown'
 import { useStreamingAnswer, StreamState } from '../../hooks/useStreamingAnswer'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react'
 import { ShimmeringText } from '../ui/shimmering-text'
 import { Response } from '../ui/response'
@@ -375,13 +374,11 @@ function ReasoningPanel({
   step,
   content,
   script,
-  compact = false,
 }: {
   state: StreamState
   step: number
   content?: string
   script: ReasoningScript
-  compact?: boolean
 }) {
   const activeStep = Math.min(Math.max(step, 0), script.steps.length - 1)
   const heading = state === 'thinking'
@@ -389,36 +386,33 @@ function ReasoningPanel({
     : state === 'streaming'
       ? script.headings.streaming
       : script.headings.done
-  const leadText = state === 'thinking'
-    ? script.steps[activeStep]
+  const thoughtText = state === 'done'
+    ? script.steps[script.steps.length - 1]
+    : script.steps[activeStep]
+  const supportText = state === 'thinking'
+    ? undefined
     : state === 'streaming'
       ? script.leads.streaming
       : script.leads.done
 
   return (
     <motion.div 
-      className={compact
-        ? 'mb-4 rounded-xl border border-foreground/[0.07] bg-background/75 px-3 py-2.5 sm:px-4 sm:py-3'
-        : 'mb-6 rounded-2xl border border-foreground/[0.08] bg-background/80 px-4 py-4 sm:px-5 sm:py-5'}
+      className="mb-4 rounded-xl border border-foreground/[0.07] bg-background/75 px-3.5 py-3 sm:px-4 sm:py-3.5"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className={compact ? 'flex items-start gap-2.5' : 'flex items-start gap-3.5'}>
-        <div className={compact
-          ? 'mt-[1px] flex h-4 w-4 items-center justify-center rounded-full border border-foreground/10'
-          : 'mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border border-foreground/10'}>
+      <div className="flex items-start gap-2.5">
+        <div className="mt-[1px] flex h-4 w-4 items-center justify-center rounded-full border border-foreground/10">
           {state === 'thinking' || state === 'streaming' ? (
-            <Loader2 className={compact ? 'h-2.5 w-2.5 text-primary animate-spin' : 'h-3 w-3 text-primary animate-spin'} />
+            <Loader2 className="h-2.5 w-2.5 text-primary animate-spin" />
           ) : (
-            <span className={compact ? 'h-1.5 w-1.5 rounded-full bg-primary/60' : 'h-2 w-2 rounded-full bg-primary/60'} aria-hidden="true" />
+            <span className="h-1.5 w-1.5 rounded-full bg-primary/60" aria-hidden="true" />
           )}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className={compact
-              ? 'text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/80'
-              : 'text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/80'}>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/80">
               {heading}
             </p>
             {state === 'thinking' && (
@@ -427,72 +421,35 @@ function ReasoningPanel({
               </span>
             )}
           </div>
-          <p className={compact
-            ? 'mt-1 text-[12px] leading-relaxed text-foreground/80'
-            : 'mt-1.5 text-[13px] leading-relaxed text-foreground/85'}>
-            {leadText}
-          </p>
-          {compact && content && (
-            <p className="mt-1 text-[11px] text-muted-foreground/75">
+
+          <div className="mt-1 min-h-[38px]">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.p
+                key={`${state}:${activeStep}:${thoughtText}`}
+                className="text-[12px] leading-relaxed text-foreground/82"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.28, ease: 'easeInOut' }}
+              >
+                {thoughtText}
+              </motion.p>
+            </AnimatePresence>
+          </div>
+
+          {supportText && (
+            <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground/75">
+              {supportText}
+            </p>
+          )}
+
+          {state === 'done' && content && (
+            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground/70">
               {content}
             </p>
           )}
         </div>
       </div>
-
-      {!compact && (
-      <div className="mt-4 space-y-2.5 border-l border-foreground/10 pl-3.5">
-        {script.steps.map((text, i) => {
-          const isDone = state === 'done' || i < activeStep
-          const isActive = state !== 'done' && i === activeStep
-
-          return (
-            <motion.div
-              key={i}
-              className="flex items-start gap-3"
-              animate={{ opacity: isDone || isActive ? 1 : 0.45 }}
-              transition={{ duration: 0.25 }}
-            >
-              <div className="mt-[3px] flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-foreground/15 bg-background">
-                {isDone ? (
-                  <svg className="h-2.5 w-2.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                ) : isActive ? (
-                  <motion.span
-                    className="h-1.5 w-1.5 rounded-full bg-primary"
-                    animate={{ scale: [1, 1.45, 1] }}
-                    transition={{ repeat: Infinity, duration: 1.1 }}
-                  />
-                ) : (
-                  <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/45" />
-                )}
-              </div>
-              <p className={`text-[12px] leading-relaxed ${isDone || isActive ? 'text-foreground/90' : 'text-muted-foreground'}`}>
-                {text}
-              </p>
-            </motion.div>
-          )
-        })}
-      </div>
-      )}
-
-      {content && !compact && (
-        <motion.div
-          className="mt-4 rounded-xl border border-primary/15 bg-primary/[0.04] px-3.5 py-3 text-[12px] leading-relaxed text-foreground/85"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-        >
-          <ReactMarkdown
-            components={{
-              p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-            }}
-          >
-            {content}
-          </ReactMarkdown>
-        </motion.div>
-      )}
     </motion.div>
   )
 }
@@ -518,7 +475,7 @@ function ProcessingSteps({ script, runCycle }: { script: ReasoningScript, runCyc
     if (isPaused || step >= script.steps.length - 1) return
 
     const variance = Math.abs(hashString(`${script.statusText}:${runCycle}:${step}`)) % 240
-    const delay = 980 + step * 170 + variance
+    const delay = 880 + step * 180 + variance
     const timeout = window.setTimeout(() => {
       setStep((s) => (s < script.steps.length - 1 ? s + 1 : s))
     }, delay)
@@ -536,8 +493,8 @@ function ProcessingSteps({ script, runCycle }: { script: ReasoningScript, runCyc
 // PERFORMANCE: Memoize to prevent re-renders when parent answer updates
 const MemoizedProcessingSteps = memo(ProcessingSteps)
 
-function ReasoningComplete({ step, content, script, compact = false }: { step: number, content?: string, script: ReasoningScript, compact?: boolean }) {
-  return <ReasoningPanel state="done" step={step} content={content} script={script} compact={compact} />
+function ReasoningComplete({ step, content, script }: { step: number, content?: string, script: ReasoningScript }) {
+  return <ReasoningPanel state="done" step={step} content={content} script={script} />
 }
 const MemoizedReasoningComplete = memo(ReasoningComplete)
 
@@ -692,7 +649,7 @@ export function StreamingAnswer({
       case 'streaming':
         return (
           <div className="w-full max-w-none animate-fade-in transition-all duration-700">
-            <ReasoningPanel state="streaming" step={streamingStep} script={reasoningScript} compact />
+            <ReasoningPanel state="streaming" step={streamingStep} script={reasoningScript} />
             {sources && sources.length > 0 && (
               <Sources sources={sources} className="mb-6" />
             )}
@@ -709,7 +666,6 @@ export function StreamingAnswer({
               step={reasoningScript.steps.length - 1}
               content={doneContent}
               script={reasoningScript}
-              compact
             />
             {sources && sources.length > 0 && (
               <Sources sources={sources} className="mb-6" />

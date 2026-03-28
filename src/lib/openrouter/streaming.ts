@@ -109,6 +109,10 @@ export async function* streamOpenRouter(
     const tier = classifyModel(model)
     const controller = externalController || new AbortController()
     const modelStartTime = Date.now()
+    const remainingGlobalBudget = Math.max(1000, policy.globalTimeout - (Date.now() - startTime) - 250)
+    const connectTimeoutMs = Math.max(1200, Math.min(policy.maxLatency, remainingGlobalBudget))
+    const connectTimeoutId = setTimeout(() => controller.abort('MODEL_TIMEOUT'), connectTimeoutMs)
+    let ttftTimeoutId: ReturnType<typeof setTimeout> | undefined
 
     try {
       const response = await fetch(
@@ -163,9 +167,12 @@ export async function* streamOpenRouter(
       
       // Tier-aware TTFT (Time To First Token) timeouts
       const ttftLimit = tier === 'fast' ? 2000 : 5000
-      const ttftTimeout = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('TTFT_TIMEOUT')), ttftLimit)
-      )
+      const ttftTimeout = new Promise<never>((_, reject) => {
+        ttftTimeoutId = setTimeout(
+          () => reject(new Error('TTFT_TIMEOUT')),
+          Math.min(ttftLimit, connectTimeoutMs)
+        )
+      })
 
       const readFirstChunk = async () => {
         while (true) {
@@ -204,6 +211,8 @@ export async function* streamOpenRouter(
       }
 
       const firstToken = await Promise.race([readFirstChunk(), ttftTimeout])
+      if (ttftTimeoutId) clearTimeout(ttftTimeoutId)
+      clearTimeout(connectTimeoutId)
 
       return {
         model,
@@ -217,19 +226,35 @@ export async function* streamOpenRouter(
       }
 
     } catch (err) {
-      const errorMsg = (err as Error).message
+      if (ttftTimeoutId) clearTimeout(ttftTimeoutId)
+      clearTimeout(connectTimeoutId)
+
+      const rawErrorMsg = (err as Error).message
+      const abortReason = controller.signal.aborted
+        ? String((controller.signal as AbortSignal & { reason?: unknown }).reason ?? '')
+        : ''
+      const isExpectedAbort =
+        abortReason === 'RACE_LOST' ||
+        abortReason === 'BATCH_ABORT' ||
+        abortReason === 'GLOBAL_TIMEOUT_ABORT' ||
+        abortReason === 'WINNER_CLEANUP'
+      const isTimeoutAbort = abortReason === 'MODEL_TIMEOUT'
+      const errorMsg = isTimeoutAbort ? 'MODEL_TIMEOUT' : rawErrorMsg
+
       const isRateLimited = errorMsg === 'RATE_LIMITED' || errorMsg.includes('HTTP 429')
       const isAuthError = errorMsg.startsWith('AUTH_ERROR_')
       const isBillingError = errorMsg === 'BILLING_REQUIRED'
 
       let failCount = modelFailures.get(model)?.failures || 0
-      if (!isRateLimited && !isAuthError && !isBillingError) {
+      if (!isRateLimited && !isAuthError && !isBillingError && !isExpectedAbort) {
         failCount += 1
         modelFailures.set(model, { failures: failCount, lastFailedAt: Date.now() })
       }
 
-      if (errorMsg === 'TTFT_TIMEOUT') {
+      if (errorMsg === 'TTFT_TIMEOUT' || errorMsg === 'MODEL_TIMEOUT') {
         logger.debug(`TTFT timeout for ${model} (maxLatency: ${policy.maxLatency}ms)`)
+      } else if (isExpectedAbort) {
+        logger.debug(`Expected cancellation for ${model} (${abortReason}) - not counted as failure`)
       } else if (isRateLimited) {
         logger.debug(`Rate limited for ${model} (not counted as model failure)`)
       } else if (isAuthError) {
@@ -240,8 +265,10 @@ export async function* streamOpenRouter(
         logger.debug(`Model connection error: ${model} - ${errorMsg} (failures: ${failCount})`)
       }
       
-      // Always abort the controller
-      controller.abort()
+      // Ensure the model request is fully cleaned up.
+      if (!controller.signal.aborted) {
+        controller.abort('CONNECT_ERROR')
+      }
       throw err
     }
   }
@@ -256,15 +283,31 @@ export async function* streamOpenRouter(
       batchControllers.set(m, new AbortController())
     }
     
+    let globalTimeoutId: ReturnType<typeof setTimeout> | undefined
+
     try {
       const promises = batch.map(m => connectToModel(m, batchControllers.get(m)!))
-      const winner = await Promise.any(promises)
+      const elapsedMs = Date.now() - startTime
+      const remainingGlobalMs = policy.globalTimeout - elapsedMs
+
+      if (remainingGlobalMs <= 0) {
+        logger.error('Global timeout reached before starting next model batch', new Error(`Elapsed: ${elapsedMs}ms`), { taskType: task })
+        yield { type: 'error', error: 'Global timeout reached before model response' }
+        return
+      }
+
+      const globalTimeoutPromise = new Promise<never>((_, reject) => {
+        globalTimeoutId = setTimeout(() => reject(new Error('GLOBAL_TIMEOUT')), remainingGlobalMs)
+      })
+
+      const winner = await Promise.race([Promise.any(promises), globalTimeoutPromise])
+      if (globalTimeoutId) clearTimeout(globalTimeoutId)
 
       // CRITICAL: Immediately abort all losing connections to prevent token waste
       for (const [model, controller] of batchControllers) {
         if (model !== winner.model) {
           try {
-            controller.abort()
+            controller.abort('RACE_LOST')
           } catch {
             logger.debug(`Failed to abort losing model: ${model}`)
           }
@@ -367,10 +410,14 @@ export async function* streamOpenRouter(
       return
 
     } catch (e) {
+      if (globalTimeoutId) clearTimeout(globalTimeoutId)
+
+      const isGlobalTimeout = e instanceof Error && e.message === 'GLOBAL_TIMEOUT'
+
       // Batch failed - abort all controllers and try next batch
       for (const controller of batchControllers.values()) {
         try {
-          controller.abort()
+          controller.abort(isGlobalTimeout ? 'GLOBAL_TIMEOUT_ABORT' : 'BATCH_ABORT')
         } catch {
           // Silently ignore
         }
@@ -380,6 +427,12 @@ export async function* streamOpenRouter(
       const messages = aggregateErrors.map(err =>
         err instanceof Error ? err.message : String(err)
       )
+
+      if (messages.some(msg => msg === 'GLOBAL_TIMEOUT')) {
+        logger.error('Global timeout reached during model race', new Error(`Elapsed: ${Date.now() - startTime}ms`), { taskType: task })
+        yield { type: 'error', error: 'Global timeout reached before first token. Please retry with a shorter query.' }
+        return
+      }
 
       if (messages.some(msg => msg.startsWith('AUTH_ERROR_'))) {
         logger.error('OpenRouter authentication failed during model race')
