@@ -21,11 +21,12 @@ function validateSearchResponse(data: unknown): SearchResult[] {
   const results = response.results
   if (!Array.isArray(results)) return []
   return results.filter((r): r is SearchResult => {
+    const item = r as { title?: unknown; snippet?: unknown; link?: unknown }
     return typeof r === 'object' && r !== null &&
       'title' in r && 'snippet' in r && 'link' in r &&
-      typeof (r as any).title === 'string' &&
-      typeof (r as any).snippet === 'string' &&
-      typeof (r as any).link === 'string'
+      typeof item.title === 'string' &&
+      typeof item.snippet === 'string' &&
+      typeof item.link === 'string'
   })
 }
 
@@ -412,7 +413,7 @@ export default function ResultsClient() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                           </svg>
                         </div>
-                        <p className="text-sm font-medium text-muted-foreground mb-2">No results found for "{query}"</p>
+                        <p className="text-sm font-medium text-muted-foreground mb-2">No results found for {query}</p>
                         <p className="text-xs text-muted-foreground/60">Try rephrasing your query, check spelling, or try broader terms.</p>
                     </div>
                   )}

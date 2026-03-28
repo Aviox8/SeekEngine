@@ -95,7 +95,6 @@ export default memo(function SearchBar({
   }, [showSuggestions])
 
   useEffect(() => { onTyping?.(isTyping) }, [isTyping, onTyping])
-  useEffect(() => { setSelectedIndex(-1) }, [suggestions])
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -186,6 +185,7 @@ export default memo(function SearchBar({
               onChange={(e) => {
                 updateQuery(e.target.value)
                 setShowSuggestions(e.target.value.trim().length > 0)
+                setSelectedIndex(-1)
               }}
               onFocus={() => {
                 setIsFocused(true)
@@ -203,7 +203,6 @@ export default memo(function SearchBar({
               aria-label="Search query input"
               aria-describedby="search-hint"
               aria-haspopup="listbox"
-              aria-expanded={showSuggestionsList || showHistory}
               className="w-full bg-transparent border-none outline-none text-[17px] font-normal tracking-normal text-foreground placeholder:text-muted-foreground/30 resize-none p-0 min-h-[48px] max-h-[160px] leading-normal"
               style={{ caretColor: 'hsl(var(--primary))' }}
               spellCheck={false}
