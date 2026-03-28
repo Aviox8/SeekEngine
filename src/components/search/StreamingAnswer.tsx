@@ -41,6 +41,207 @@ type ReasoningScript = {
   steps: string[]
 }
 
+type IntentMicroTone = {
+  thinkingHeadings: string[]
+  streamingHeadings: string[]
+  doneHeadings: string[]
+  statusVerbs: string[]
+  step1Hints: string[]
+  step2Hints: string[]
+  step3Hints: string[]
+  streamingHints: string[]
+  doneHints: string[]
+}
+
+const INTENT_MICRO_TONES: Record<QueryIntent, IntentMicroTone> = {
+  compare: {
+    thinkingHeadings: ['Weighing Side By Side', 'Balancing The Tradeoffs', 'Comparing What Matters'],
+    streamingHeadings: ['Writing A Balanced Comparison', 'Turning Tradeoffs Into Guidance', 'Composing A Side-By-Side Answer'],
+    doneHeadings: ['Comparison Ready', 'Tradeoff Review Complete', 'Balanced Verdict Ready'],
+    statusVerbs: ['weighing options on', 'mapping tradeoffs for', 'comparing signals for'],
+    step1Hints: [
+      'I am separating must-have criteria from nice-to-have points first.',
+      'I am locking comparison dimensions early so the answer stays fair.',
+      'I am identifying shared ground before spotlighting real differences.',
+    ],
+    step2Hints: [
+      'I am favoring apples-to-apples evidence and skipping marketing noise.',
+      'I am checking both strengths and weak spots so one side is not overhyped.',
+      'I am validating each claim across multiple references before scoring it.',
+    ],
+    step3Hints: [
+      'I am framing recommendations by context instead of forcing one universal winner.',
+      'I am surfacing tradeoffs you will actually feel in practical usage.',
+      'I am keeping the final pick conditional on your likely priorities.',
+    ],
+    streamingHints: [
+      'I am keeping the wording neutral so the choice remains yours.',
+      'I am emphasizing what changes the decision in real-world scenarios.',
+      'I am making the contrast clear without adding unnecessary hype.',
+    ],
+    doneHints: [
+      'The final comparison stays balanced and criteria-driven.',
+      'I kept the conclusion grounded in tradeoffs, not absolute claims.',
+      'You can now pick based on priorities rather than guesswork.',
+    ],
+  },
+  howto: {
+    thinkingHeadings: ['Building A Practical Plan', 'Laying Out The Steps', 'Turning Intent Into Action'],
+    streamingHeadings: ['Writing Actionable Steps', 'Composing The Execution Plan', 'Turning Research Into A Playbook'],
+    doneHeadings: ['Step Plan Ready', 'Execution Path Complete', 'How-To Draft Finalized'],
+    statusVerbs: ['laying out steps for', 'building an action plan for', 'mapping implementation for'],
+    step1Hints: [
+      'I am identifying the cleanest path from first step to finished result.',
+      'I am structuring this into a sequence you can execute without backtracking.',
+      'I am clarifying prerequisites first so the rest flows smoothly.',
+    ],
+    step2Hints: [
+      'I am pulling examples that are practical to apply right away.',
+      'I am filtering out theoretical detours and keeping only useful actions.',
+      'I am prioritizing steps that reduce setup friction and avoid common pitfalls.',
+    ],
+    step3Hints: [
+      'I am shaping the answer so each step has a clear outcome.',
+      'I am organizing it for fast execution, not just explanation.',
+      'I am keeping the order realistic so it works in an actual workflow.',
+    ],
+    streamingHints: [
+      'I am optimizing this for clarity so you can start immediately.',
+      'I am writing with an action-first tone and minimal fluff.',
+      'I am focusing on decisions and steps you can directly apply.',
+    ],
+    doneHints: [
+      'The final answer is structured to be followed, not just read.',
+      'I kept the instructions concise so execution stays smooth.',
+      'You should be able to move from this response straight into action.',
+    ],
+  },
+  recent: {
+    thinkingHeadings: ['Checking Fresh Signals', 'Prioritizing Recent Evidence', 'Filtering By Recency'],
+    streamingHeadings: ['Writing With Fresh Context', 'Composing A Current Snapshot', 'Turning Updates Into Clarity'],
+    doneHeadings: ['Fresh View Ready', 'Recency Review Complete', 'Current Snapshot Finalized'],
+    statusVerbs: ['checking freshness for', 'verifying recent updates for', 'sorting latest signals for'],
+    step1Hints: [
+      'I am setting a freshness lens so stale references do not dominate.',
+      'I am focusing on what changed recently before summarizing the topic.',
+      'I am scoping the timeline first so older material is weighted correctly.',
+    ],
+    step2Hints: [
+      'I am cross-checking timestamps to avoid outdated guidance.',
+      'I am prioritizing newer sources while still validating consistency.',
+      'I am separating confirmed updates from rumors and low-confidence chatter.',
+    ],
+    step3Hints: [
+      'I am connecting updates into a coherent picture of what matters now.',
+      'I am framing the answer around new shifts and their practical impact.',
+      'I am highlighting what is still true versus what has recently changed.',
+    ],
+    streamingHints: [
+      'I am keeping the narrative time-aware so the answer feels current.',
+      'I am calling out timeline-sensitive details where they change conclusions.',
+      'I am emphasizing what is new so you can act on the latest context.',
+    ],
+    doneHints: [
+      'The final answer favors freshness without sacrificing reliability.',
+      'I kept the response anchored in recent, verifiable context.',
+      'You should see a clear split between established facts and recent updates.',
+    ],
+  },
+  decision: {
+    thinkingHeadings: ['Weighing The Decision', 'Ranking What Matters Most', 'Scoring The Options'],
+    streamingHeadings: ['Writing A Practical Recommendation', 'Composing Decision Guidance', 'Turning Evidence Into A Pick'],
+    doneHeadings: ['Recommendation Ready', 'Decision Review Complete', 'Priority-Based Verdict Ready'],
+    statusVerbs: ['ranking priorities for', 'weighing choices for', 'building a recommendation for'],
+    step1Hints: [
+      'I am identifying decision criteria that genuinely change outcomes.',
+      'I am translating your query into a shortlist of practical priorities.',
+      'I am defining the decision frame so recommendations stay relevant.',
+    ],
+    step2Hints: [
+      'I am pulling evidence for each option against the same scoring lens.',
+      'I am testing claims against constraints like effort, risk, and payoff.',
+      'I am separating high-confidence signals from opinion-heavy advice.',
+    ],
+    step3Hints: [
+      'I am mapping each option to the context where it wins.',
+      'I am turning the evidence into a recommendation with clear conditions.',
+      'I am keeping uncertainty visible so the recommendation stays honest.',
+    ],
+    streamingHints: [
+      'I am making the recommendation explicit while preserving nuance.',
+      'I am highlighting when a different priority would flip the best choice.',
+      'I am keeping the verdict practical, not absolute.',
+    ],
+    doneHints: [
+      'The recommendation is tied to priorities rather than broad assumptions.',
+      'I kept the final call transparent about tradeoffs and confidence.',
+      'You can adapt the pick quickly if your constraints change.',
+    ],
+  },
+  local: {
+    thinkingHeadings: ['Grounding In Local Context', 'Mapping Nearby Relevance', 'Adapting To Your Location'],
+    streamingHeadings: ['Writing Location-Aware Guidance', 'Composing Localized Recommendations', 'Turning Context Into Local Answers'],
+    doneHeadings: ['Local Guidance Ready', 'Location Review Complete', 'Contextual Answer Finalized'],
+    statusVerbs: ['grounding context for', 'adapting locally for', 'checking nearby relevance for'],
+    step1Hints: [
+      'I am identifying which parts of the question depend on local conditions.',
+      'I am mapping location-sensitive factors before drafting recommendations.',
+      'I am distinguishing universal advice from context-specific guidance.',
+    ],
+    step2Hints: [
+      'I am prioritizing sources that better reflect regional differences.',
+      'I am checking constraints likely to change by city, country, or nearby options.',
+      'I am filtering generic advice when local variability can change results.',
+    ],
+    step3Hints: [
+      'I am tailoring the response to context while keeping fallback options clear.',
+      'I am balancing local relevance with guidance that still generalizes when needed.',
+      'I am shaping recommendations around what is realistic in nearby conditions.',
+    ],
+    streamingHints: [
+      'I am keeping assumptions explicit so local differences stay visible.',
+      'I am writing with place-specific context rather than generic defaults.',
+      'I am emphasizing adaptable choices in case your exact location varies.',
+    ],
+    doneHints: [
+      'The final answer is localized where it matters and flexible where it should be.',
+      'I kept location assumptions clear so you can adjust quickly.',
+      'You should now have guidance that feels contextual, not generic.',
+    ],
+  },
+  general: {
+    thinkingHeadings: ['Working Through Your Search', 'Mapping Your Search Intent', 'Building Your Answer Logic'],
+    streamingHeadings: ['Writing Your Response', 'Composing The Final Draft', 'Turning Findings Into Answers'],
+    doneHeadings: ['Answer Ready', 'Reasoning Pass Complete', 'Final Review Complete'],
+    statusVerbs: ['drafting', 'refining', 'shaping'],
+    step1Hints: [
+      'I am narrowing this to the exact question behind your wording.',
+      'I am setting the scope so the answer stays focused and useful.',
+      'I am clarifying intent first so the response is precise.',
+    ],
+    step2Hints: [
+      'I am prioritizing reliable details and filtering repetitive noise.',
+      'I am collecting high-signal facts before writing the final wording.',
+      'I am checking source quality before using any claim in the answer.',
+    ],
+    step3Hints: [
+      'I am organizing the strongest findings into a direct response.',
+      'I am shaping the evidence into a clear and readable answer.',
+      'I am connecting facts into a concise explanation with practical value.',
+    ],
+    streamingHints: [
+      'I am keeping this concise while preserving key context.',
+      'I am balancing clarity and depth so the answer stays usable.',
+      'I am emphasizing the points that matter most to your query.',
+    ],
+    doneHints: [
+      'I kept the final response focused on your original intent.',
+      'The answer stays clear, grounded, and easy to apply.',
+      'I removed side noise so the important points stand out.',
+    ],
+  },
+}
+
 const STOP_WORDS = new Set([
   'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from', 'how', 'i',
   'in', 'is', 'it', 'of', 'on', 'or', 'that', 'the', 'this', 'to', 'was', 'what',
@@ -105,6 +306,7 @@ function buildReasoningScript(query: string, runCycle: number): ReasoningScript 
     : 'your answer'
 
   const intent = detectIntent(clean)
+  const tone = INTENT_MICRO_TONES[intent]
   const intentGoalMap: Record<QueryIntent, string> = {
     compare: 'a side-by-side comparison',
     howto: 'a practical step-by-step answer',
@@ -116,40 +318,31 @@ function buildReasoningScript(query: string, runCycle: number): ReasoningScript 
 
   const seed = Math.abs(hashString(`${clean}|${runCycle}`))
   const pick = (options: string[], offset: number) => options[(seed + offset) % options.length]
+  const step1Hint = pick(tone.step1Hints, 9)
+  const step2Hint = pick(tone.step2Hints, 10)
+  const step3Hint = pick(tone.step3Hints, 11)
 
   const headingSet = {
-    thinking: pick([
-      'Working Through Your Search',
-      'Mapping Your Search Intent',
-      'Building Your Answer Logic',
-    ], 0),
-    streaming: pick([
-      'Writing Your Response',
-      'Composing The Final Draft',
-      'Turning Findings Into Answers',
-    ], 1),
-    done: pick([
-      'Answer Ready',
-      'Reasoning Pass Complete',
-      'Final Review Complete',
-    ], 2),
+    thinking: pick(tone.thinkingHeadings, 0),
+    streaming: pick(tone.streamingHeadings, 1),
+    done: pick(tone.doneHeadings, 2),
   }
 
   const steps = [
     pick([
-      `I'm mapping ${queryLabel} into the exact points that need evidence.`,
-      `I'm breaking ${queryLabel} into focused sub-questions before writing.`,
-      `I'm framing what ${queryLabel} is really asking so the answer stays on target.`,
+      `I'm mapping ${queryLabel} into the exact points that need evidence. ${step1Hint}`,
+      `I'm breaking ${queryLabel} into focused sub-questions before writing. ${step1Hint}`,
+      `I'm framing what ${queryLabel} is really asking so the answer stays on target. ${step1Hint}`,
     ], 3),
     pick([
-      `I'm pulling high-signal sources around ${focusPhrase} and filtering repetitive noise.`,
-      `I'm gathering reliable details on ${focusPhrase} and dropping weak matches.`,
-      `I'm scanning multiple references on ${focusPhrase} before I draft your answer.`,
+      `I'm pulling high-signal sources around ${focusPhrase} and filtering repetitive noise. ${step2Hint}`,
+      `I'm gathering reliable details on ${focusPhrase} and dropping weak matches. ${step2Hint}`,
+      `I'm scanning multiple references on ${focusPhrase} before I draft your answer. ${step2Hint}`,
     ], 4),
     pick([
-      `I'm connecting the findings into ${intentGoalMap[intent]} tailored to your query.`,
-      `I'm shaping the evidence into ${intentGoalMap[intent]} that directly answers you.`,
-      `I'm organizing the strongest points into ${intentGoalMap[intent]} without extra fluff.`,
+      `I'm connecting the findings into ${intentGoalMap[intent]} tailored to your query. ${step3Hint}`,
+      `I'm shaping the evidence into ${intentGoalMap[intent]} that directly answers you. ${step3Hint}`,
+      `I'm organizing the strongest points into ${intentGoalMap[intent]} without extra fluff. ${step3Hint}`,
     ], 5),
     pick([
       "I'm doing a final pass for factual consistency and citation quality.",
@@ -161,18 +354,18 @@ function buildReasoningScript(query: string, runCycle: number): ReasoningScript 
   return {
     headings: headingSet,
     leads: {
-      streaming: pick([
+      streaming: `${pick([
         `I'm drafting the final response for ${queryLabel} and keeping every point grounded in sources.`,
         `I'm now writing your answer for ${queryLabel}, keeping it concise and evidence-backed.`,
         `I'm turning the research on ${focusPhrase} into a clean response you can use immediately.`,
-      ], 7),
-      done: pick([
+      ], 7)} ${pick(tone.streamingHints, 12)}`,
+      done: `${pick([
         `I finished a final quality pass so this answer stays aligned with ${queryLabel}.`,
         `I completed the reasoning pass and kept only details that directly support ${queryLabel}.`,
         `I wrapped up with one more check so the response remains accurate and relevant to your search.`,
-      ], 8),
+      ], 8)} ${pick(tone.doneHints, 13)}`,
     },
-    statusText: `drafting ${statusTopic}...`,
+    statusText: `${pick(tone.statusVerbs, 14)} ${statusTopic}...`,
     steps,
   }
 }
