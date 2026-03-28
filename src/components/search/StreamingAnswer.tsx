@@ -25,25 +25,180 @@ interface StreamingAnswerProps {
   onRegenerate?: () => void
 }
 
-const STEPS = [
-  "I'm reading your question and clarifying what you really need.",
-  "I'm gathering the strongest facts and examples.",
-  "I'm shaping everything into a clear, direct answer.",
-  "I'm doing a final check for accuracy and citations."
-]
+type QueryIntent = 'compare' | 'howto' | 'recent' | 'decision' | 'local' | 'general'
 
-function ReasoningPanel({ state, step, content }: { state: StreamState, step: number, content?: string }) {
-  const activeStep = Math.min(Math.max(step, 0), STEPS.length - 1)
+type ReasoningScript = {
+  headings: {
+    thinking: string
+    streaming: string
+    done: string
+  }
+  leads: {
+    streaming: string
+    done: string
+  }
+  statusText: string
+  steps: string[]
+}
+
+const STOP_WORDS = new Set([
+  'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from', 'how', 'i',
+  'in', 'is', 'it', 'of', 'on', 'or', 'that', 'the', 'this', 'to', 'was', 'what',
+  'when', 'where', 'which', 'who', 'why', 'with', 'you', 'your'
+])
+
+function hashString(value: string) {
+  let hash = 0
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash << 5) - hash + value.charCodeAt(i)
+    hash |= 0
+  }
+  return hash
+}
+
+function truncateText(value: string, maxLength: number) {
+  if (value.length <= maxLength) return value
+  return `${value.slice(0, Math.max(maxLength - 3, 0)).trimEnd()}...`
+}
+
+function normalizeQuery(query: string) {
+  return query.replace(/\s+/g, ' ').trim()
+}
+
+function extractKeywords(query: string, limit = 3) {
+  const words = query
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter((word) => word.length > 2 && !STOP_WORDS.has(word))
+
+  const unique: string[] = []
+  for (const word of words) {
+    if (!unique.includes(word)) {
+      unique.push(word)
+    }
+    if (unique.length >= limit) break
+  }
+  return unique
+}
+
+function detectIntent(query: string): QueryIntent {
+  const lower = query.toLowerCase()
+
+  if (/\b(vs|versus|compare|comparison|difference|better)\b/.test(lower)) return 'compare'
+  if (/\b(how|guide|steps|tutorial|implement|build|fix)\b/.test(lower)) return 'howto'
+  if (/\b(latest|news|today|recent|update|trend|202[0-9])\b/.test(lower)) return 'recent'
+  if (/\b(best|top|recommend|should|choose|worth)\b/.test(lower)) return 'decision'
+  if (/\b(near me|nearby|local|location|city|country)\b/.test(lower)) return 'local'
+  return 'general'
+}
+
+function buildReasoningScript(query: string, runCycle: number): ReasoningScript {
+  const clean = normalizeQuery(query)
+  const queryLabel = clean ? `"${truncateText(clean, 78)}"` : 'your question'
+  const keywords = extractKeywords(clean)
+  const focusPhrase = keywords.length > 0
+    ? keywords.slice(0, 2).join(' and ')
+    : 'the core topic'
+  const statusTopic = keywords.length > 0
+    ? truncateText(keywords.slice(0, 2).join(' + '), 20)
+    : 'your answer'
+
+  const intent = detectIntent(clean)
+  const intentGoalMap: Record<QueryIntent, string> = {
+    compare: 'a side-by-side comparison',
+    howto: 'a practical step-by-step answer',
+    recent: 'fresh and current guidance',
+    decision: 'a recommendation you can act on',
+    local: 'location-specific guidance',
+    general: 'a direct answer',
+  }
+
+  const seed = Math.abs(hashString(`${clean}|${runCycle}`))
+  const pick = (options: string[], offset: number) => options[(seed + offset) % options.length]
+
+  const headingSet = {
+    thinking: pick([
+      'Working Through Your Search',
+      'Mapping Your Search Intent',
+      'Building Your Answer Logic',
+    ], 0),
+    streaming: pick([
+      'Writing Your Response',
+      'Composing The Final Draft',
+      'Turning Findings Into Answers',
+    ], 1),
+    done: pick([
+      'Answer Ready',
+      'Reasoning Pass Complete',
+      'Final Review Complete',
+    ], 2),
+  }
+
+  const steps = [
+    pick([
+      `I'm mapping ${queryLabel} into the exact points that need evidence.`,
+      `I'm breaking ${queryLabel} into focused sub-questions before writing.`,
+      `I'm framing what ${queryLabel} is really asking so the answer stays on target.`,
+    ], 3),
+    pick([
+      `I'm pulling high-signal sources around ${focusPhrase} and filtering repetitive noise.`,
+      `I'm gathering reliable details on ${focusPhrase} and dropping weak matches.`,
+      `I'm scanning multiple references on ${focusPhrase} before I draft your answer.`,
+    ], 4),
+    pick([
+      `I'm connecting the findings into ${intentGoalMap[intent]} tailored to your query.`,
+      `I'm shaping the evidence into ${intentGoalMap[intent]} that directly answers you.`,
+      `I'm organizing the strongest points into ${intentGoalMap[intent]} without extra fluff.`,
+    ], 5),
+    pick([
+      "I'm doing a final pass for factual consistency and citation quality.",
+      "I'm validating key claims one more time before finalizing.",
+      "I'm checking clarity, accuracy, and source alignment before I submit.",
+    ], 6),
+  ]
+
+  return {
+    headings: headingSet,
+    leads: {
+      streaming: pick([
+        `I'm drafting the final response for ${queryLabel} and keeping every point grounded in sources.`,
+        `I'm now writing your answer for ${queryLabel}, keeping it concise and evidence-backed.`,
+        `I'm turning the research on ${focusPhrase} into a clean response you can use immediately.`,
+      ], 7),
+      done: pick([
+        `I finished a final quality pass so this answer stays aligned with ${queryLabel}.`,
+        `I completed the reasoning pass and kept only details that directly support ${queryLabel}.`,
+        `I wrapped up with one more check so the response remains accurate and relevant to your search.`,
+      ], 8),
+    },
+    statusText: `drafting ${statusTopic}...`,
+    steps,
+  }
+}
+
+function ReasoningPanel({
+  state,
+  step,
+  content,
+  script,
+}: {
+  state: StreamState
+  step: number
+  content?: string
+  script: ReasoningScript
+}) {
+  const activeStep = Math.min(Math.max(step, 0), script.steps.length - 1)
   const heading = state === 'thinking'
-    ? 'Working Through Your Question'
+    ? script.headings.thinking
     : state === 'streaming'
-      ? 'Drafting The Final Answer'
-      : 'Answer Review Complete'
+      ? script.headings.streaming
+      : script.headings.done
   const leadText = state === 'thinking'
-    ? STEPS[activeStep]
+    ? script.steps[activeStep]
     : state === 'streaming'
-      ? "I'm writing the response now and keeping it grounded in the source material."
-      : "I've finished the reasoning pass and kept only the points that directly support your answer."
+      ? script.leads.streaming
+      : script.leads.done
 
   return (
     <motion.div 
@@ -67,7 +222,7 @@ function ReasoningPanel({ state, step, content }: { state: StreamState, step: nu
             </p>
             {state === 'thinking' && (
               <span className="inline-flex rounded-full border border-primary/20 bg-primary/[0.05] px-2 py-0.5 text-[10px] font-medium text-primary/70">
-                <ShimmeringText text="drafting..." duration={1.8} spread={1.25} />
+                <ShimmeringText text={script.statusText} duration={1.8} spread={1.25} />
               </span>
             )}
           </div>
@@ -78,7 +233,7 @@ function ReasoningPanel({ state, step, content }: { state: StreamState, step: nu
       </div>
 
       <div className="mt-4 space-y-2.5 border-l border-foreground/10 pl-3.5">
-        {STEPS.map((text, i) => {
+        {script.steps.map((text, i) => {
           const isDone = state === 'done' || i < activeStep
           const isActive = state !== 'done' && i === activeStep
 
@@ -132,7 +287,7 @@ function ReasoningPanel({ state, step, content }: { state: StreamState, step: nu
   )
 }
 
-function ProcessingSteps() {
+function ProcessingSteps({ script, runCycle }: { script: ReasoningScript, runCycle: number }) {
   const [step, setStep] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const elementRef = useRef<HTMLDivElement>(null)
@@ -150,19 +305,20 @@ function ProcessingSteps() {
   }, [])
 
   useEffect(() => {
-    if (isPaused || step >= STEPS.length - 1) return
+    if (isPaused || step >= script.steps.length - 1) return
 
-    const delay = 1050 + step * 180 + Math.floor(Math.random() * 180)
+    const variance = Math.abs(hashString(`${script.statusText}:${runCycle}:${step}`)) % 240
+    const delay = 980 + step * 170 + variance
     const timeout = window.setTimeout(() => {
-      setStep((s) => (s < STEPS.length - 1 ? s + 1 : s))
+      setStep((s) => (s < script.steps.length - 1 ? s + 1 : s))
     }, delay)
 
     return () => window.clearTimeout(timeout)
-  }, [isPaused, step])
+  }, [isPaused, step, script.steps.length, script.statusText, runCycle])
 
   return (
     <div ref={elementRef}>
-      <ReasoningPanel state="thinking" step={step} />
+      <ReasoningPanel state="thinking" step={step} script={script} />
     </div>
   )
 }
@@ -170,8 +326,8 @@ function ProcessingSteps() {
 // PERFORMANCE: Memoize to prevent re-renders when parent answer updates
 const MemoizedProcessingSteps = memo(ProcessingSteps)
 
-function ReasoningComplete({ step, content }: { step: number, content?: string }) {
-  return <ReasoningPanel state="done" step={step} content={content} />
+function ReasoningComplete({ step, content, script }: { step: number, content?: string, script: ReasoningScript }) {
+  return <ReasoningPanel state="done" step={step} content={content} script={script} />
 }
 const MemoizedReasoningComplete = memo(ReasoningComplete)
 
@@ -257,14 +413,30 @@ export function StreamingAnswer({
   const lastStartedQuery = useRef<string | null>(null)
   const completed = useRef(false)
   const shouldAutoScroll = useRef(true)
+  const [runCycle, setRunCycle] = useState(0)
+
+  const reasoningScript = useMemo(() => {
+    return buildReasoningScript(query, runCycle)
+  }, [query, runCycle])
+
+  const streamingStep = useMemo(() => {
+    const maxStep = reasoningScript.steps.length - 1
+    if (answer.length < 80) return Math.min(1, maxStep)
+    if (answer.length < 260) return Math.min(2, maxStep)
+    return maxStep
+  }, [answer, reasoningScript.steps.length])
 
   // Memoize done content
   const doneContent = useMemo(() => {
     if (!metadata) return undefined
+
+    const normalized = normalizeQuery(query)
+    const queryLabel = normalized ? `"${truncateText(normalized, 66)}"` : 'your search'
+
     return metadata.cached
-      ? "I found a recent matching result and reused it so you get the same answer faster."
-      : "I finished with a quick clarity pass so the final answer is direct and easy to use."
-  }, [metadata])
+      ? `I found a recent matching result for ${queryLabel} and reused it so you get the same answer faster.`
+      : `I finished with a final clarity pass so this response stays tightly aligned with ${queryLabel}.`
+  }, [metadata, query])
 
   useEffect(() => {
     const el = containerRef.current
@@ -303,14 +475,14 @@ export function StreamingAnswer({
       case 'thinking':
         return (
           <div className="animate-fade-in-up">
-            <MemoizedProcessingSteps />
+            <MemoizedProcessingSteps key={`${query}:${runCycle}`} script={reasoningScript} runCycle={runCycle} />
           </div>
         )
         
       case 'streaming':
         return (
           <div className="w-full max-w-none animate-fade-in transition-all duration-700">
-            <ReasoningPanel state="streaming" step={2} />
+            <ReasoningPanel state="streaming" step={streamingStep} script={reasoningScript} />
             {sources && sources.length > 0 && (
               <Sources sources={sources} className="mb-6" />
             )}
@@ -324,8 +496,9 @@ export function StreamingAnswer({
         return (
           <div className="w-full animate-fade-in transition-all duration-700">
             <MemoizedReasoningComplete 
-              step={STEPS.length - 1} 
+              step={reasoningScript.steps.length - 1}
               content={doneContent}
+              script={reasoningScript}
             />
             {sources && sources.length > 0 && (
               <Sources sources={sources} className="mb-6" />
@@ -348,6 +521,7 @@ export function StreamingAnswer({
                 onClick={() => {
                   completed.current = false
                   lastStartedQuery.current = null
+                  setRunCycle((current) => current + 1)
                   onRegenerate?.()
                   startStream(query)
                 }}
@@ -378,6 +552,7 @@ export function StreamingAnswer({
             <button 
               onClick={() => {
                 completed.current = false
+                setRunCycle((current) => current + 1)
                 startStream(query)
               }}
               className="w-full px-3 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg transition-all active:scale-95 bg-destructive/10 border border-destructive/20 text-destructive hover:bg-destructive/15 flex items-center justify-center gap-2"
