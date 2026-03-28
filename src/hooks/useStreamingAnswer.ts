@@ -13,7 +13,7 @@
 
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 
 export type StreamState = 'idle' | 'thinking' | 'streaming' | 'done' | 'error'
 
@@ -63,6 +63,14 @@ export function useStreamingAnswer() {
   const abortControllerRef = useRef<AbortController | null>(null)
   const answerRef = useRef('')
 
+  // Ensure active stream is aborted when the consumer unmounts.
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = null
+    }
+  }, [])
+
   const reset = useCallback(() => {
     setAnswer('')
     answerRef.current = ''
@@ -82,12 +90,13 @@ export function useStreamingAnswer() {
     setState('thinking')
 
     // Create abort controller for cancellation
-    abortControllerRef.current = new AbortController()
+    const requestController = new AbortController()
+    abortControllerRef.current = requestController
 
     try {
       const response = await fetch(
         `/api/ai/stream?q=${encodeURIComponent(query)}`,
-        { signal: abortControllerRef.current.signal }
+        { signal: requestController.signal }
       )
 
       if (!response.ok) {
@@ -223,6 +232,9 @@ export function useStreamingAnswer() {
       // (e.g. server crash, abrupt disconnect), finalize the state
       if (!receivedDone && answerRef.current.length > 0) {
         setState('done')
+      } else if (!receivedDone) {
+        setState('error')
+        setError('No response received from AI service.')
       }
     } catch (err) {
       if ((err as Error).name === 'AbortError') {
@@ -231,6 +243,10 @@ export function useStreamingAnswer() {
       } else {
         setState('error')
         setError((err as Error).message)
+      }
+    } finally {
+      if (abortControllerRef.current === requestController) {
+        abortControllerRef.current = null
       }
     }
   }, [reset])

@@ -21,6 +21,7 @@ export function useSearch() {
   const [isTyping, setIsTyping] = useState(false)
   const debouncedQuery = useDebounce(query, 300)
   const abortControllerRef = useRef<AbortController | null>(null)
+  const suggestionsCacheRef = useRef<Map<string, string[]>>(new Map())
 
   const fetchSuggestions = useCallback(async (q: string) => {
     // Cancel any in-flight suggestion request
@@ -29,9 +30,22 @@ export function useSearch() {
       abortControllerRef.current = null
     }
 
-    if (q.trim().length < 2) {
+    const normalized = q.trim().toLowerCase()
+
+    if (normalized.length < 2) {
       setSuggestions([])
       setPrediction('')
+      setIsLoading(false)
+      return
+    }
+
+    const cachedSuggestions = suggestionsCacheRef.current.get(normalized)
+    if (cachedSuggestions) {
+      setSuggestions(cachedSuggestions)
+      const cachedPrediction = cachedSuggestions.find(s =>
+        s.toLowerCase().startsWith(normalized)
+      )
+      setPrediction(cachedPrediction || '')
       setIsLoading(false)
       return
     }
@@ -53,6 +67,15 @@ export function useSearch() {
 
       const newSuggestions = (data.suggestions || []).filter((s): s is string => typeof s === 'string')
       setSuggestions(newSuggestions)
+
+      // Lightweight capped cache to avoid re-fetching identical inputs.
+      if (newSuggestions.length > 0) {
+        if (suggestionsCacheRef.current.size >= 50) {
+          const firstKey = suggestionsCacheRef.current.keys().next().value
+          if (firstKey) suggestionsCacheRef.current.delete(firstKey)
+        }
+        suggestionsCacheRef.current.set(normalized, newSuggestions)
+      }
       
       if (newSuggestions.length > 0) {
         const matchingSuggestion = newSuggestions.find(s => 

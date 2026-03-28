@@ -55,11 +55,14 @@ export default memo(function SearchBar({
 
   useEffect(() => {
     function handleGlobalKeyDown(e: KeyboardEvent) {
-      if (e.key === '/' && !textareaRef.current?.matches(':focus')) {
+      const active = document.activeElement as HTMLElement | null
+      const inEditable = !!active?.matches('input, textarea, select, [contenteditable="true"]')
+
+      if (e.key === '/' && !textareaRef.current?.matches(':focus') && !inEditable) {
         e.preventDefault()
         textareaRef.current?.focus()
       }
-      if (e.key === 'Escape') {
+      if (e.key === 'Escape' && textareaRef.current?.matches(':focus')) {
         textareaRef.current?.blur()
         setShowSuggestions(false)
       }
@@ -99,9 +102,11 @@ export default memo(function SearchBar({
       setShowSuggestions(false)
     } else if (e.key === 'ArrowDown' && suggestions.length > 0) {
       e.preventDefault()
+      if (!showSuggestions) setShowSuggestions(true)
       setSelectedIndex(prev => prev < suggestions.length - 1 ? prev + 1 : prev)
     } else if (e.key === 'ArrowUp' && suggestions.length > 0) {
       e.preventDefault()
+      if (!showSuggestions) setShowSuggestions(true)
       setSelectedIndex(prev => prev > 0 ? prev - 1 : -1)
     } else if (e.key === 'Escape') {
       setShowSuggestions(false)
@@ -109,7 +114,7 @@ export default memo(function SearchBar({
       e.preventDefault()
       updateQuery(prediction)
     }
-  }, [query, selectedIndex, suggestions, prediction, handleSearch, updateQuery])
+  }, [query, selectedIndex, suggestions, prediction, handleSearch, updateQuery, showSuggestions])
 
   const ghostText = isTyping && prediction && prediction.toLowerCase().startsWith(query.toLowerCase())
     ? prediction.slice(query.length)
@@ -173,7 +178,7 @@ export default memo(function SearchBar({
               value={query}
               onChange={(e) => {
                 updateQuery(e.target.value)
-                setShowSuggestions(true)
+                setShowSuggestions(e.target.value.trim().length > 0)
               }}
               onFocus={() => {
                 setIsFocused(true)
@@ -259,7 +264,7 @@ export default memo(function SearchBar({
             >
                {suggestions.slice(0, 10).map((suggestion, index) => (
                  <div
-                   key={index}
+                   key={`${suggestion}-${index}`}
                    role="option"
                    aria-selected={index === selectedIndex}
                    onClick={() => {

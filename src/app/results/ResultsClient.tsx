@@ -57,10 +57,12 @@ export default function ResultsClient() {
 
   const [aiAnswer, setAiAnswer] = useState('')
   const [copied, setCopied] = useState(false)
+  const [shareCopied, setShareCopied] = useState(false)
 
   const [results, setResults] = useState<SearchResult[]>([])
   const [resultsLoading, setResultsLoading] = useState(true)
   const [resultsError, setResultsError] = useState('')
+  const [retryToken, setRetryToken] = useState(0)
 
   const [followUpQuery, setFollowUpQuery] = useState('')
   const followUpInputRef = useRef<HTMLInputElement>(null)
@@ -95,6 +97,7 @@ export default function ResultsClient() {
     setAiAnswer('')
     setFollowUpQuery('')
     setCopied(false)
+    setShareCopied(false)
 
     if (searchAbortRef.current) searchAbortRef.current.abort()
     const controller = new AbortController()
@@ -105,7 +108,15 @@ export default function ResultsClient() {
         const params = new URLSearchParams({ q: query })
         if (timeFilter) params.set('time', timeFilter)
         const response = await fetch(`/api/search?${params.toString()}`, { signal: controller.signal })
-        if (!response.ok) throw new Error('Failed to fetch results')
+        if (!response.ok) {
+          if (response.status === 429) {
+            throw new Error('Too many requests. Please wait a moment and try again.')
+          }
+          if (response.status >= 500) {
+            throw new Error('Search service is temporarily unavailable. Please try again shortly.')
+          }
+          throw new Error('Failed to fetch results')
+        }
         const data = await response.json()
         
         // Validate response structure before using it
@@ -124,7 +135,7 @@ export default function ResultsClient() {
           setResultsError(
             isFetchError 
               ? 'Network error. Please check your connection and try again.'
-              : 'Could not fetch search results. Please try again or refine your query.'
+              : errorMsg || 'Could not fetch search results. Please try again or refine your query.'
           )
         }
       } finally {
@@ -134,23 +145,45 @@ export default function ResultsClient() {
 
     fetchResults()
     return () => { controller.abort() }
-  }, [query, timeFilter])
+  }, [query, timeFilter, retryToken])
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(aiAnswer)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  const copyTextToClipboard = async (text: string): Promise<boolean> => {
+    if (!text.trim()) return false
+    try {
+      await navigator.clipboard.writeText(text)
+      return true
+    } catch {
+      return false
+    }
   }
 
-  const shareResults = () => {
+  const copyToClipboard = async () => {
+    const ok = await copyTextToClipboard(aiAnswer)
+    if (ok) {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
+  const shareResults = async () => {
+    const shareUrl = window.location.href
     if (navigator.share) {
-      navigator.share({
-        title: `SeekEngine: ${query}`,
-        text: `Results for "${query}"`,
-        url: window.location.href,
-      })
-    } else {
-      copyToClipboard()
+      try {
+        await navigator.share({
+          title: `SeekEngine: ${query}`,
+          text: `Results for "${query}"`,
+          url: shareUrl,
+        })
+        return
+      } catch {
+        // Fall through to copy-link fallback.
+      }
+    }
+
+    const ok = await copyTextToClipboard(shareUrl)
+    if (ok) {
+      setShareCopied(true)
+      setTimeout(() => setShareCopied(false), 2000)
     }
   }
 
@@ -197,7 +230,7 @@ export default function ResultsClient() {
                  onClick={shareResults}
                  className="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all active:scale-95 border border-border/60 text-muted-foreground hover:text-foreground hover:bg-accent/5 hover:border-foreground/20"
                >
-                 Share
+                 {shareCopied ? 'Link Copied' : 'Share'}
                </button>
             </div>
         </header>
@@ -232,7 +265,8 @@ export default function ResultsClient() {
                     <div className="ml-auto flex items-center gap-2">
                       <button 
                         onClick={copyToClipboard}
-                        className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide transition-all px-2.5 py-1.5 rounded-lg text-muted-foreground/70 hover:text-foreground hover:bg-accent/10 active:scale-95"
+                        disabled={!aiAnswer.trim()}
+                        className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide transition-all px-2.5 py-1.5 rounded-lg text-muted-foreground/70 hover:text-foreground hover:bg-accent/10 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
@@ -318,7 +352,7 @@ export default function ResultsClient() {
                        } else {
                          params.delete('time')
                        }
-                       router.push(`?${params.toString()}`, { scroll: false })
+                       router.push(`/results?${params.toString()}`, { scroll: false })
                      }}
                      className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-200 border ${
                        timeFilter === opt.value
@@ -343,19 +377,17 @@ export default function ResultsClient() {
                           </svg>
                         </div>
                         <p className="text-sm text-destructive font-medium mb-1">{resultsError}</p>
-                        <p className="text-xs text-muted-foreground/60">Try a different query or check your connection.</p>
+                        <p className="text-xs text-muted-foreground/60 mb-4">Try a different query or check your connection.</p>
+                        <button
+                          onClick={() => setRetryToken(t => t + 1)}
+                          className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
+                        >
+                          Retry
+                        </button>
                     </div>
                   ) : results.length > 0 ? (
                     results.map((result, index) => (
-                      <motion.div
-                        key={result.link}
-                        data-result-index={index + 1}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.08 * index }}
-                      >
-                        <ResultCard result={result} index={index} />
-                      </motion.div>
+                      <ResultCard key={result.link} result={result} index={index} />
                     ))
                   ) : (
                     <div className="p-6 text-center rounded-xl border border-dashed border-foreground/10">

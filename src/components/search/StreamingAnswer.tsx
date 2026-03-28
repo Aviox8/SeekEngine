@@ -8,7 +8,7 @@
 'use client'
 
 import { useEffect, useRef, useState, CSSProperties, useMemo, memo } from 'react'
-import ReactMarkdown, { Components } from 'react-markdown'
+import ReactMarkdown from 'react-markdown'
 import { useStreamingAnswer, StreamState } from '../../hooks/useStreamingAnswer'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, Loader2, AlertCircle, RefreshCw } from 'lucide-react'
@@ -174,7 +174,11 @@ function ProcessingSteps() {
     }
   }, [isPaused])
 
-  return <ReasoningPanel state="thinking" step={step} />
+  return (
+    <div ref={elementRef}>
+      <ReasoningPanel state="thinking" step={step} />
+    </div>
+  )
 }
 
 // PERFORMANCE: Memoize to prevent re-renders when parent answer updates
@@ -261,22 +265,12 @@ export function StreamingAnswer({
     error, 
     sources,
     startStream, 
-    reset,
-    isLoading 
   } = useStreamingAnswer()
   
   const containerRef = useRef<HTMLDivElement>(null)
   const lastStartedQuery = useRef<string | null>(null)
   const completed = useRef(false)
   const shouldAutoScroll = useRef(true)
-
-  // PERF: Memoize streaming content to prevent re-renders when answer updates
-  // Previously: content prop computed on every render, causing re-mount of MemoizedReasoningComplete
-  const streamingContent = useMemo(() => {
-    return metadata?.model.includes('deepseek') || metadata?.model.includes('o1') 
-      ? "Developing comprehensive response..." 
-      : undefined
-  }, [metadata?.model])
 
   // Memoize done content
   const doneContent = useMemo(() => {
