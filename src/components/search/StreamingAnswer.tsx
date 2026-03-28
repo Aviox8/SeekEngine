@@ -12,6 +12,7 @@ import ReactMarkdown from 'react-markdown'
 import { useStreamingAnswer, StreamState } from '../../hooks/useStreamingAnswer'
 import { motion } from 'framer-motion'
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react'
+import { ShimmeringText } from '../ui/shimmering-text'
 import { Response } from '../ui/response'
 import { Sources } from '../ui/sources'
 
@@ -60,9 +61,16 @@ function ReasoningPanel({ state, step, content }: { state: StreamState, step: nu
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/80">
-            {heading}
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/80">
+              {heading}
+            </p>
+            {state === 'thinking' && (
+              <span className="inline-flex rounded-full border border-primary/20 bg-primary/[0.05] px-2 py-0.5 text-[10px] font-medium text-primary/70">
+                <ShimmeringText text="drafting..." duration={1.8} spread={1.25} />
+              </span>
+            )}
+          </div>
           <p className="mt-1.5 text-[13px] leading-relaxed text-foreground/85">
             {leadText}
           </p>
