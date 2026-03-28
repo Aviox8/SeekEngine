@@ -3,7 +3,7 @@
  * Constants, policies, and static fallback models
  */
 
-import { ENV } from '../env'
+import { getOpenRouterApiKeys } from '../env'
 import type { AITask, TaskPolicy, ModelTier } from './types'
 import { AITask as AITaskEnum } from './types'
 import { MODEL_CACHE_TTL_MS, MAX_MODEL_FAILURES_THRESHOLD } from '../constants'
@@ -17,7 +17,8 @@ export const BASE_SYSTEM_PROMPT = "You are SeekEngine AI. Concise markdown. Cite
 
 // Debug API Key presence (safe log — development only)
 if (process.env.NODE_ENV === 'development') {
-  console.log(`🔑 OpenRouter API Key Present: ${!!ENV.OPENROUTER_API_KEY}`)
+  const keyCount = getOpenRouterApiKeys().length
+  console.log(`🔑 OpenRouter API Keys Configured: ${keyCount}`)
 }
 
 export const TASK_POLICIES: Record<AITask, TaskPolicy> = {

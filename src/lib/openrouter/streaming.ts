@@ -10,7 +10,7 @@
  * - Performance telemetry: Logs per-model latency and success rates
  */
 
-import { ENV } from '../env'
+import { getOpenRouterApiKeys } from '../env'
 import { logger } from '../logger'
 import type { ChatMessage, AITask, ModelTier, StreamEvent } from './types'
 import { AITask as AITaskEnum } from './types'
@@ -39,10 +39,10 @@ export async function* streamOpenRouter(
   messages: ChatMessage[],
   task: AITask = AITaskEnum.ANSWER
 ): AsyncGenerator<StreamEvent> {
-  const apiKey = ENV.OPENROUTER_API_KEY
-  if (!apiKey) {
-    logger.error('OPENROUTER_API_KEY is missing')
-    yield { type: 'error', error: 'OPENROUTER_API_KEY missing' }
+  const apiKeys = getOpenRouterApiKeys()
+  if (apiKeys.length === 0) {
+    logger.error('No OpenRouter API keys configured')
+    yield { type: 'error', error: 'No OpenRouter API key configured' }
     return
   }
 
@@ -90,13 +90,17 @@ export async function* streamOpenRouter(
     return
   }
 
-  const startTime = Date.now()
   let attempts = 0
 
   yield { type: 'thinking', content: 'Connecting to AI...' }
 
   // ── Model Connection Handler ──────────────────────────────────────────────────
-  const connectToModel = async (model: string, externalController?: AbortController): Promise<{
+  const connectToModel = async (
+    model: string,
+    externalController?: AbortController,
+    apiKey?: string,
+    keyStartedAt?: number
+  ): Promise<{
     model: string
     reader: ReadableStreamDefaultReader<Uint8Array>
     decoder: TextDecoder
@@ -109,7 +113,9 @@ export async function* streamOpenRouter(
     const tier = classifyModel(model)
     const controller = externalController || new AbortController()
     const modelStartTime = Date.now()
-    const remainingGlobalBudget = Math.max(1000, policy.globalTimeout - (Date.now() - startTime) - 250)
+    const activeApiKey = apiKey || apiKeys[0]
+    const activeKeyStart = keyStartedAt ?? Date.now()
+    const remainingGlobalBudget = Math.max(1000, policy.globalTimeout - (Date.now() - activeKeyStart) - 250)
     const connectTimeoutMs = Math.max(1200, Math.min(policy.maxLatency, remainingGlobalBudget))
     const connectTimeoutId = setTimeout(() => controller.abort('MODEL_TIMEOUT'), connectTimeoutMs)
     let ttftTimeoutId: ReturnType<typeof setTimeout> | undefined
@@ -120,7 +126,7 @@ export async function* streamOpenRouter(
         {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${apiKey}`,
+            Authorization: `Bearer ${activeApiKey}`,
             'Content-Type': 'application/json',
             'HTTP-Referer': 'https://github.com/archduke1337/seekengine',
             'X-Title': 'SeekEngine',
@@ -274,197 +280,242 @@ export async function* streamOpenRouter(
   }
 
   // ── Model Racing Loop ─────────────────────────────────────────────────────────
-  for (let i = 0; i < models.length; i += MAX_CONCURRENT_MODELS) {
-    const batch = models.slice(i, i + MAX_CONCURRENT_MODELS)
-    attempts += batch.length
-    
-    const batchControllers = new Map<string, AbortController>()
-    for (const m of batch) {
-      batchControllers.set(m, new AbortController())
-    }
-    
-    let globalTimeoutId: ReturnType<typeof setTimeout> | undefined
+  keyLoop:
+  for (let keyIndex = 0; keyIndex < apiKeys.length; keyIndex++) {
+    const apiKey = apiKeys[keyIndex]
+    const keyLabel = `${keyIndex + 1}/${apiKeys.length}`
+    const keyStartTime = Date.now()
 
-    try {
-      const promises = batch.map(m => connectToModel(m, batchControllers.get(m)!))
-      const elapsedMs = Date.now() - startTime
-      const remainingGlobalMs = policy.globalTimeout - elapsedMs
+    logger.info(`Starting model race using OpenRouter key ${keyLabel}`)
 
-      if (remainingGlobalMs <= 0) {
-        logger.error('Global timeout reached before starting next model batch', new Error(`Elapsed: ${elapsedMs}ms`), { taskType: task })
-        yield { type: 'error', error: 'Global timeout reached before model response' }
-        return
+    for (let i = 0; i < models.length; i += MAX_CONCURRENT_MODELS) {
+      const batch = models.slice(i, i + MAX_CONCURRENT_MODELS)
+      attempts += batch.length
+
+      const batchControllers = new Map<string, AbortController>()
+      for (const m of batch) {
+        batchControllers.set(m, new AbortController())
       }
 
-      const globalTimeoutPromise = new Promise<never>((_, reject) => {
-        globalTimeoutId = setTimeout(() => reject(new Error('GLOBAL_TIMEOUT')), remainingGlobalMs)
-      })
-
-      const winner = await Promise.race([Promise.any(promises), globalTimeoutPromise])
-      if (globalTimeoutId) clearTimeout(globalTimeoutId)
-
-      // CRITICAL: Immediately abort all losing connections to prevent token waste
-      for (const [model, controller] of batchControllers) {
-        if (model !== winner.model) {
-          try {
-            controller.abort('RACE_LOST')
-          } catch {
-            logger.debug(`Failed to abort losing model: ${model}`)
-          }
-        }
-      }
-
-      logger.debug('Model won race', {
-        winner: humanizeModel(winner.model),
-        tier: winner.tier,
-        ttftMs: winner.latency,
-        attempts
-      })
-
-      yield { 
-        type: 'model_selected', 
-        model: winner.model, 
-        modelHuman: humanizeModel(winner.model),
-        tier: winner.tier,
-        attempts 
-      }
-
-      if (winner.firstToken) {
-        yield { type: 'token', content: winner.firstToken }
-      }
-
-      // ── Stream Remaining Tokens ──────────────────────────────────────────────────
-      const { reader, decoder } = winner
-      let buffer = winner.remainingBuffer
-      let fullContent = winner.firstToken || ''
-
-      const processChunk = function* (chunk: string): Generator<StreamEvent, void, unknown> {
-        buffer += chunk
-        const lines = buffer.split('\n')
-        buffer = lines.pop() || ''
-
-        for (const line of lines) {
-          const trimmed = line.trim()
-          if (!trimmed || trimmed === 'data: [DONE]') continue
-          if (!trimmed.startsWith('data: ')) continue
-
-          try {
-            if (!trimmed.includes('"content":')) continue
-            const json = JSON.parse(trimmed.slice(6))
-            const delta = json.choices?.[0]?.delta?.content
-            
-            if (delta) {
-              fullContent += delta
-              yield { type: 'token', content: delta }
-            }
-          } catch { }
-        }
-      }
+      let globalTimeoutId: ReturnType<typeof setTimeout> | undefined
 
       try {
-        if (buffer) {
-          const initial = buffer
-          buffer = ''
-          for (const event of processChunk(initial)) yield event
+        const promises = batch.map(m => connectToModel(m, batchControllers.get(m)!, apiKey, keyStartTime))
+        const elapsedMs = Date.now() - keyStartTime
+        const remainingGlobalMs = policy.globalTimeout - elapsedMs
+
+        if (remainingGlobalMs <= 0) {
+          if (keyIndex < apiKeys.length - 1) {
+            logger.warn(`Global timeout reached for OpenRouter key ${keyLabel}; switching key`)
+            continue keyLoop
+          }
+
+          logger.error('Global timeout reached before starting next model batch', new Error(`Elapsed: ${elapsedMs}ms`), { taskType: task })
+          yield { type: 'error', error: 'Global timeout reached before model response' }
+          return
         }
 
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-          
-          const chunk = decoder.decode(value, { stream: true })
-          for (const event of processChunk(chunk)) yield event
+        const globalTimeoutPromise = new Promise<never>((_, reject) => {
+          globalTimeoutId = setTimeout(() => reject(new Error('GLOBAL_TIMEOUT')), remainingGlobalMs)
+        })
+
+        const winner = await Promise.race([Promise.any(promises), globalTimeoutPromise])
+        if (globalTimeoutId) clearTimeout(globalTimeoutId)
+
+        // CRITICAL: Immediately abort all losing connections to prevent token waste
+        for (const [model, controller] of batchControllers) {
+          if (model !== winner.model) {
+            try {
+              controller.abort('RACE_LOST')
+            } catch {
+              logger.debug(`Failed to abort losing model: ${model}`)
+            }
+          }
         }
-      } finally {
+
+        logger.debug('Model won race', {
+          winner: humanizeModel(winner.model),
+          tier: winner.tier,
+          ttftMs: winner.latency,
+          attempts,
+          key: keyLabel,
+        })
+
+        yield {
+          type: 'model_selected',
+          model: winner.model,
+          modelHuman: humanizeModel(winner.model),
+          tier: winner.tier,
+          attempts
+        }
+
+        if (winner.firstToken) {
+          yield { type: 'token', content: winner.firstToken }
+        }
+
+        // ── Stream Remaining Tokens ──────────────────────────────────────────────
+        const { reader, decoder } = winner
+        let buffer = winner.remainingBuffer
+        let fullContent = winner.firstToken || ''
+
+        const processChunk = function* (chunk: string): Generator<StreamEvent, void, unknown> {
+          buffer += chunk
+          const lines = buffer.split('\n')
+          buffer = lines.pop() || ''
+
+          for (const line of lines) {
+            const trimmed = line.trim()
+            if (!trimmed || trimmed === 'data: [DONE]') continue
+            if (!trimmed.startsWith('data: ')) continue
+
+            try {
+              if (!trimmed.includes('"content":')) continue
+              const json = JSON.parse(trimmed.slice(6))
+              const delta = json.choices?.[0]?.delta?.content
+
+              if (delta) {
+                fullContent += delta
+                yield { type: 'token', content: delta }
+              }
+            } catch { }
+          }
+        }
+
         try {
-          await reader.cancel()
-          winner.controller.abort() 
-        } catch {
-          logger.debug('Error cleaning up reader')
+          if (buffer) {
+            const initial = buffer
+            buffer = ''
+            for (const event of processChunk(initial)) yield event
+          }
+
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+
+            const chunk = decoder.decode(value, { stream: true })
+            for (const event of processChunk(chunk)) yield event
+          }
+        } finally {
+          try {
+            await reader.cancel()
+            winner.controller.abort('WINNER_CLEANUP')
+          } catch {
+            logger.debug('Error cleaning up reader')
+          }
+        }
+
+        logTelemetry({
+          task,
+          model: winner.model,
+          tier: winner.tier,
+          latency: winner.latency,
+          success: true
+        })
+
+        logger.info('Answer generation complete', {
+          model: humanizeModel(winner.model),
+          tokens: fullContent.length,
+          ttftMs: winner.latency,
+          key: keyLabel,
+        })
+
+        yield {
+          type: 'done',
+          content: fullContent,
+          model: winner.model,
+          modelHuman: humanizeModel(winner.model),
+          tier: winner.tier,
+          latencyMs: winner.latency,
+          attempts
+        }
+        return
+
+      } catch (e) {
+        if (globalTimeoutId) clearTimeout(globalTimeoutId)
+
+        const isGlobalTimeout = e instanceof Error && e.message === 'GLOBAL_TIMEOUT'
+
+        // Batch failed - abort all controllers and try next batch
+        for (const controller of batchControllers.values()) {
+          try {
+            controller.abort(isGlobalTimeout ? 'GLOBAL_TIMEOUT_ABORT' : 'BATCH_ABORT')
+          } catch {
+            // Silently ignore
+          }
+        }
+
+        const aggregateErrors = e instanceof AggregateError ? e.errors : [e]
+        const messages = aggregateErrors.map(err =>
+          err instanceof Error ? err.message : String(err)
+        )
+
+        if (messages.some(msg => msg === 'GLOBAL_TIMEOUT')) {
+          if (keyIndex < apiKeys.length - 1) {
+            logger.warn(`Global timeout reached on key ${keyLabel}; retrying with next key`)
+            continue keyLoop
+          }
+
+          logger.error('Global timeout reached during model race', new Error(`Elapsed: ${Date.now() - keyStartTime}ms`), { taskType: task })
+          yield { type: 'error', error: 'Global timeout reached before first token. Please retry with a shorter query.' }
+          return
+        }
+
+        if (messages.some(msg => msg.startsWith('AUTH_ERROR_'))) {
+          if (keyIndex < apiKeys.length - 1) {
+            logger.warn(`Authentication failed on key ${keyLabel}; trying next key`)
+            continue keyLoop
+          }
+
+          logger.error('OpenRouter authentication failed during model race')
+          yield { type: 'error', error: 'OpenRouter authentication failed. Please verify API key configuration.' }
+          return
+        }
+
+        if (messages.some(msg => msg === 'BILLING_REQUIRED')) {
+          if (keyIndex < apiKeys.length - 1) {
+            logger.warn(`Billing/credits issue on key ${keyLabel}; trying next key`)
+            continue keyLoop
+          }
+
+          logger.error('OpenRouter billing/credits issue during model race')
+          yield { type: 'error', error: 'OpenRouter account requires credits or billing setup.' }
+          return
+        }
+
+        const allRateLimited = messages.length > 0 && messages.every(msg => msg === 'RATE_LIMITED' || msg.includes('HTTP 429'))
+        if (allRateLimited) {
+          if (keyIndex < apiKeys.length - 1) {
+            logger.warn(`Rate limited across raced models on key ${keyLabel}; trying next key`)
+            continue keyLoop
+          }
+
+          logger.warn('OpenRouter rate limit reached across raced models')
+          yield { type: 'error', error: 'OpenRouter rate limit reached. Please retry shortly.' }
+          return
+        }
+
+        logger.debug(`Model batch failed (${batch.length} models) on key ${keyLabel}`)
+
+        if (Date.now() - keyStartTime > policy.globalTimeout) {
+          if (keyIndex < apiKeys.length - 1) {
+            logger.warn(`Global timeout reached for key ${keyLabel}; switching key`)
+            continue keyLoop
+          }
+
+          logger.error('Global timeout reached', new Error(`Elapsed: ${Date.now() - keyStartTime}ms`), { taskType: task })
+          yield { type: 'error', error: 'Global timeout reached' }
+          return
         }
       }
+    }
 
-      logTelemetry({ 
-        task, 
-        model: winner.model, 
-        tier: winner.tier, 
-        latency: winner.latency, 
-        success: true 
-      })
-
-      logger.info('Answer generation complete', {
-        model: humanizeModel(winner.model),
-        tokens: fullContent.length,
-        ttftMs: winner.latency
-      })
-
-      yield {
-        type: 'done',
-        content: fullContent,
-        model: winner.model,
-        modelHuman: humanizeModel(winner.model),
-        tier: winner.tier,
-        latencyMs: winner.latency,
-        attempts
-      }
-      return
-
-    } catch (e) {
-      if (globalTimeoutId) clearTimeout(globalTimeoutId)
-
-      const isGlobalTimeout = e instanceof Error && e.message === 'GLOBAL_TIMEOUT'
-
-      // Batch failed - abort all controllers and try next batch
-      for (const controller of batchControllers.values()) {
-        try {
-          controller.abort(isGlobalTimeout ? 'GLOBAL_TIMEOUT_ABORT' : 'BATCH_ABORT')
-        } catch {
-          // Silently ignore
-        }
-      }
-
-      const aggregateErrors = e instanceof AggregateError ? e.errors : [e]
-      const messages = aggregateErrors.map(err =>
-        err instanceof Error ? err.message : String(err)
-      )
-
-      if (messages.some(msg => msg === 'GLOBAL_TIMEOUT')) {
-        logger.error('Global timeout reached during model race', new Error(`Elapsed: ${Date.now() - startTime}ms`), { taskType: task })
-        yield { type: 'error', error: 'Global timeout reached before first token. Please retry with a shorter query.' }
-        return
-      }
-
-      if (messages.some(msg => msg.startsWith('AUTH_ERROR_'))) {
-        logger.error('OpenRouter authentication failed during model race')
-        yield { type: 'error', error: 'OpenRouter authentication failed. Please verify OPENROUTER_API_KEY.' }
-        return
-      }
-
-      if (messages.some(msg => msg === 'BILLING_REQUIRED')) {
-        logger.error('OpenRouter billing/credits issue during model race')
-        yield { type: 'error', error: 'OpenRouter account requires credits or billing setup.' }
-        return
-      }
-
-      const allRateLimited = messages.length > 0 && messages.every(msg => msg === 'RATE_LIMITED' || msg.includes('HTTP 429'))
-      if (allRateLimited) {
-        logger.warn('OpenRouter rate limit reached across raced models')
-        yield { type: 'error', error: 'OpenRouter rate limit reached. Please retry shortly.' }
-        return
-      }
-
-      logger.debug(`Model batch failed (${batch.length} models)`)
-      
-      if (Date.now() - startTime > policy.globalTimeout) {
-        logger.error('Global timeout reached', new Error(`Elapsed: ${Date.now() - startTime}ms`), { taskType: task })
-        yield { type: 'error', error: 'Global timeout reached' }
-        return
-      }
+    if (keyIndex < apiKeys.length - 1) {
+      logger.warn(`No successful model response with key ${keyLabel}; switching to next key`)
     }
   }
 
-  logger.error('All models failed to generate answer', new Error(`Task: ${task}`))
-  yield { type: 'error', error: 'All models failed' }
+  logger.error('All models failed to generate answer', new Error(`Task: ${task}, Keys: ${apiKeys.length}`))
+  yield { type: 'error', error: 'All models failed across configured OpenRouter keys' }
 }
 
 // ── Streaming Answer Response (For API Routes) ──────────────────────────────

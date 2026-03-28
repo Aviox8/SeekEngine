@@ -19,7 +19,7 @@ import { validateSearchQuery } from '../../../../lib/validation'
 import { checkRateLimit, getClientIP, RATE_LIMITS, rateLimitResponse } from '../../../../lib/rate-limit'
 import { getCachedAnswer, setCachedAnswer, type CachedAnswer } from '../../../../lib/semantic-cache'
 import { logger } from '../../../../lib/logger'
-import { ENV } from '../../../../lib/env'
+import { getOpenRouterApiKeys } from '../../../../lib/env'
 import { NextRequest } from 'next/server'
 
 // Enable edge runtime for streaming support
@@ -28,10 +28,10 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   // CRITICAL: Validate API key early to fail fast instead of streaming for 10+ seconds
-  if (!ENV.OPENROUTER_API_KEY) {
-    logger.error('OPENROUTER_API_KEY is missing at stream endpoint')
+  if (getOpenRouterApiKeys().length === 0) {
+    logger.error('No OpenRouter API keys configured at stream endpoint')
     return new Response(
-      JSON.stringify({ error: 'AI service not configured. Please set OPENROUTER_API_KEY.' }),
+      JSON.stringify({ error: 'AI service not configured. Please set OPENROUTER_API_KEY or OPENROUTER_API_KEYS.' }),
       { 
         status: 503,
         headers: { 'Content-Type': 'application/json' }
@@ -132,13 +132,12 @@ export async function GET(request: NextRequest) {
     // CRITICAL FIX: Capture and cache tokens atomically
     // Previously: Shared variables without synchronization caused data corruption
     // during concurrent requests for same query. Using AbortSignal ensures cleanup.
-    const encoder = new TextEncoder()
     const decoder = new TextDecoder()
     let lastChunkTime = Date.now()
     
     // Use closure to ensure each stream has isolated state
     let fullAnswer = ''
-    let modelInfo = { model: '', modelHuman: '' }
+    const modelInfo = { model: '', modelHuman: '' }
     let cacheWritten = false
     const streamAbortController = new AbortController()
     
@@ -177,7 +176,7 @@ export async function GET(request: NextRequest) {
                   setCachedAnswer(query, entry, 'stream')
                   logger.info('Stream answer cached', { length: fullAnswer.length, queryLen: query.length })
                 }
-              } catch (e) {
+              } catch {
                 // Skip malformed JSON lines silently
               }
             }
