@@ -85,6 +85,20 @@ export async function callOpenRouter(
       clearTimeout(timeoutId)
       const latency = Date.now() - modelStartTime
 
+      // 401/403 indicate invalid credentials - fail fast.
+      if ([401, 403].includes(response.status)) {
+        console.error(`❌ OpenRouter authentication failed (${response.status})`)
+        logTelemetry({ task, model, tier, latency, success: false, error: `HTTP ${response.status} Auth` })
+        return null
+      }
+
+      // 402 indicates account-level billing/credits issue.
+      if (response.status === 402) {
+        console.error('❌ OpenRouter account requires credits or billing setup (HTTP 402)')
+        logTelemetry({ task, model, tier, latency, success: false, error: 'HTTP 402 Billing Required' })
+        return null
+      }
+
       // 429 (Rate Limit) is NOT a model failure - it's API quota exhaustion, skip without incrementing
       if (response.status === 429) {
         console.warn(`⚠️ Rate limited (429) for ${model} - skipping to next model`)

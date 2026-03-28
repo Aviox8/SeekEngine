@@ -350,8 +350,7 @@ export default function ResultsClient() {
 
             {/* RIGHT COLUMN: Web Sources with scroll fade */}
             <div className="w-full lg:w-1/3 animate-fade-in-up animate-delay-100">
-               <h3 className="text-[11px] font-semibold uppercase tracking-[0.2em] mb-4 flex items-center gap-2 text-muted-foreground/40">
-                  <LivingIcon color="#6F6F6F" size="w-1.5 h-1.5" />
+              <h3 className="text-[11px] font-semibold uppercase tracking-[0.2em] mb-4 text-muted-foreground/40">
                   Web Sources
                </h3>
 

@@ -16,8 +16,7 @@ import type { ChatMessage, AITask, ModelTier, StreamEvent } from './types'
 import { AITask as AITaskEnum } from './types'
 import { OPENROUTER_BASE_URL, TASK_POLICIES, MAX_MODEL_FAILURES, BASE_SYSTEM_PROMPT } from './config'
 import { humanizeModel, classifyModel, modelFailures, logTelemetry, getModelsForTask } from './models'
-import { Errors } from '../errors'
-import { MODEL_RACING_TIMEOUT_MS, MAX_CONCURRENT_MODELS, SYSTEMIC_FAILURE_THRESHOLD_MS } from '../constants'
+import { MAX_CONCURRENT_MODELS, SYSTEMIC_FAILURE_THRESHOLD_MS } from '../constants'
 
 // ── Streaming AI Caller (SSE-Compatible) ─────────────────────────────────────
 /**
@@ -73,7 +72,7 @@ export async function* streamOpenRouter(
     // If ALL models failed within the last 30 seconds, we have a systemic issue (API down)
     // Don't keep retrying - fail fast to avoid quota waste and rate limiting
     const timeSinceMostRecentFailure = Date.now() - mostRecentFailureTime
-    if (timeSinceMostRecentFailure < 30_000 && modelFailures.size > 0) {
+    if (timeSinceMostRecentFailure < SYSTEMIC_FAILURE_THRESHOLD_MS && modelFailures.size > 0) {
       logger.error(`Systemic API failure detected - all ${modelFailures.size} models failed ${timeSinceMostRecentFailure}ms ago`)
       yield { type: 'error', error: 'All AI models currently unavailable. API appears to be down.' }
       return
@@ -138,11 +137,23 @@ export async function* streamOpenRouter(
         // 429 (Rate Limit) is NOT a model failure - it's API quota exhaustion
         if (response.status === 429) {
           logger.warn(`Rate limited (429) for ${model} - moving to next model`)
-          throw new Error(`HTTP 429 - Rate Limited`)
+          throw new Error('RATE_LIMITED')
+        }
+
+        // 401/403 indicate invalid credentials and should fail fast.
+        if (response.status === 401 || response.status === 403) {
+          logger.error(`Authentication failure from OpenRouter (HTTP ${response.status})`)
+          throw new Error(`AUTH_ERROR_${response.status}`)
+        }
+
+        // 402 indicates account-level credit/billing issue.
+        if (response.status === 402) {
+          logger.error('OpenRouter account requires credits or billing setup (HTTP 402)')
+          throw new Error('BILLING_REQUIRED')
         }
 
         // Let catch block handle failure accounting to avoid double counting.
-        logger.warn(`Model connection failed: ${model} (HTTP ${response.status})`)
+        logger.warn(`Model connection failed: ${model} (HTTP ${response.status || 'UNKNOWN'})`)
         throw new Error(`HTTP ${response.status}`)
       }
 
@@ -207,10 +218,12 @@ export async function* streamOpenRouter(
 
     } catch (err) {
       const errorMsg = (err as Error).message
-      const isRateLimited = errorMsg.includes('HTTP 429')
+      const isRateLimited = errorMsg === 'RATE_LIMITED' || errorMsg.includes('HTTP 429')
+      const isAuthError = errorMsg.startsWith('AUTH_ERROR_')
+      const isBillingError = errorMsg === 'BILLING_REQUIRED'
 
       let failCount = modelFailures.get(model)?.failures || 0
-      if (!isRateLimited) {
+      if (!isRateLimited && !isAuthError && !isBillingError) {
         failCount += 1
         modelFailures.set(model, { failures: failCount, lastFailedAt: Date.now() })
       }
@@ -219,6 +232,10 @@ export async function* streamOpenRouter(
         logger.debug(`TTFT timeout for ${model} (maxLatency: ${policy.maxLatency}ms)`)
       } else if (isRateLimited) {
         logger.debug(`Rate limited for ${model} (not counted as model failure)`)
+      } else if (isAuthError) {
+        logger.debug(`Authentication failure for ${model} (not counted as model failure)`)
+      } else if (isBillingError) {
+        logger.debug(`Billing/credits issue for ${model} (not counted as model failure)`)
       } else {
         logger.debug(`Model connection error: ${model} - ${errorMsg} (failures: ${failCount})`)
       }
@@ -248,7 +265,7 @@ export async function* streamOpenRouter(
         if (model !== winner.model) {
           try {
             controller.abort()
-          } catch (e) {
+          } catch {
             logger.debug(`Failed to abort losing model: ${model}`)
           }
         }
@@ -357,6 +374,30 @@ export async function* streamOpenRouter(
         } catch {
           // Silently ignore
         }
+      }
+
+      const aggregateErrors = e instanceof AggregateError ? e.errors : [e]
+      const messages = aggregateErrors.map(err =>
+        err instanceof Error ? err.message : String(err)
+      )
+
+      if (messages.some(msg => msg.startsWith('AUTH_ERROR_'))) {
+        logger.error('OpenRouter authentication failed during model race')
+        yield { type: 'error', error: 'OpenRouter authentication failed. Please verify OPENROUTER_API_KEY.' }
+        return
+      }
+
+      if (messages.some(msg => msg === 'BILLING_REQUIRED')) {
+        logger.error('OpenRouter billing/credits issue during model race')
+        yield { type: 'error', error: 'OpenRouter account requires credits or billing setup.' }
+        return
+      }
+
+      const allRateLimited = messages.length > 0 && messages.every(msg => msg === 'RATE_LIMITED' || msg.includes('HTTP 429'))
+      if (allRateLimited) {
+        logger.warn('OpenRouter rate limit reached across raced models')
+        yield { type: 'error', error: 'OpenRouter rate limit reached. Please retry shortly.' }
+        return
       }
 
       logger.debug(`Model batch failed (${batch.length} models)`)

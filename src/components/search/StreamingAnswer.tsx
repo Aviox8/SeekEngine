@@ -10,10 +10,8 @@
 import { useEffect, useRef, useState, CSSProperties, useMemo, memo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { useStreamingAnswer, StreamState } from '../../hooks/useStreamingAnswer'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, Loader2, AlertCircle, RefreshCw } from 'lucide-react'
-import LivingIcon from '../shared/LivingIcon'
-import { ShimmeringText } from '../ui/shimmering-text'
+import { motion } from 'framer-motion'
+import { Loader2, AlertCircle, RefreshCw } from 'lucide-react'
 import { Response } from '../ui/response'
 import { Sources } from '../ui/sources'
 
@@ -27,122 +25,101 @@ interface StreamingAnswerProps {
 }
 
 const STEPS = [
-  "Analyzing query intent...",
-  "Searching knowledge index...",
-  "Synthesizing grounded answer...",
-  "Verifying source citations..."
+  "I'm reading your question and clarifying what you really need.",
+  "I'm gathering the strongest facts and examples.",
+  "I'm shaping everything into a clear, direct answer.",
+  "I'm doing a final check for accuracy and citations."
 ]
 
 function ReasoningPanel({ state, step, content }: { state: StreamState, step: number, content?: string }) {
-  const [isOpen, setIsOpen] = useState(true)
+  const activeStep = Math.min(Math.max(step, 0), STEPS.length - 1)
+  const heading = state === 'thinking'
+    ? 'Working Through Your Question'
+    : state === 'streaming'
+      ? 'Drafting The Final Answer'
+      : 'Answer Review Complete'
+  const leadText = state === 'thinking'
+    ? STEPS[activeStep]
+    : state === 'streaming'
+      ? "I'm writing the response now and keeping it grounded in the source material."
+      : "I've finished the reasoning pass and kept only the points that directly support your answer."
 
   return (
     <motion.div 
-      className="mb-6 rounded-xl border border-foreground/[0.04] bg-foreground/[0.01] overflow-hidden"
+      className="mb-6 rounded-2xl border border-foreground/[0.08] bg-background/80 px-4 py-4 sm:px-5 sm:py-5"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-foreground/[0.02] transition-colors group"
-      >
-        <div className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center w-5 h-5">
-            {state === 'thinking' ? (
-              <Loader2 className="w-3 h-3 text-primary animate-spin" />
-            ) : (
-              <LivingIcon size="w-5 h-5" color="#6F6F6F" />
-            )}
-          </div>
-          <div className="flex flex-col items-start leading-tight">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 group-hover:text-foreground/70 transition-colors">
-              {state === 'thinking' ? (
-                <ShimmeringText text={`Thinking: ${STEPS[step]}`} duration={1.8} spread={1.5} />
-              ) : 'Thought Process'}
-            </span>
-            {state === 'thinking' && (
-              <span className="text-[9px] text-primary/40 font-medium uppercase tracking-tight">Processing</span>
-            )}
-          </div>
+      <div className="flex items-start gap-3.5">
+        <div className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border border-foreground/10">
+          {state === 'thinking' || state === 'streaming' ? (
+            <Loader2 className="h-3 w-3 text-primary animate-spin" />
+          ) : (
+            <span className="h-2 w-2 rounded-full bg-primary/60" aria-hidden="true" />
+          )}
         </div>
-        <motion.div
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <ChevronDown className="w-3.5 h-3.5 text-muted-foreground/40" />
-        </motion.div>
-      </button>
-      
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="overflow-hidden"
-          >
-            <div className="px-4 pb-4 space-y-4">
-              {content && (
-                <motion.div 
-                  className="text-[13px] leading-relaxed text-muted-foreground/80 border-l-2 border-primary/20 pl-4 py-1 italic bg-primary/[0.01] rounded"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.1 }}
-                >
-                   <ReactMarkdown components={{
-                     p: ({children}) => <p className="mb-2 last:mb-0">{children}</p>
-                   }}>
-                     {content}
-                   </ReactMarkdown>
-                </motion.div>
-              )}
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/80">
+            {heading}
+          </p>
+          <p className="mt-1.5 text-[13px] leading-relaxed text-foreground/85">
+            {leadText}
+          </p>
+        </div>
+      </div>
 
-              <div className="space-y-2 pt-2">
-                {STEPS.map((text, i) => (
-                  <motion.div 
-                    key={i} 
-                    className="flex items-center gap-3"
-                    animate={{ opacity: i > step ? 0.25 : i === step ? 1 : 0.5 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <motion.div 
-                      className="flex items-center justify-center w-4 h-4 rounded-full border border-foreground/10 shrink-0"
-                      animate={{ scale: i === step ? 1.1 : 1 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      {i < step ? (
-                        <motion.svg 
-                          className="w-2.5 h-2.5 text-primary" 
-                          fill="none" 
-                          viewBox="0 0 24 24" 
-                          stroke="currentColor" 
-                          strokeWidth="3"
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: 'spring', stiffness: 300 }}
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </motion.svg>
-                      ) : i === step ? (
-                        <motion.div 
-                          className="w-1 h-1 rounded-full bg-primary" 
-                          animate={{ scale: [1, 1.5, 1] }}
-                          transition={{ repeat: Infinity, duration: 1 }}
-                        />
-                      ) : null}
-                    </motion.div>
-                    <span className={`text-[12px] font-medium ${i === step ? 'text-foreground' : 'text-muted-foreground'}`}>
-                      {text}
-                    </span>
-                  </motion.div>
-                ))}
+      <div className="mt-4 space-y-2.5 border-l border-foreground/10 pl-3.5">
+        {STEPS.map((text, i) => {
+          const isDone = state === 'done' || i < activeStep
+          const isActive = state !== 'done' && i === activeStep
+
+          return (
+            <motion.div
+              key={i}
+              className="flex items-start gap-3"
+              animate={{ opacity: isDone || isActive ? 1 : 0.45 }}
+              transition={{ duration: 0.25 }}
+            >
+              <div className="mt-[3px] flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-foreground/15 bg-background">
+                {isDone ? (
+                  <svg className="h-2.5 w-2.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : isActive ? (
+                  <motion.span
+                    className="h-1.5 w-1.5 rounded-full bg-primary"
+                    animate={{ scale: [1, 1.45, 1] }}
+                    transition={{ repeat: Infinity, duration: 1.1 }}
+                  />
+                ) : (
+                  <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/45" />
+                )}
               </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <p className={`text-[12px] leading-relaxed ${isDone || isActive ? 'text-foreground/90' : 'text-muted-foreground'}`}>
+                {text}
+              </p>
+            </motion.div>
+          )
+        })}
+      </div>
+
+      {content && (
+        <motion.div
+          className="mt-4 rounded-xl border border-primary/15 bg-primary/[0.04] px-3.5 py-3 text-[12px] leading-relaxed text-foreground/85"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+        >
+          <ReactMarkdown
+            components={{
+              p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+            }}
+          >
+            {content}
+          </ReactMarkdown>
+        </motion.div>
+      )}
     </motion.div>
   )
 }
@@ -153,26 +130,27 @@ function ProcessingSteps() {
   const elementRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // PERFORMANCE: Only animate when visible (IntersectionObserver)
     const observer = new IntersectionObserver(([entry]) => {
       setIsPaused(!entry.isIntersecting)
     }, { threshold: 0.1 })
-    
+
     if (elementRef.current) {
       observer.observe(elementRef.current)
     }
 
-    const interval = setInterval(() => {
-      if (!isPaused) {
-        setStep(s => (s < STEPS.length - 1 ? s + 1 : s))
-      }
-    }, 900)
-    
-    return () => {
-      observer.disconnect()
-      clearInterval(interval)
-    }
-  }, [isPaused])
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (isPaused || step >= STEPS.length - 1) return
+
+    const delay = 1050 + step * 180 + Math.floor(Math.random() * 180)
+    const timeout = window.setTimeout(() => {
+      setStep((s) => (s < STEPS.length - 1 ? s + 1 : s))
+    }, delay)
+
+    return () => window.clearTimeout(timeout)
+  }, [isPaused, step])
 
   return (
     <div ref={elementRef}>
@@ -185,7 +163,7 @@ function ProcessingSteps() {
 const MemoizedProcessingSteps = memo(ProcessingSteps)
 
 function ReasoningComplete({ step, content }: { step: number, content?: string }) {
-  return <ReasoningPanel state="streaming" step={step} content={content} />
+  return <ReasoningPanel state="done" step={step} content={content} />
 }
 const MemoizedReasoningComplete = memo(ReasoningComplete)
 
@@ -274,8 +252,11 @@ export function StreamingAnswer({
 
   // Memoize done content
   const doneContent = useMemo(() => {
-    return metadata?.cached ? "Result retrieved from neural search cache." : undefined
-  }, [metadata?.cached])
+    if (!metadata) return undefined
+    return metadata.cached
+      ? "I found a recent matching result and reused it so you get the same answer faster."
+      : "I finished with a quick clarity pass so the final answer is direct and easy to use."
+  }, [metadata])
 
   useEffect(() => {
     const el = containerRef.current
@@ -321,7 +302,7 @@ export function StreamingAnswer({
       case 'streaming':
         return (
           <div className="w-full max-w-none animate-fade-in transition-all duration-700">
-            {/* PERF: Hide thought process during streaming - only show sources and answer */}
+            <ReasoningPanel state="streaming" step={2} />
             {sources && sources.length > 0 && (
               <Sources sources={sources} className="mb-6" />
             )}

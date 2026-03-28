@@ -10,9 +10,9 @@ import {
   MODELS_ENDPOINT,
   STATIC_FALLBACK_MODELS,
   CACHE_TTL,
-  MAX_MODEL_FAILURES,
   TASK_POLICIES,
 } from './config'
+import { MODEL_FAILURE_RECOVERY_WINDOW_MS } from '../constants'
 
 // ── Model Name Registry ──────────────────────────────────────────────────────
 /**
@@ -157,6 +157,14 @@ type ModelFailureInfo = {
 
 export const modelFailures = new Map<string, ModelFailureInfo>()
 
+function pruneStaleModelFailures(now = Date.now()): void {
+  for (const [model, info] of modelFailures.entries()) {
+    if (now - info.lastFailedAt >= MODEL_FAILURE_RECOVERY_WINDOW_MS) {
+      modelFailures.delete(model)
+    }
+  }
+}
+
 // ── Telemetry ────────────────────────────────────────────────────────────────
 /**
  * Log model performance metrics
@@ -253,6 +261,9 @@ export async function getModelsByTier(): Promise<Record<ModelTier, string[]>> {
  * @returns Array of model IDs ordered by preference
  */
 export async function getModelsForTask(task: AITask): Promise<string[]> {
+  // Recover models that have been healthy for long enough.
+  pruneStaleModelFailures()
+
   const policy = TASK_POLICIES[task]
   const tieredModels = await getModelsByTier()
 

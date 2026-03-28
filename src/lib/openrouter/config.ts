@@ -49,6 +49,7 @@ export const MODEL_TIER_PATTERNS: Record<ModelTier, RegExp[]> = {
     /gemini.*flash/i,
     /gemma-3n/i,
     /gemma-3-4b/i,
+    /llama-3\.2-3b/i,
     /nano/i,
     /3b-instruct/i,
     /qwen3-4b/i,
@@ -161,10 +162,6 @@ export const STATIC_FALLBACK_MODELS: Record<ModelTier, string[]> = {
     
     // Arcee: Specialized large model
     'arcee-ai/trinity-large-preview:free',           // Trinity Large — Premium performance tier
-    
-    // OpenRouter proprietary
-    'openrouter/hunter-alpha',                       // Hunter Alpha — Experimental high-capability model
-    'openrouter/healer-alpha',                       // Healer Alpha — Experimental specialized variant
     
     // Liquid: Reasoning-enhanced model
     'liquid/lfm-2.5-1.2b-thinking:free',             // LFM 2.5 1.2B Thinking — Extended reasoning with token budget
