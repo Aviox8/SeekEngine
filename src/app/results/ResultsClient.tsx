@@ -67,6 +67,8 @@ export default function ResultsClient() {
   const [followUpQuery, setFollowUpQuery] = useState('')
   const followUpInputRef = useRef<HTMLInputElement>(null)
   const searchAbortRef = useRef<AbortController | null>(null)
+  const copyResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const shareResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { addEntry } = useSearchHistory()
   const [timeFilter, setTimeFilter] = useState(urlTime)
 
@@ -79,13 +81,23 @@ export default function ResultsClient() {
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === '/' && !document.activeElement?.matches('input, textarea')) {
+      const active = document.activeElement as HTMLElement | null
+      const inEditable = !!active?.matches('input, textarea, select, [contenteditable="true"]')
+      if (e.key === '/' && !inEditable) {
         e.preventDefault()
         followUpInputRef.current?.focus()
       }
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (copyResetTimerRef.current) clearTimeout(copyResetTimerRef.current)
+      if (shareResetTimerRef.current) clearTimeout(shareResetTimerRef.current)
+      searchAbortRef.current?.abort()
+    }
   }, [])
 
   useEffect(() => {
@@ -98,6 +110,8 @@ export default function ResultsClient() {
     setFollowUpQuery('')
     setCopied(false)
     setShareCopied(false)
+    if (copyResetTimerRef.current) clearTimeout(copyResetTimerRef.current)
+    if (shareResetTimerRef.current) clearTimeout(shareResetTimerRef.current)
 
     if (searchAbortRef.current) searchAbortRef.current.abort()
     const controller = new AbortController()
@@ -161,7 +175,8 @@ export default function ResultsClient() {
     const ok = await copyTextToClipboard(aiAnswer)
     if (ok) {
       setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      if (copyResetTimerRef.current) clearTimeout(copyResetTimerRef.current)
+      copyResetTimerRef.current = setTimeout(() => setCopied(false), 2000)
     }
   }
 
@@ -183,7 +198,8 @@ export default function ResultsClient() {
     const ok = await copyTextToClipboard(shareUrl)
     if (ok) {
       setShareCopied(true)
-      setTimeout(() => setShareCopied(false), 2000)
+      if (shareResetTimerRef.current) clearTimeout(shareResetTimerRef.current)
+      shareResetTimerRef.current = setTimeout(() => setShareCopied(false), 2000)
     }
   }
 

@@ -34,6 +34,7 @@ export default memo(function SearchBar({
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const suggestionsRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { resolvedTheme } = useTheme()
   const { history, removeEntry } = useSearchHistory()
   const isDark = resolvedTheme === 'dark'
@@ -69,6 +70,12 @@ export default memo(function SearchBar({
     }
     document.addEventListener('keydown', handleGlobalKeyDown)
     return () => document.removeEventListener('keydown', handleGlobalKeyDown)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current)
+    }
   }, [])
 
   useEffect(() => {
@@ -187,7 +194,8 @@ export default memo(function SearchBar({
               onBlur={(e) => {
                 const relatedTarget = e.relatedTarget as Node | null
                 if (relatedTarget && suggestionsRef.current?.contains(relatedTarget)) return
-                setTimeout(() => setIsFocused(false), 150)
+                if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current)
+                blurTimeoutRef.current = setTimeout(() => setIsFocused(false), 150)
               }}
               onKeyDown={handleKeyDown}
               rows={1}
@@ -202,6 +210,9 @@ export default memo(function SearchBar({
               autoComplete="off"
               autoFocus={autoFocus}
             />
+            <p id="search-hint" className="sr-only">
+              Press Enter to search. Press Shift and Enter for a new line. Press Tab to accept a suggestion.
+            </p>
           </div>
 
           {/* Right controls - minimal and inline */}
@@ -358,6 +369,7 @@ export default memo(function SearchBar({
                       e.stopPropagation()
                       removeEntry(entry.query)
                     }}
+                    aria-label={`Remove ${entry.query} from history`}
                     className="opacity-0 group-hover:opacity-100 p-1 rounded transition-all text-muted-foreground/30 hover:text-destructive hover:bg-destructive/5"
                   >
                     <X className="w-3 h-3" />

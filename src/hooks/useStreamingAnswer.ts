@@ -135,6 +135,90 @@ export function useStreamingAnswer() {
       let receivedDone = false
       let seenCacheHit = false
 
+      const processEventLine = (line: string) => {
+        if (!line.startsWith('data: ')) return
+
+        try {
+          const parsedData = JSON.parse(line.slice(6))
+
+          // Validate before type casting - prevents runtime errors from malformed API responses
+          if (!isValidStreamEvent(parsedData)) {
+            console.warn('Received invalid stream event', parsedData)
+            return
+          }
+
+          const event: StreamEvent = parsedData
+
+          switch (event.type) {
+            case 'thinking':
+              setState('thinking')
+              break
+
+            case 'sources':
+              if (event.sources) setSources(event.sources)
+              break
+
+            case 'model_selected':
+              setMetadata({
+                model: event.model || '',
+                modelHuman: event.modelHuman || '',
+                tier: event.tier || 'balanced',
+                latencyMs: 0,
+                attempts: event.attempts || 1,
+                cached: false,
+              })
+              break
+
+            case 'cache_hit':
+              seenCacheHit = true
+              answerRef.current = event.content || ''
+              setAnswer(answerRef.current)
+              setMetadata({
+                model: event.model || '',
+                modelHuman: event.modelHuman || '',
+                tier: 'cached',
+                latencyMs: 0,
+                attempts: 0,
+                cached: true,
+              })
+              break
+
+            case 'token':
+              setState('streaming')
+              answerRef.current += (event.content || '')
+              setAnswer(answerRef.current)
+              break
+
+            case 'done':
+              receivedDone = true
+              setState('done')
+              // Only use event.content if we haven't accumulated tokens
+              // (i.e. cache_hit scenario where no tokens were streamed)
+              if (event.content && answerRef.current.length === 0) {
+                answerRef.current = event.content
+                setAnswer(event.content)
+              }
+              setMetadata({
+                model: event.model || '',
+                modelHuman: event.modelHuman || '',
+                tier: event.tier || 'balanced',
+                latencyMs: event.latencyMs || 0,
+                attempts: event.attempts || 1,
+                cached: event.cached === true || event.cachedAt !== undefined || seenCacheHit,
+              })
+              break
+
+            case 'error':
+              receivedDone = true
+              setState('error')
+              setError(event.error || 'Unknown error')
+              break
+          }
+        } catch {
+          // Ignore parse errors
+        }
+      }
+
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
@@ -144,88 +228,14 @@ export function useStreamingAnswer() {
         buffer = lines.pop() || ''
 
         for (const line of lines) {
-          if (!line.startsWith('data: ')) continue
-
-          try {
-            const parsedData = JSON.parse(line.slice(6))
-            
-            // Validate before type casting - prevents runtime errors from malformed API responses
-            if (!isValidStreamEvent(parsedData)) {
-              console.warn('Received invalid stream event', parsedData)
-              continue
-            }
-            
-            const event: StreamEvent = parsedData
-
-            switch (event.type) {
-              case 'thinking':
-                setState('thinking')
-                break
-
-              case 'sources':
-                if (event.sources) setSources(event.sources)
-                break
-
-              case 'model_selected':
-                setMetadata({
-                  model: event.model || '',
-                  modelHuman: event.modelHuman || '',
-                  tier: event.tier || 'balanced',
-                  latencyMs: 0,
-                  attempts: event.attempts || 1,
-                  cached: false,
-                })
-                break
-
-              case 'cache_hit':
-                seenCacheHit = true
-                answerRef.current = event.content || ''
-                setAnswer(answerRef.current)
-                setMetadata({
-                  model: event.model || '',
-                  modelHuman: event.modelHuman || '',
-                  tier: 'cached',
-                  latencyMs: 0,
-                  attempts: 0,
-                  cached: true,
-                })
-                break
-
-              case 'token':
-                setState('streaming')
-                answerRef.current += (event.content || '')
-                setAnswer(answerRef.current)
-                break
-
-              case 'done':
-                receivedDone = true
-                setState('done')
-                // Only use event.content if we haven't accumulated tokens
-                // (i.e. cache_hit scenario where no tokens were streamed)
-                if (event.content && answerRef.current.length === 0) {
-                  answerRef.current = event.content
-                  setAnswer(event.content)
-                }
-                setMetadata({
-                  model: event.model || '',
-                  modelHuman: event.modelHuman || '',
-                  tier: event.tier || 'balanced',
-                  latencyMs: event.latencyMs || 0,
-                  attempts: event.attempts || 1,
-                  cached: event.cached === true || event.cachedAt !== undefined || seenCacheHit,
-                })
-                break
-
-              case 'error':
-                receivedDone = true
-                setState('error')
-                setError(event.error || 'Unknown error')
-                break
-            }
-          } catch {
-            // Ignore parse errors
-          }
+          processEventLine(line)
         }
+      }
+
+      // Handle last buffered event if stream ended without trailing separator.
+      const trailing = buffer.trim()
+      if (trailing) {
+        processEventLine(trailing)
       }
 
       // Safety net: if the stream ended without a 'done' event

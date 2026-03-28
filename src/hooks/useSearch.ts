@@ -69,13 +69,11 @@ export function useSearch() {
       setSuggestions(newSuggestions)
 
       // Lightweight capped cache to avoid re-fetching identical inputs.
-      if (newSuggestions.length > 0) {
-        if (suggestionsCacheRef.current.size >= 50) {
-          const firstKey = suggestionsCacheRef.current.keys().next().value
-          if (firstKey) suggestionsCacheRef.current.delete(firstKey)
-        }
-        suggestionsCacheRef.current.set(normalized, newSuggestions)
+      if (suggestionsCacheRef.current.size >= 50) {
+        const firstKey = suggestionsCacheRef.current.keys().next().value
+        if (firstKey) suggestionsCacheRef.current.delete(firstKey)
       }
+      suggestionsCacheRef.current.set(normalized, newSuggestions)
       
       if (newSuggestions.length > 0) {
         const matchingSuggestion = newSuggestions.find(s => 
@@ -95,6 +93,9 @@ export function useSearch() {
       // Previously non-abort errors would leave controller ref dangling indefinitely
       abortControllerRef.current = null
     } finally {
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null
+      }
       if (!controller.signal.aborted) {
         setIsLoading(false)
       }
