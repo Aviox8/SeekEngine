@@ -21,6 +21,17 @@ export interface SearchResult {
   source?: string
 }
 
+interface GoogleCustomSearchItem {
+  title?: string
+  link?: string
+  snippet?: string
+  displayLink?: string
+}
+
+interface GoogleCustomSearchResponse {
+  items?: GoogleCustomSearchItem[]
+}
+
 /**
  * Fetch web search results from Google Custom Search
  * @param query - The search query
@@ -54,19 +65,25 @@ export async function getWebSearchResults(
       throw Errors.externalApiFailed('Google Custom Search', response.status)
     }
 
-    const data = await response.json()
+    const data = await response.json() as GoogleCustomSearchResponse
 
     if (!data.items) {
       return []
     }
 
-    return data.items.map((item: any) => ({
-      title: item.title,
-      link: item.link,
-      snippet: item.snippet,
-      displayLink: item.displayLink,
-    }))
-      } catch (error) {
+    return data.items
+      .filter((item): item is Required<Pick<GoogleCustomSearchItem, 'title' | 'link' | 'snippet'>> & GoogleCustomSearchItem =>
+        typeof item.title === 'string' &&
+        typeof item.link === 'string' &&
+        typeof item.snippet === 'string'
+      )
+      .map((item) => ({
+        title: item.title,
+        link: item.link,
+        snippet: item.snippet,
+        displayLink: item.displayLink,
+      }))
+  } catch (error) {
     if (signal?.aborted) {
       throw error
     }

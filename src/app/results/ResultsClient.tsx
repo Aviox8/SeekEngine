@@ -73,6 +73,10 @@ export default function ResultsClient() {
   const { addEntry } = useSearchHistory()
   const [timeFilter, setTimeFilter] = useState(urlTime)
 
+  useEffect(() => {
+    setTimeFilter(urlTime)
+  }, [urlTime])
+
   // PERF: Removed useScroll/useSpring scroll listeners to reduce continuous re-renders from scroll events
   // A simple CSS-based progress bar can be added instead if needed
 
@@ -205,7 +209,15 @@ export default function ResultsClient() {
   }
 
   const handleSearch = (searchQuery: string) => {
-    if (searchQuery.trim()) router.push(`/results?q=${encodeURIComponent(searchQuery)}`)
+    const trimmedQuery = searchQuery.trim()
+    if (!trimmedQuery) return
+
+    const params = new URLSearchParams({ q: trimmedQuery })
+    if (timeFilter) {
+      params.set('time', timeFilter)
+    }
+
+    router.push(`/results?${params.toString()}`)
   }
 
   function handleFollowUp() {
@@ -296,6 +308,10 @@ export default function ResultsClient() {
 
                  <StreamingAnswer 
                     query={query} 
+                    timeRange={timeFilter || undefined}
+                    context={results}
+                    waitForContext
+                    contextReady={!resultsLoading}
                     onComplete={setAiAnswer}
                     onRegenerate={() => setAiAnswer('')}
                     className="text-[17px] leading-relaxed"

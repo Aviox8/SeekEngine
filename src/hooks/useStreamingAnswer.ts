@@ -26,6 +26,18 @@ export interface StreamMetadata {
   cached: boolean
 }
 
+export interface StreamContextItem {
+  title: string
+  link: string
+  snippet: string
+}
+
+interface StartStreamOptions {
+  timeRange?: string
+  context?: StreamContextItem[]
+  hasProvidedContext?: boolean
+}
+
 interface StreamEvent {
   type: 'token' | 'thinking' | 'done' | 'error' | 'model_selected' | 'cache_hit' | 'sources'
   content?: string
@@ -84,7 +96,7 @@ export function useStreamingAnswer() {
     }
   }, [])
 
-  const startStream = useCallback(async (query: string) => {
+  const startStream = useCallback(async (query: string, options: StartStreamOptions = {}) => {
     // Reset previous state
     reset()
     setState('thinking')
@@ -94,10 +106,22 @@ export function useStreamingAnswer() {
     abortControllerRef.current = requestController
 
     try {
-      const response = await fetch(
-        `/api/ai/stream?q=${encodeURIComponent(query)}`,
-        { signal: requestController.signal }
-      )
+      const payload: Record<string, unknown> = { q: query }
+      if (options.timeRange) {
+        payload.time = options.timeRange
+      }
+      if (options.hasProvidedContext) {
+        payload.context = options.context ?? []
+      }
+
+      const response = await fetch('/api/ai/stream', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+        signal: requestController.signal,
+      })
 
       if (!response.ok) {
         let errorMessage = `Request failed (HTTP ${response.status})`

@@ -19,6 +19,23 @@ export interface SerpResult {
   source: string
 }
 
+interface SerpOrganicResult {
+  title?: string
+  link?: string
+  snippet?: string
+  source?: string
+  display_link?: string
+  about_this_result?: {
+    source?: {
+      description?: string
+    }
+  }
+}
+
+interface SerpApiResponse {
+  organic_results?: SerpOrganicResult[]
+}
+
 /**
  * Fetch real-time search results from SerpApi
  */
@@ -47,18 +64,23 @@ export async function getSerpResults(
       throw Errors.externalApiFailed('SerpApi', response.status)
     }
 
-    const data = await response.json()
+    const data = await response.json() as SerpApiResponse
 
     if (!data.organic_results) {
       return []
     }
 
-    return data.organic_results.map((item: any) => ({
-      title: item.title,
-      link: item.link,
-      snippet: item.snippet || item.about_this_result?.source?.description || '',
-      source: item.source || item.display_link || ''
-    }))
+    return data.organic_results
+      .filter((item): item is Required<Pick<SerpOrganicResult, 'title' | 'link'>> & SerpOrganicResult =>
+        typeof item.title === 'string' &&
+        typeof item.link === 'string'
+      )
+      .map((item) => ({
+        title: item.title,
+        link: item.link,
+        snippet: item.snippet || item.about_this_result?.source?.description || '',
+        source: item.source || item.display_link || '',
+      }))
   } catch (error) {
     if (signal?.aborted) {
       throw error

@@ -9,15 +9,21 @@
 
 import { useEffect, useRef, useState, CSSProperties, useMemo, memo } from 'react'
 import { useStreamingAnswer, StreamState } from '../../hooks/useStreamingAnswer'
+import type { StreamContextItem } from '../../hooks/useStreamingAnswer'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react'
 import { ShimmeringText } from '../ui/shimmering-text'
 import { Response } from '../ui/response'
 import { Sources } from '../ui/sources'
+import type { SearchResult } from '../../lib/google-search'
 
 interface StreamingAnswerProps {
   query: string
   autoStart?: boolean
+  timeRange?: string
+  context?: SearchResult[]
+  waitForContext?: boolean
+  contextReady?: boolean
   className?: string
   style?: CSSProperties
   onComplete?: (answer: string) => void
@@ -562,6 +568,10 @@ const MemoizedModelBadge = memo(ModelBadge)
 export function StreamingAnswer({ 
   query, 
   autoStart = true, 
+  timeRange,
+  context,
+  waitForContext = false,
+  contextReady = true,
   className = '',
   style,
   onComplete,
@@ -574,17 +584,27 @@ export function StreamingAnswer({
     error, 
     sources,
     startStream, 
+    reset,
   } = useStreamingAnswer()
   
   const containerRef = useRef<HTMLDivElement>(null)
-  const lastStartedQuery = useRef<string | null>(null)
+  const lastStartedRequest = useRef<string | null>(null)
   const completed = useRef(false)
   const shouldAutoScroll = useRef(true)
   const [runCycle, setRunCycle] = useState(0)
+  const requestKey = `${query}::${timeRange ?? ''}`
+
+  const normalizedContext = useMemo<StreamContextItem[]>(() => {
+    return (context ?? []).map(({ title, link, snippet }) => ({
+      title,
+      link,
+      snippet,
+    }))
+  }, [context])
 
   const reasoningScript = useMemo(() => {
-    return buildReasoningScript(query, runCycle)
-  }, [query, runCycle])
+    return buildReasoningScript(requestKey, runCycle)
+  }, [requestKey, runCycle])
 
   const streamingStep = useMemo(() => {
     const maxStep = reasoningScript.steps.length - 1
@@ -605,6 +625,14 @@ export function StreamingAnswer({
       : `I finished with a final clarity pass so this response stays tightly aligned with ${queryLabel}.`
   }, [metadata, query])
 
+  const startCurrentStream = useMemo(() => {
+    return () => startStream(query, {
+      timeRange,
+      context: normalizedContext,
+      hasProvidedContext: waitForContext,
+    })
+  }, [normalizedContext, query, startStream, timeRange, waitForContext])
+
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -616,12 +644,20 @@ export function StreamingAnswer({
   }, [])
 
   useEffect(() => {
-    if (autoStart && query && lastStartedQuery.current !== query) {
-      lastStartedQuery.current = query
-      completed.current = false
-      startStream(query)
-    }
-  }, [query, autoStart, startStream])
+    completed.current = false
+    lastStartedRequest.current = null
+    reset()
+  }, [requestKey, reset])
+
+  useEffect(() => {
+    if (!autoStart || !query) return
+    if (waitForContext && !contextReady) return
+    if (lastStartedRequest.current === requestKey) return
+
+    lastStartedRequest.current = requestKey
+    completed.current = false
+    startCurrentStream()
+  }, [autoStart, contextReady, query, requestKey, startCurrentStream, waitForContext])
 
   useEffect(() => {
     if (state === 'done' && onComplete && answer && !completed.current) {
@@ -687,10 +723,10 @@ export function StreamingAnswer({
               <button
                 onClick={() => {
                   completed.current = false
-                  lastStartedQuery.current = null
+                  lastStartedRequest.current = null
                   setRunCycle((current) => current + 1)
                   onRegenerate?.()
-                  startStream(query)
+                  startCurrentStream()
                 }}
                 className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-wide transition-all text-muted-foreground/70 hover:text-primary active:scale-95 group/regen"
                 title="Regenerate answer"
@@ -719,8 +755,9 @@ export function StreamingAnswer({
             <button 
               onClick={() => {
                 completed.current = false
+                lastStartedRequest.current = null
                 setRunCycle((current) => current + 1)
-                startStream(query)
+                startCurrentStream()
               }}
               className="w-full px-3 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg transition-all active:scale-95 bg-destructive/10 border border-destructive/20 text-destructive hover:bg-destructive/15 flex items-center justify-center gap-2"
             >

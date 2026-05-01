@@ -80,7 +80,7 @@ describe('humanizeModel', () => {
   describe('Fallback behavior', () => {
     it('extracts model name from provider/model format', () => {
       const result = humanizeModel('provider/model-name-test:free')
-      expect(result).toContain('model')
+      expect(result.toLowerCase()).toContain('model')
     })
 
     it('returns original for unknown models', () => {

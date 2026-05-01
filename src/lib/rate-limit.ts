@@ -9,7 +9,7 @@
  * - Standard HTTP 429 responses with Retry-After headers
  */
 
-import { RATE_LIMIT_CLEANUP_INTERVAL_MS, RATE_LIMIT_MAX_ENTRIES } from './constants'
+import { RATE_LIMIT_MAX_ENTRIES } from './constants'
 
 interface RateLimitEntry {
   count: number
@@ -17,7 +17,6 @@ interface RateLimitEntry {
 }
 
 const store = new Map<string, RateLimitEntry>()
-let lastCleanup = Date.now()
 const TRUSTED_IP_HEADERS = [
   'x-vercel-forwarded-for',
   'cf-connecting-ip',
@@ -56,10 +55,8 @@ function cleanup() {
     }
   }
   
-  let deleted = 0
   for (const key of keysToDelete) {
     store.delete(key)
-    deleted++
   }
 
   // If still over limit after expiration cleanup, evict oldest entries
@@ -75,7 +72,6 @@ function cleanup() {
     }
   }
   
-  lastCleanup = now
 }
 
 export interface RateLimitConfig {

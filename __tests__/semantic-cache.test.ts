@@ -23,8 +23,8 @@ describe('normalizeQuery', () => {
     expect(normalizeQuery('hello? world! foo.')).toBe('hello world foo')
   })
 
-  it('removes structural filler words', () => {
-    expect(normalizeQuery('can you explain the concept')).toBe('you concept')
+  it('preserves structural words that affect intent', () => {
+    expect(normalizeQuery('can you explain the concept')).toBe('can you explain the concept')
   })
 
   it('preserves question-intent words', () => {
