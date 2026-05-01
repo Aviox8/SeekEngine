@@ -16,64 +16,61 @@ export default function AboutPage() {
   ]
 
   return (
-    <main className="relative min-h-screen bg-[#fbfbfd] pt-20 pb-24 font-sans transition-colors duration-1000 selection:bg-blue-500/20 dark:bg-[#000000] sm:pt-24 sm:pb-40">
-      
-      {/* Background */}
-      <div className="fixed inset-0 pointer-events-none bg-grid-black/[0.01] dark:bg-grid-white/[0.01]" />
+    <main className="relative min-h-screen bg-background pt-20 pb-24 font-sans transition-colors duration-700 selection:bg-foreground/10 sm:pt-24 sm:pb-40">
 
-      <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6">
+      <div className="relative z-10 mx-auto max-w-3xl px-5 sm:px-6">
         
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="mb-12 border-b border-black/5 pb-10 text-left dark:border-white/5 sm:mb-16 sm:pb-12"
+          transition={{ duration: 0.7 }}
+          className="mb-14 border-b border-foreground/[0.06] pb-10 text-left sm:mb-16 sm:pb-12"
         >
           <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
-              <span className="px-2.5 py-1 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[9px] font-bold uppercase tracking-wide border border-blue-200 dark:border-blue-800">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="px-2.5 py-1 rounded-lg bg-foreground/[0.04] text-foreground/60 text-[9px] font-semibold uppercase tracking-[0.1em] border border-foreground/[0.08]">
                 Open Source
               </span>
-              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Research Prototype</span>
+              <span className="text-[10px] font-medium text-muted-foreground/40 uppercase tracking-[0.12em]">Research Prototype</span>
             </div>
-            <h1 className="text-4xl font-bold leading-tight tracking-tight text-black dark:text-white sm:text-6xl">
+            <h1 className="font-display text-[clamp(2.5rem,6vw,4rem)] leading-[0.95] tracking-tight text-foreground">
               SeekEngine
             </h1>
-            <p className="max-w-2xl text-base leading-relaxed text-zinc-600 dark:text-zinc-400 sm:text-lg">
+            <p className="max-w-xl text-[15px] leading-relaxed text-muted-foreground/80 sm:text-base">
               A grounded hybrid retrieval system. Hallucination, reframed as a coordination problem. Built independently with free-tier APIs, zero budget, and the principle that truth has a cost.
             </p>
           </div>
         </motion.div>
 
         {/* Research Journey */}
-        <div className="space-y-8 sm:space-y-10">
+        <div className="space-y-0">
           {researchPhases.map((phase, idx) => (
             <motion.div
               key={idx}
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: idx * 0.05 }}
-              viewport={{ once: true, margin: '-100px' }}
+              transition={{ duration: 0.5, delay: idx * 0.04 }}
+              viewport={{ once: true, margin: '-80px' }}
               className="group"
             >
-              <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
-                {/* Phase number */}
-                <div className="relative shrink-0">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 sm:sticky sm:top-24 sm:h-10 sm:w-10">
-                    <span className="text-xs font-black text-white">{phase.num.replace('0', '')}</span>
+              <div className="flex gap-5 sm:gap-8">
+                {/* Phase number + line */}
+                <div className="relative flex flex-col items-center shrink-0">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full border border-foreground/[0.1] bg-foreground/[0.03] sm:h-9 sm:w-9 transition-colors group-hover:border-foreground/20 group-hover:bg-foreground/[0.06]">
+                    <span className="text-[11px] font-semibold text-foreground/50 tabular-nums">{phase.num}</span>
                   </div>
                   {idx < researchPhases.length - 1 && (
-                    <div className="absolute left-4 top-10 hidden h-20 w-0.5 bg-gradient-to-b from-blue-500 to-transparent opacity-30 transition-opacity group-hover:opacity-50 sm:block" />
+                    <div className="w-[1px] flex-1 bg-foreground/[0.06] mt-2 mb-0 group-hover:bg-foreground/[0.1] transition-colors" />
                   )}
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 min-w-0 pb-8">
-                  <h3 className="text-xl sm:text-2xl font-bold text-black dark:text-white mb-2">
+                <div className="flex-1 min-w-0 pb-10 sm:pb-12">
+                  <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 tracking-tight">
                     {phase.title}
                   </h3>
-                  <p className="text-base text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                  <p className="text-[14px] sm:text-[15px] text-muted-foreground/70 leading-relaxed">
                     {phase.desc}
                   </p>
                 </div>
@@ -86,31 +83,31 @@ export default function AboutPage() {
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          transition={{ duration: 0.7, delay: 0.15 }}
           viewport={{ once: true }}
-          className="mt-16 space-y-6 border-t border-black/5 pt-10 dark:border-white/5 sm:mt-20 sm:pt-12"
+          className="mt-12 space-y-6 border-t border-foreground/[0.06] pt-10 sm:mt-16 sm:pt-12"
         >
           <div>
-            <h3 className="text-2xl font-bold text-black dark:text-white mb-4">Research & Inquiries</h3>
-            <div className="space-y-3">
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <h3 className="text-xl font-semibold text-foreground mb-4 tracking-tight">Research & Inquiries</h3>
+            <div className="space-y-2.5">
+              <p className="text-sm text-muted-foreground/70">
                 For architectural questions, research collaboration, or project discussion:
               </p>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <p className="text-sm">
-                  <span className="text-zinc-400">Researcher:</span> <span className="font-semibold text-black dark:text-white">Gaurav Yadav</span>
+                  <span className="text-muted-foreground/50">Researcher:</span> <span className="font-semibold text-foreground">Gaurav Yadav</span>
                 </p>
                 <p className="text-sm">
-                  <a href="mailto:gauravramyadav@gmail.com" className="text-blue-600 dark:text-blue-400 hover:underline font-semibold">gauravramyadav@gmail.com</a>
+                  <a href="mailto:gauravramyadav@gmail.com" className="text-foreground/70 hover:text-foreground underline underline-offset-4 decoration-foreground/20 hover:decoration-foreground/40 transition-colors font-medium">gauravramyadav@gmail.com</a>
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-4 pt-4 sm:gap-6">
-            <Link href="https://github.com/archduke1337/SeekEngine" target="_blank" className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 hover:text-black dark:hover:text-white transition-colors">GitHub</Link>
-            <Link href="https://archduke.is-a.dev/research/seekengine" target="_blank" className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 hover:text-black dark:hover:text-white transition-colors">Research Paper</Link>
-            <Link href="https://archduke.is-a.dev" target="_blank" className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 hover:text-black dark:hover:text-white transition-colors">Portfolio</Link>
+          <div className="flex flex-wrap gap-5 pt-4 sm:gap-7">
+            <Link href="https://github.com/archduke1337/SeekEngine" target="_blank" className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/35 hover:text-foreground transition-colors">GitHub</Link>
+            <Link href="https://archduke.is-a.dev/research/seekengine" target="_blank" className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/35 hover:text-foreground transition-colors">Research Paper</Link>
+            <Link href="https://archduke.is-a.dev" target="_blank" className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/35 hover:text-foreground transition-colors">Portfolio</Link>
           </div>
         </motion.div>
       </div>

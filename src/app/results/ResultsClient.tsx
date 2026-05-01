@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState, useRef } from 'react'
@@ -238,41 +238,34 @@ export default function ResultsClient() {
   }
 
   return (
-    <main className="relative flex w-full flex-1 flex-col bg-background pb-16 pt-20 sm:pt-24">
+    <main className="relative flex w-full flex-1 flex-col bg-background pb-16 pt-18 sm:pt-20">
       {/* PERF: Removed scroll progress indicator - was using useScroll/useSpring listeners */}
 
       {/* Noise */}
       <div className="fixed inset-0 pointer-events-none z-[1] noise" />
 
-      <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6">
-        {/* Header Navigation */}
-        <header className="mb-6 flex flex-wrap items-center justify-between gap-4 py-6">
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <Image src="/logo.png" alt="SeekEngine" width={28} height={28} className="transition-transform group-hover:scale-90" />
-              <span className="font-display text-xl tracking-tight text-foreground group-hover:opacity-70 transition-opacity">
-                SeekEngine
-              </span>
-            </Link>
-
-            <div className="flex w-full justify-end gap-2 sm:w-auto sm:gap-3">
+      <div className="relative z-10 mx-auto max-w-5xl px-5 sm:px-6">
+        {/* Header Navigation — simplified, navbar handles branding */}
+        <header className="mb-4 flex items-center justify-end gap-3 py-4 sm:mb-6">
+             <div className="flex gap-2">
                <button 
                  onClick={shareResults}
-                 className="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all active:scale-95 border border-border/60 text-muted-foreground hover:text-foreground hover:bg-accent/5 hover:border-foreground/20"
+                 className="px-3.5 py-2 rounded-xl text-xs font-medium transition-all active:scale-95 border border-foreground/[0.08] text-muted-foreground hover:text-foreground hover:border-foreground/15 hover:bg-foreground/[0.02]"
                >
                  {shareCopied ? 'Link Copied' : 'Share'}
                </button>
-            </div>
+             </div>
         </header>
 
-        {/* Query Title */}
-        <div className="mb-10 animate-fade-in-up sm:mb-12">
-           <div className="flex items-center gap-3 mb-4">
-             <div className="w-1 h-5 rounded-full bg-primary/[0.4] dark:bg-primary/[0.3]" />
-             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
-               Search Results
+        {/* Query Title — clean, confident */}
+        <div className="mb-8 animate-fade-in-up sm:mb-10">
+           <div className="flex items-center gap-2.5 mb-3">
+             <div className="w-0.5 h-4 rounded-full bg-foreground/20" />
+             <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/50">
+               Results
              </span>
            </div>
-           <h1 className="font-display break-words text-3xl leading-tight tracking-tight text-foreground sm:text-5xl md:text-6xl">
+           <h1 className="font-display break-words text-[clamp(1.75rem,5vw,3.5rem)] leading-[1.05] tracking-tight text-foreground">
              {query}
            </h1>
         </div>
@@ -281,15 +274,15 @@ export default function ResultsClient() {
             
             {/* LEFT COLUMN: Synthesis */}
             <div className="w-full lg:w-2/3 animate-fade-in-up">
-              <div className="relative mb-10 overflow-hidden rounded-xl p-5 group shader-card sm:p-6 md:p-8">
+              <div className="relative mb-8 overflow-hidden rounded-2xl p-5 group border border-foreground/[0.06] bg-foreground/[0.01] sm:p-6 md:p-8">
                  
                  {/* Top accent line */}
                  <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
                  
                  <div className="flex items-center gap-3 mb-6 pb-4 border-b border-foreground/5">
                     <LivingIcon color="#6F6F6F" size="w-2.5 h-2.5" />
-                    <h2 className="text-sm font-bold tracking-wide text-foreground/80">
-                      AI Deep Analysis
+                    <h2 className="text-sm font-semibold tracking-wide text-foreground/70">
+                      Synthesis
                     </h2>
                     <div className="ml-auto flex items-center gap-2">
                       <button 

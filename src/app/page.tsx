@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 /**
  * Home Page — Creative B&W with atmospheric background
@@ -13,38 +13,33 @@ import { motion } from 'framer-motion'
 export default function Home() {
   return (
     <main className="min-h-screen bg-background text-foreground overflow-x-hidden transition-colors duration-700 relative">
-      
 
       {/* Subtle noise texture */}
       <div className="fixed inset-0 pointer-events-none z-50 noise" />
 
       {/* MAIN CONTENT */}
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 pb-16 sm:pb-20">
+      <div className="relative z-10 flex min-h-[100dvh] flex-col items-center justify-center px-5 pb-20 sm:px-6 sm:pb-24">
         <Hero />
         
-        {/* SEARCH INTERFACE */}
+        {/* SEARCH INTERFACE — pulled closer to hero */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-8 w-full max-w-[640px] px-1 sm:mt-10"
+          transition={{ delay: 0.6, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="mt-6 w-full max-w-[620px] sm:mt-8"
         >
           <SearchBar />
         </motion.div>
 
-        {/* Footer tagline */}
-        <motion.div
+        {/* Footer tagline — readable, not invisible */}
+        <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.2, duration: 1 }}
-          className="mt-10 flex flex-wrap items-center justify-center gap-2.5 text-center text-[9px] font-medium uppercase tracking-[0.2em] text-muted-foreground/25 sm:mt-14 sm:gap-4 sm:tracking-[0.25em]"
+          transition={{ delay: 1, duration: 0.8 }}
+          className="mt-12 text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground/40 sm:mt-16 sm:text-[11px] sm:tracking-[0.25em]"
         >
-          <span>Seek</span>
-          <span className="w-[3px] h-[3px] rounded-full bg-foreground/10" />
-          <span>Understand</span>
-          <span className="w-[3px] h-[3px] rounded-full bg-foreground/10" />
-          <span>Discover</span>
-        </motion.div>
+          Seek — Understand — Discover
+        </motion.p>
       </div>
     </main>
   )

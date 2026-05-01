@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 /**
  * Search Bar — Ultra-Minimal Text Input
@@ -131,24 +131,15 @@ export default memo(function SearchBar({
 
   return (
     <div className="relative w-full z-[100]" ref={suggestionsRef}>
-      {/* Main search container - absolutely minimal */}
-      <div className="relative z-50">
-        {/* Focus underline indicator */}
-        <motion.div
-          className="absolute -bottom-1 left-0 right-0 h-[1px]"
-          animate={{ 
-            opacity: isFocused ? 1 : 0,
-            scaleX: isFocused ? 1 : 0,
-          }}
-          transition={{ duration: 0.3 }}
-          style={{
-            background: 'hsl(var(--primary))',
-            transformOrigin: 'left'
-          }}
-        />
+      {/* Main search container — subtle border for grounding */}
+      <div className={`relative z-50 rounded-2xl border transition-all duration-300 px-4 py-1.5 sm:px-5 ${
+        isFocused 
+          ? 'border-foreground/15 bg-foreground/[0.02] shadow-sm' 
+          : 'border-foreground/[0.06] hover:border-foreground/10'
+      }`}>
 
-        {/* Input wrapper - no visual styling */}
-        <div className="relative flex items-baseline gap-1">
+        {/* Input wrapper */}
+        <div className="relative flex items-baseline gap-1.5">
           {/* Living icon - appears while typing */}
           <AnimatePresence>
             {isTyping && (
@@ -173,9 +164,9 @@ export default memo(function SearchBar({
           <div className="relative flex-1">
             {/* Ghost text prediction */}
             {ghostText && (
-              <div className="absolute inset-0 flex items-baseline pointer-events-none text-[17px] tracking-normal overflow-hidden whitespace-pre">
+              <div className="absolute inset-0 flex items-baseline pointer-events-none text-[15px] sm:text-[16px] tracking-normal overflow-hidden whitespace-pre">
                 <span className="opacity-0">{query}</span>
-                <span className="text-muted-foreground/20">{ghostText}</span>
+                <span className="text-muted-foreground/25">{ghostText}</span>
               </div>
             )}
 
@@ -199,11 +190,11 @@ export default memo(function SearchBar({
               }}
               onKeyDown={handleKeyDown}
               rows={1}
-              placeholder="Ask anything…"
+              placeholder="Search anything…"
               aria-label="Search query input"
               aria-describedby="search-hint"
               aria-haspopup="listbox"
-              className="w-full bg-transparent border-none outline-none text-[17px] font-normal tracking-normal text-foreground placeholder:text-muted-foreground/30 resize-none p-0 min-h-[48px] max-h-[160px] leading-normal"
+              className="w-full bg-transparent border-none outline-none text-[15px] sm:text-[16px] font-normal tracking-normal text-foreground placeholder:text-muted-foreground/35 resize-none p-0 min-h-[44px] max-h-[160px] leading-normal"
               style={{ caretColor: 'hsl(var(--primary))' }}
               spellCheck={false}
               autoComplete="off"

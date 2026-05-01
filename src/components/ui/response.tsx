@@ -62,19 +62,10 @@ const Response = React.forwardRef<HTMLDivElement, ResponseProps>(
       },
       ul: (props) => <ul className="flex flex-col gap-3 mb-4 ml-1 list-none" {...props} />,
       li: ({ children }) => (
-        <motion.div 
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3 }}
-          className="flex items-start gap-3"
-        >
-          <motion.span 
-            className="mt-2 w-1.5 h-1.5 rounded-full shrink-0 bg-primary/50"
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ repeat: Infinity, duration: 2, delay: 0.5 }}
-          />
+        <div className="flex items-start gap-2.5">
+          <span className="mt-[9px] w-1 h-1 rounded-full shrink-0 bg-foreground/30" />
           <span className="text-[14px] leading-relaxed text-foreground/85 sm:text-[15px]">{children}</span>
-        </motion.div>
+        </div>
       ),
       blockquote: (props) => (
         <blockquote className="border-l-2 border-primary/20 pl-4 py-1 my-4 italic text-muted-foreground" {...props} />

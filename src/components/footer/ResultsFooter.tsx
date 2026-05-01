@@ -6,85 +6,71 @@ import Image from 'next/image'
 import { useLocation } from '../../hooks/useLocation'
 
 /**
- * ResultsFooter — Refined footer for the search results page
- * Features: Location greeting, keyboard shortcuts, navigation, ambient design
+ * ResultsFooter — Restrained footer for the results page
+ * Features: Location greeting, keyboard shortcuts, navigation
  */
 export default function ResultsFooter() {
   const { location, timeOfDay } = useLocation()
 
   return (
-    <footer className="w-full mt-20 relative">
+    <footer className="w-full mt-16 sm:mt-20 relative">
       {/* Top gradient divider */}
-      <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-foreground/8 to-transparent" />
+      <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent" />
 
-      <div className="mx-auto flex max-w-5xl flex-col items-center gap-8 px-4 pb-12 pt-10 sm:px-6">
+      <div className="mx-auto flex max-w-5xl flex-col items-center gap-7 px-5 pb-10 pt-8 sm:px-6 sm:gap-8 sm:pb-12 sm:pt-10">
         
-        {/* Location greeting with decorative elements */}
+        {/* Location greeting */}
         {timeOfDay && (
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col items-center gap-3"
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-col items-center gap-2"
           >
-            {/* Decorative dot cluster */}
-            <div className="flex items-center gap-1.5 mb-1">
-              <span className="w-1 h-1 rounded-full bg-foreground/8" />
-              <span className="w-1.5 h-1.5 rounded-full bg-foreground/12" />
-              <span className="w-1 h-1 rounded-full bg-foreground/8" />
-            </div>
-
-            <span className="text-[10px] font-semibold uppercase tracking-[0.35em] text-muted-foreground/35 sm:text-[11px] sm:tracking-[0.5em]">
+            <span className="text-[10px] font-medium uppercase tracking-[0.3em] text-muted-foreground/30 sm:text-[11px] sm:tracking-[0.4em]">
               Good {timeOfDay}
             </span>
-            <span className="text-center text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground/20 sm:tracking-[0.25em]">
+            <span className="text-center text-[9px] font-medium uppercase tracking-[0.15em] text-muted-foreground/20 sm:tracking-[0.2em]">
               Connecting from {location}
             </span>
           </motion.div>
         )}
 
-        {/* Keyboard shortcuts hint */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
-          className="flex flex-wrap items-center justify-center gap-3 text-[8px] text-center text-muted-foreground/20 sm:gap-4 sm:text-[9px]"
-        >
+        {/* Keyboard shortcuts */}
+        <div className="flex flex-wrap items-center justify-center gap-4 text-[9px] text-muted-foreground/25 sm:gap-5">
           <div className="flex items-center gap-1.5">
-            <kbd className="inline-flex items-center justify-center w-5 h-5 text-[9px] font-medium rounded border border-foreground/[0.06] bg-foreground/[0.02] text-muted-foreground/30">/</kbd>
-            <span>Focus search</span>
+            <kbd className="inline-flex items-center justify-center w-6 h-6 text-[10px] font-medium rounded-md border border-foreground/[0.06] bg-foreground/[0.02] text-muted-foreground/30">/</kbd>
+            <span>Focus</span>
           </div>
-          <span className="w-[3px] h-[3px] rounded-full bg-foreground/6" />
           <div className="flex items-center gap-1.5">
-            <kbd className="inline-flex items-center justify-center px-1.5 h-5 text-[9px] font-medium rounded border border-foreground/[0.06] bg-foreground/[0.02] text-muted-foreground/30">Esc</kbd>
+            <kbd className="inline-flex items-center justify-center px-1.5 h-6 text-[10px] font-medium rounded-md border border-foreground/[0.06] bg-foreground/[0.02] text-muted-foreground/30">Esc</kbd>
             <span>Dismiss</span>
           </div>
-          <span className="w-[3px] h-[3px] rounded-full bg-foreground/6" />
           <div className="flex items-center gap-1.5">
-            <kbd className="inline-flex items-center justify-center px-1.5 h-5 text-[9px] font-medium rounded border border-foreground/[0.06] bg-foreground/[0.02] text-muted-foreground/30">Tab</kbd>
-            <span>Autocomplete</span>
+            <kbd className="inline-flex items-center justify-center px-1.5 h-6 text-[10px] font-medium rounded-md border border-foreground/[0.06] bg-foreground/[0.02] text-muted-foreground/30">Tab</kbd>
+            <span>Complete</span>
           </div>
-        </motion.div>
+        </div>
 
         {/* Divider */}
-        <div className="w-12 h-[1px] bg-gradient-to-r from-transparent via-foreground/6 to-transparent" />
+        <div className="w-10 h-[1px] bg-foreground/[0.05]" />
 
-        {/* Logo + nav row */}
-        <div className="flex flex-col items-center gap-6 sm:flex-row sm:gap-10">
-          <Link href="/" className="flex items-center gap-2 group">
+        {/* Logo + nav */}
+        <div className="flex flex-col items-center gap-5 sm:flex-row sm:gap-8">
+          <Link href="/" className="flex items-center gap-2 group touch-reset">
             <Image
               src="/logo.png"
               alt="SeekEngine"
-              width={16}
-              height={16}
-              className="opacity-25 group-hover:opacity-50 transition-opacity duration-300"
+              width={14}
+              height={14}
+              className="opacity-20 group-hover:opacity-40 transition-opacity duration-300"
             />
-            <span className="font-display text-xs tracking-tight text-muted-foreground/25 group-hover:text-muted-foreground/50 transition-colors duration-300">
+            <span className="font-display text-xs tracking-tight text-muted-foreground/20 group-hover:text-muted-foreground/40 transition-colors duration-300">
               SeekEngine
             </span>
           </Link>
 
-          <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3 sm:gap-6">
+          <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:gap-5">
             {[
               { label: 'Home', href: '/' },
               { label: 'About', href: '/about' },
@@ -98,7 +84,7 @@ export default function ResultsFooter() {
                 href={link.href}
                 target={link.external ? '_blank' : undefined}
                 rel={link.external ? 'noopener noreferrer' : undefined}
-                className="text-[10px] font-medium uppercase tracking-[0.1em] text-muted-foreground/20 transition-all duration-300 hover:text-foreground/50 hover:tracking-[0.14em] sm:tracking-[0.12em] sm:hover:tracking-[0.18em]"
+                className="text-[10px] font-medium uppercase tracking-[0.1em] text-muted-foreground/20 transition-colors duration-200 hover:text-foreground/50"
               >
                 {link.label}
               </a>
@@ -107,11 +93,8 @@ export default function ResultsFooter() {
         </div>
 
         {/* Copyright */}
-        <div className="flex flex-col items-center gap-1.5">
-          <p className="text-center text-[8px] uppercase tracking-[0.22em] text-muted-foreground/12 sm:tracking-[0.3em]">
-            Sensed synthesis of human intent
-          </p>
-          <p className="text-center text-[9px] uppercase tracking-[0.12em] text-muted-foreground/18 sm:tracking-[0.15em]">
+        <div className="flex flex-col items-center gap-1">
+          <p className="text-center text-[9px] uppercase tracking-[0.15em] text-muted-foreground/15">
             &copy; {new Date().getFullYear()} SeekEngine &middot; All rights reserved
           </p>
         </div>
