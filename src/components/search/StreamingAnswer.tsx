@@ -403,7 +403,7 @@ function ReasoningPanel({
 
   return (
     <motion.div 
-      className="mb-4 rounded-xl border border-foreground/[0.07] bg-background/75 px-3.5 py-3 sm:px-4 sm:py-3.5"
+      className="mb-3 rounded-lg border border-foreground/[0.07] bg-background/75 px-3 py-2.5 sm:mb-4 sm:rounded-xl sm:px-4 sm:py-3.5"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
@@ -432,7 +432,7 @@ function ReasoningPanel({
             <AnimatePresence mode="wait" initial={false}>
               <motion.p
                 key={`${state}:${activeStep}:${thoughtText}`}
-                className="text-[12px] leading-relaxed text-foreground/82"
+                className="text-[11px] leading-relaxed text-foreground/82 sm:text-[12px]"
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
@@ -535,9 +535,9 @@ function ModelBadge({
   const tierStyle = getTierStyles(tier)
   
   return (
-    <div className="flex items-center gap-3 mt-7 pt-5 flex-wrap border-t border-foreground/5 animate-fade-in">
+    <div className="flex items-center gap-2 mt-5 pt-4 flex-wrap border-t border-foreground/5 animate-fade-in sm:gap-3 sm:mt-7 sm:pt-5">
       {cached && (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-wide bg-amber-500/8 text-amber-600 dark:text-amber-400 border border-amber-500/15 backdrop-blur-sm">
+        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[9px] font-semibold uppercase tracking-wide bg-amber-500/8 text-amber-600 dark:text-amber-400 border border-amber-500/15 sm:gap-1.5 sm:px-3 sm:py-1.5 sm:rounded-lg sm:text-[10px]">
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
@@ -545,16 +545,16 @@ function ModelBadge({
         </span>
       )}
       
-      <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-wide border backdrop-blur-sm ${tierStyle.className}`}>
+      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[9px] font-semibold uppercase tracking-wide border sm:gap-1.5 sm:px-3 sm:py-1.5 sm:rounded-lg sm:text-[10px] ${tierStyle.className}`}>
         {tier}
       </span>
       
-      <span className="text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wide">
+      <span className="text-[9px] font-medium text-muted-foreground/70 uppercase tracking-wide sm:text-[10px]">
         {cached ? 'via' : 'by'}{' '}
         <span className="text-foreground/60 font-semibold">{modelHuman}</span>
       </span>
       
-      <span className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wide ml-auto">
+      <span className="text-[9px] font-medium text-muted-foreground/50 uppercase tracking-wide ml-auto sm:text-[10px]">
         {cached ? '⚡ Instant' : `⏱ ${latencyMs}ms`}
         {!cached && attempts > 1 && <span className="ml-1 text-muted-foreground/40">• {attempts} attempts</span>}
       </span>
@@ -713,11 +713,11 @@ export function StreamingAnswer({
             {sources && sources.length > 0 && (
               <Sources sources={sources} className="mb-6" />
             )}
-            <Response className="min-h-[100px]">
+            <Response className="min-h-[60px] sm:min-h-[100px]">
               {answer}
             </Response>
 
-            <div className="flex items-center justify-between flex-wrap gap-4 mt-6">
+            <div className="flex items-center justify-between flex-wrap gap-3 mt-4 sm:gap-4 sm:mt-6">
               {metadata && (
                 <MemoizedModelBadge 
                   modelHuman={metadata.modelHuman}
@@ -735,7 +735,7 @@ export function StreamingAnswer({
                   onRegenerate?.()
                   startCurrentStream()
                 }}
-                className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-wide transition-all text-muted-foreground/70 hover:text-primary active:scale-95 group/regen"
+                className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide transition-all text-muted-foreground/70 hover:text-primary active:scale-95 group/regen sm:gap-2.5 sm:text-xs"
                 title="Regenerate answer"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover/regen:rotate-180 transition-transform duration-700">
@@ -750,14 +750,14 @@ export function StreamingAnswer({
       case 'error':
         return (
           <motion.div 
-            className="flex flex-col gap-3 p-4 rounded-xl bg-destructive/5 border border-destructive/20"
+            className="flex flex-col gap-2.5 p-3 rounded-lg bg-destructive/5 border border-destructive/20 sm:gap-3 sm:p-4 sm:rounded-xl"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 shrink-0 text-destructive mt-0.5" />
-              <span className="text-sm font-medium text-destructive flex-1">{error || 'Failed to generate answer'}</span>
+            <div className="flex items-start gap-2 sm:gap-3">
+              <AlertCircle className="w-4 h-4 shrink-0 text-destructive mt-0.5 sm:w-5 sm:h-5" />
+              <span className="text-xs font-medium text-destructive flex-1 sm:text-sm">{error || 'Failed to generate answer'}</span>
             </div>
             <button 
               onClick={() => {
@@ -766,9 +766,9 @@ export function StreamingAnswer({
                 setRunCycle((current) => current + 1)
                 startCurrentStream()
               }}
-              className="w-full px-3 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg transition-all active:scale-95 bg-destructive/10 border border-destructive/20 text-destructive hover:bg-destructive/15 flex items-center justify-center gap-2"
+              className="w-full px-3 py-2 text-[10px] font-semibold uppercase tracking-wide rounded-md transition-all active:scale-95 bg-destructive/10 border border-destructive/20 text-destructive hover:bg-destructive/15 flex items-center justify-center gap-1.5 sm:text-xs sm:gap-2 sm:rounded-lg"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
+              <RefreshCw className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               Try Again
             </button>
           </motion.div>

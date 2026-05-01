@@ -364,6 +364,15 @@ html.theme-transition *, html.theme-transition *::before, html.theme-transition 
       rgba(0, 0, 0, var(--fb, 0))
     );
   }
+
+  /* Hide scrollbar for horizontal scroll containers on mobile */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /*
