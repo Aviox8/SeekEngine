@@ -181,6 +181,24 @@
       "skillPath": "skills/nextjs-best-practices/SKILL.md",
       "computedHash": "3c40a7ea604cdbee772bd7b3efe59aafd6fedf62252a76d43b9f835a6adc92cd"
     },
+    "open-responses": {
+      "source": "openrouterteam/skills",
+      "sourceType": "github",
+      "skillPath": "open-responses/SKILL.md",
+      "computedHash": "e458c2309c7f7555791825cc610d7c1a92d0362e10889996863cfa4207a70d04"
+    },
+    "openrouter-models": {
+      "source": "openrouterteam/skills",
+      "sourceType": "github",
+      "skillPath": "skills/openrouter-models/SKILL.md",
+      "computedHash": "d092939fc27e87542f2ccff60118abe171945d54575f8407786c258b35e64326"
+    },
+    "openrouter-typescript-sdk": {
+      "source": "openrouterteam/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/typescript-sdk/SKILL.md",
+      "computedHash": "d6effb9c0f5f5361ed95976936845fd3c9e8eeef53f9214aa2e82845c708fd3f"
+    },
     "planning-with-files": {
       "source": "sickn33/antigravity-awesome-skills",
       "sourceType": "github",
