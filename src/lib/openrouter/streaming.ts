@@ -17,6 +17,7 @@ import { AITask as AITaskEnum } from './types'
 import { OPENROUTER_BASE_URL, TASK_POLICIES, MAX_MODEL_FAILURES, BASE_SYSTEM_PROMPT } from './config'
 import { humanizeModel, classifyModel, modelFailures, logTelemetry, getModelsForTask } from './models'
 import { MAX_CONCURRENT_MODELS, SYSTEMIC_FAILURE_THRESHOLD_MS } from '../constants'
+import type { SearchContextItem } from '../search-context'
 
 // ── Streaming AI Caller (SSE-Compatible) ─────────────────────────────────────
 /**
@@ -37,7 +38,8 @@ import { MAX_CONCURRENT_MODELS, SYSTEMIC_FAILURE_THRESHOLD_MS } from '../constan
  */
 export async function* streamOpenRouter(
   messages: ChatMessage[],
-  task: AITask = AITaskEnum.ANSWER
+  task: AITask = AITaskEnum.ANSWER,
+  abortSignal?: AbortSignal
 ): AsyncGenerator<StreamEvent> {
   const apiKeys = getOpenRouterApiKeys()
   if (apiKeys.length === 0) {
@@ -92,8 +94,6 @@ export async function* streamOpenRouter(
 
   let attempts = 0
 
-  yield { type: 'thinking', content: 'Connecting to AI...' }
-
   // ── Model Connection Handler ──────────────────────────────────────────────────
   const connectToModel = async (
     model: string,
@@ -109,6 +109,7 @@ export async function* streamOpenRouter(
     latency: number
     controller: AbortController
     tier: ModelTier
+    detachAbort: () => void
   }> => {
     const tier = classifyModel(model)
     const controller = externalController || new AbortController()
@@ -119,6 +120,14 @@ export async function* streamOpenRouter(
     const connectTimeoutMs = Math.max(1200, Math.min(policy.maxLatency, remainingGlobalBudget))
     const connectTimeoutId = setTimeout(() => controller.abort('MODEL_TIMEOUT'), connectTimeoutMs)
     let ttftTimeoutId: ReturnType<typeof setTimeout> | undefined
+    const externalAbortHandler = () => controller.abort('CLIENT_ABORT')
+    const detachAbort = () => abortSignal?.removeEventListener('abort', externalAbortHandler)
+
+    if (abortSignal?.aborted) {
+      controller.abort('CLIENT_ABORT')
+    } else if (abortSignal) {
+      abortSignal.addEventListener('abort', externalAbortHandler, { once: true })
+    }
 
     try {
       const response = await fetch(
@@ -228,10 +237,12 @@ export async function* streamOpenRouter(
         firstToken,
         latency: Date.now() - modelStartTime,
         controller,
-        tier
+        tier,
+        detachAbort,
       }
 
     } catch (err) {
+      detachAbort()
       if (ttftTimeoutId) clearTimeout(ttftTimeoutId)
       clearTimeout(connectTimeoutId)
 
@@ -243,7 +254,9 @@ export async function* streamOpenRouter(
         abortReason === 'RACE_LOST' ||
         abortReason === 'BATCH_ABORT' ||
         abortReason === 'GLOBAL_TIMEOUT_ABORT' ||
-        abortReason === 'WINNER_CLEANUP'
+        abortReason === 'WINNER_CLEANUP' ||
+        abortReason === 'CLIENT_ABORT' ||
+        abortReason === 'STREAM_CLOSED'
       const isTimeoutAbort = abortReason === 'MODEL_TIMEOUT'
       const errorMsg = isTimeoutAbort ? 'MODEL_TIMEOUT' : rawErrorMsg
 
@@ -286,6 +299,11 @@ export async function* streamOpenRouter(
 
   keyLoop:
   for (let keyIndex = 0; keyIndex < apiKeys.length; keyIndex++) {
+    if (abortSignal?.aborted) {
+      logger.debug('OpenRouter stream aborted before model race began')
+      return
+    }
+
     const apiKey = apiKeys[keyIndex]
     const keyLabel = `${keyIndex + 1}/${apiKeys.length}`
     const keyStartTime = Date.now()
@@ -293,6 +311,11 @@ export async function* streamOpenRouter(
     logger.info(`Starting model race using OpenRouter key ${keyLabel}`, { raceBatchSize })
 
     for (let i = 0; i < models.length; i += raceBatchSize) {
+      if (abortSignal?.aborted) {
+        logger.debug('OpenRouter stream aborted during model race setup')
+        return
+      }
+
       const batch = models.slice(i, i + raceBatchSize)
       attempts += batch.length
 
@@ -393,6 +416,10 @@ export async function* streamOpenRouter(
           }
 
           while (true) {
+            if (abortSignal?.aborted) {
+              break
+            }
+
             const { done, value } = await reader.read()
             if (done) break
 
@@ -401,6 +428,7 @@ export async function* streamOpenRouter(
           }
         } finally {
           try {
+            winner.detachAbort()
             await reader.cancel()
             winner.controller.abort('WINNER_CLEANUP')
           } catch {
@@ -452,6 +480,11 @@ export async function* streamOpenRouter(
         const messages = aggregateErrors.map(err =>
           err instanceof Error ? err.message : String(err)
         )
+
+        if (abortSignal?.aborted) {
+          logger.debug('OpenRouter stream aborted during model batch')
+          return
+        }
 
         if (messages.some(msg => msg === 'GLOBAL_TIMEOUT')) {
           if (keyIndex < apiKeys.length - 1) {
@@ -539,83 +572,133 @@ export async function* streamOpenRouter(
  */
 export function createStreamingAnswerResponse(
   query: string,
-  context?: { title: string; snippet: string; link: string }[],
+  contextOrLoader?: SearchContextItem[] | (() => Promise<SearchContextItem[]>),
   abortSignal?: AbortSignal
 ): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder()
-
-  // Build system prompt with search context
-  const contextText =
-    context
-      ?.map((r, i) => `[${i + 1}] "${r.title}": ${r.snippet}`)
-      .join('\n') || ''
-
-  const messages: ChatMessage[] = [
-    {
-      role: 'system',
-      content: contextText 
-        ? `${BASE_SYSTEM_PROMPT}\n\nSearch Context:\n${contextText}` 
-        : BASE_SYSTEM_PROMPT,
-    },
-    {
-      role: 'user',
-      content: query,
-    },
-  ]
-
   let isCancelled = false
+  const requestAbortController = new AbortController()
+
+  const cancelStream = () => {
+    if (isCancelled) {
+      return
+    }
+
+    isCancelled = true
+    if (!requestAbortController.signal.aborted) {
+      requestAbortController.abort('CLIENT_ABORT')
+    }
+    logger.debug('Streaming cancelled by client')
+  }
+
+  const buildMessages = (context: SearchContextItem[]): ChatMessage[] => {
+    const contextText = context
+      .map((result, index) => `[${index + 1}] "${result.title}": ${result.snippet}`)
+      .join('\n')
+
+    return [
+      {
+        role: 'system',
+        content: contextText
+          ? `${BASE_SYSTEM_PROMPT}\n\nSearch Context:\n${contextText}`
+          : BASE_SYSTEM_PROMPT,
+      },
+      {
+        role: 'user',
+        content: query,
+      },
+    ]
+  }
+
+  const buildFaviconUrl = (url: string): string | undefined => {
+    try {
+      const hostname = new URL(url).hostname
+      return hostname
+        ? `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`
+        : undefined
+    } catch {
+      return undefined
+    }
+  }
 
   return new ReadableStream({
     async start(controller) {
-      // Send grounding sources metadata immediately before starting AI stream
-      if (context && context.length > 0) {
-        const sourcesEvent: StreamEvent = {
-          type: 'sources',
-          sources: context.map(r => ({
-            title: r.title,
-            url: r.link,
-            favicon: `https://www.google.com/s2/favicons?domain=${new URL(r.link).hostname}&sz=32`
-          }))
+      const onAbort = () => cancelStream()
+      const enqueueEvent = (event: StreamEvent) => {
+        if (isCancelled) {
+          return false
         }
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify(sourcesEvent)}\n\n`))
+
+        try {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`))
+          return true
+        } catch {
+          cancelStream()
+          return false
+        }
       }
 
-      // Handle client cancellation (e.g., user navigates away)
-      abortSignal?.addEventListener('abort', () => {
-        isCancelled = true
-        logger.debug('Streaming cancelled by client')
-        try {
-          controller.close()
-        } catch {
-          // Already closed
-        }
-      })
+      if (abortSignal?.aborted) {
+        cancelStream()
+      } else {
+        abortSignal?.addEventListener('abort', onAbort, { once: true })
+      }
 
       try {
-        // Stream events from model racing engine
-        for await (const event of streamOpenRouter(messages, AITaskEnum.ANSWER)) {
-          if (isCancelled) break
-          
-          // Format as NDJSON (newline-delimited JSON) for SSE
-          const data = `data: ${JSON.stringify(event)}\n\n`
-          controller.enqueue(encoder.encode(data))
+        if (!enqueueEvent({ type: 'thinking', content: 'Gathering sources...' })) {
+          return
         }
 
-        if (!isCancelled) {
-          controller.close()
+        const context = typeof contextOrLoader === 'function'
+          ? await contextOrLoader()
+          : (contextOrLoader ?? [])
+
+        if (isCancelled) {
+          return
+        }
+
+        if (context.length > 0) {
+          const sourcesEvent: StreamEvent = {
+            type: 'sources',
+            sources: context.map((result) => ({
+              title: result.title,
+              url: result.link,
+              favicon: buildFaviconUrl(result.link),
+            })),
+          }
+          if (!enqueueEvent(sourcesEvent)) {
+            return
+          }
+        }
+
+        const messages = buildMessages(context)
+
+        // Stream events from model racing engine
+        for await (const event of streamOpenRouter(messages, AITaskEnum.ANSWER, requestAbortController.signal)) {
+          if (!enqueueEvent(event)) {
+            break
+          }
         }
       } catch (error) {
-        logger.error('Streaming error', error instanceof Error ? error.message : String(error))
-        
         if (!isCancelled) {
-          const errorEvent = { 
-            type: 'error', 
-            error: (error as Error).message || 'Stream processing failed' 
-          }
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify(errorEvent)}\n\n`))
+          logger.error('Streaming error', error instanceof Error ? error.message : String(error))
+          enqueueEvent({
+            type: 'error',
+            error: (error as Error).message || 'Stream processing failed',
+          })
+        }
+      } finally {
+        abortSignal?.removeEventListener('abort', onAbort)
+        if (!requestAbortController.signal.aborted) {
+          requestAbortController.abort('STREAM_CLOSED')
+        }
+        if (!isCancelled) {
           controller.close()
         }
       }
+    },
+    cancel() {
+      cancelStream()
     },
   })
 }

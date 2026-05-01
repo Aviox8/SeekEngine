@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server'
-import { getWebSearchResults } from '@/lib/google-search'
-import { getSerpResults } from '@/lib/serpapi'
 import { checkRateLimit, getClientIP, RATE_LIMITS, rateLimitResponse } from '@/lib/rate-limit'
 import { sanitizeSearchQuery, isValidUTF8 } from '@/lib/sanitize'
 import { logger } from '@/lib/logger'
 import { createErrorResponse, Errors } from '@/lib/errors'
-import { validateSearchQuery } from '@/lib/validation'
-import { TIME_RANGES, type TimeRangeCode } from '@/lib/constants'
+import { validateSearchQuery, validateTimeRange } from '@/lib/validation'
+import { getSearchContext } from '@/lib/search-context'
 
 export const runtime = 'edge'
 
@@ -77,62 +75,27 @@ export async function GET(request: Request) {
     })
 
     // Parse optional time filter
-    const timeRange = searchParams.get('time') as TimeRangeCode | null || undefined
-    
-    // IMPROVED: Single source of truth for time ranges
-    // Previously: Maintained separate tbsMap and dateRestrictMap, causing duplication and divergence
-    // Now: All time filters in one place (TIME_RANGES constant)
-    let tbs: string | undefined
-    let dateRestrict: string | undefined
-    
-    if (timeRange && timeRange in TIME_RANGES) {
-      const range = TIME_RANGES[timeRange as TimeRangeCode]
-      tbs = range.tbs
-      dateRestrict = range.dateRestrict
-    } else if (timeRange) {
-      logger.warn('Invalid time range parameter', { timeRange })
+    const timeValidation = validateTimeRange(searchParams.get('time'))
+    if (!timeValidation.valid) {
+      logger.warn('Invalid time range parameter', { timeRange: searchParams.get('time') })
       const { error, status } = createErrorResponse(
-        Errors.invalidQuery(`Invalid time range: ${timeRange}. Valid values: ${Object.keys(TIME_RANGES).join(', ')}`)
+        Errors.invalidQuery(timeValidation.error)
       )
       return NextResponse.json(error, { status })
     }
+    const timeRange = timeValidation.timeRange
 
-    // Try SerpAPI first, fall back to Google Custom Search
-    let results = await getSerpResults(sanitizedQuery, tbs)
-    
-    if (!results || results.length === 0) {
-      logger.debug('SerpAPI returned no results, trying Google Custom Search')
-      const webResults = await getWebSearchResults(sanitizedQuery, 1, dateRestrict)
-      
-      // Normalize to consistent format
-      results = webResults.map(r => ({
-        title: r.title,
-        link: r.link,
-        snippet: r.snippet,
-        source: r.source || r.displayLink || ''
-      }))
-    } else {
-      // If SerpAPI has results, try to supplement with Google Custom Search (limit to avoid duplicates)
-      const webResults = await getWebSearchResults(sanitizedQuery, 1, dateRestrict)
-      const existingLinks = new Set(results.map(r => r.link))
-      
-      // Add unique results from Google that aren't in SerpAPI results
-      const uniqueWebResults = webResults
-        .filter(r => !existingLinks.has(r.link))
-        .slice(0, 2) // Only add up to 2 supplementary results
-        .map(r => ({
-          title: r.title,
-          link: r.link,
-          snippet: r.snippet,
-          source: r.source || r.displayLink || ''
-        }))
-      
-      results = [...results, ...uniqueWebResults]
-    }
+    const { results, provider, cached } = await getSearchContext(
+      sanitizedQuery,
+      timeRange,
+      request.signal
+    )
 
     logger.info('Search completed successfully', { 
       query: sanitizedQuery, 
-      resultCount: results.length 
+      resultCount: results.length,
+      provider,
+      cached,
     })
     endTimer()
 
