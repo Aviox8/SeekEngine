@@ -54,39 +54,44 @@ export const MODEL_TIER_PATTERNS: Record<ModelTier, RegExp[]> = {
     /nano/i,
     /3b-instruct/i,
     /qwen3-4b/i,
-    /trinity-mini/i,
     /lfm-.*instruct/i,
-    /step-.*flash/i,
     /glm-.*air/i,
   ],
   balanced: [
+    /owl-alpha/i,
+    /hy3-preview/i,
+    /gemma-4-26b/i,
+    /gemma-4-31b/i,
     /mistral.*small/i,
     /gemma-3-12b/i,
     /gemma-3-27b/i,
     /dolphin-mistral/i,
-    /devstral/i,
     /deepseek-chat/i,
+    /nemotron-3-nano-omni/i,
+    /nemotron-3-nano/i,
+    /minimax-m2\.5/i,
   ],
   heavy: [
     /70b/i,
     /80b/i,
     /120b/i,
     /405b/i,
+    /1t/i,
     /think/i,
-    /trinity-large/i,
     /hunter-alpha/i,
     /healer-alpha/i,
     /gpt-oss/i,
     /hermes.*405b/i,
     /nemotron-3-super/i,
     /qwen3-next/i,
+    /ling-2\.6-1t/i,
   ],
   code: [
     /coder/i,
-    /devstral/i,
     /deepseek.*code/i,
     /qwen.*coder/i,
     /codellama/i,
+    /laguna/i,
   ],
 }
 
@@ -104,73 +109,50 @@ export const MODEL_TIER_PATTERNS: Record<ModelTier, RegExp[]> = {
  * 4. Use model ID from OpenRouter (e.g., "meta-llama/llama-3.3-70b-instruct:free")
  * 5. Test in staging environment before deploying
  * 
- * Last Updated: 2026-03-27
- * Total Models: 25 (12 fast, 4 balanced, 8 heavy, 1 code)
+ * Last Updated: 2026-05-02
+ * Source: https://openrouter.ai/models?max_price=0&output_modalities=text
+ * Total Models: 29 (8 fast, 10 balanced, 8 heavy, 3 code)
  */
 export const STATIC_FALLBACK_MODELS: Record<ModelTier, string[]> = {
   fast: [
-    // Google Gemma: Ultra-fast 2-4B parameter models
-    'google/gemma-3n-e4b-it:free',        // Gemma 3N 4B — Best speed/quality balance for fast tier
-    'google/gemma-3n-e2b-it:free',        // Gemma 3N 2B — Smallest, near instant  
-    'google/gemma-3-4b-it:free',          // Gemma 3 4B — Higher quality than 3N, still very fast
-    
-    // NVIDIA Nemotron: Efficient small models
-    'nvidia/nemotron-nano-12b-v2-vl:free',  // Nemotron Nano 12B VL — Lightweight multimodal
-    'nvidia/nemotron-nano-9b-v2:free',      // Nemotron Nano 9B — Small but capable
-    'nvidia/nemotron-3-nano-30b-a3b:free',  // Nemotron 3 Nano 30B — Larger fast model, good quality
-    
-    // Meta LLaMA: Open foundation models
-    'meta-llama/llama-3.2-3b-instruct:free', // LLaMA 3.2 3B — Tiny but surprisingly good
-    
-    // Qwen: Alibaba's efficient models
-    'qwen/qwen3-4b:free',                   // Qwen3 4B — Fast Mandarin/English model
-    
-    // Specialized fast models
-    'arcee-ai/trinity-mini:free',           // Trinity Mini — Optimized for speed
-    'stepfun/step-3.5-flash:free',          // Step 3.5 Flash — StepFun's quick model
-    'liquid/lfm-2.5-1.2b-instruct:free',    // LFM 2.5 1.2B — Extremely lightweight
-    'z-ai/glm-4.5-air:free',                // GLM 4.5 Air — Compact Chinese variant
+    'google/gemma-3n-e4b-it:free',
+    'google/gemma-3n-e2b-it:free',
+    'google/gemma-3-4b-it:free',
+    'meta-llama/llama-3.2-3b-instruct:free',
+    'nvidia/nemotron-nano-9b-v2:free',
+    'nvidia/nemotron-nano-12b-v2-vl:free',
+    'liquid/lfm-2.5-1.2b-instruct:free',
+    'z-ai/glm-4.5-air:free',
   ],
   
   balanced: [
-    // Mistral: Strong mid-size performers
-    'mistralai/mistral-small-3.1-24b-instruct:free', // Mistral Small 24B — Best balanced choice
-    
-    // Google Gemma: Mid-size instruction models
-    'google/gemma-3-12b-it:free',           // Gemma 3 12B — Good quality, still responsive
-    'google/gemma-3-27b-it:free',           // Gemma 3 27B — High quality responses, slightly slower
-    
-    // Cognitive Computations: Mistral variant
-    'cognitivecomputations/dolphin-mistral-24b-venice-edition:free', // Dolphin Mistral — Great for creative/long-form
+    'openrouter/owl-alpha',
+    'tencent/hy3-preview:free',
+    'google/gemma-3-12b-it:free',
+    'google/gemma-3-27b-it:free',
+    'google/gemma-4-26b-a4b-it:free',
+    'google/gemma-4-31b-it:free',
+    'cognitivecomputations/dolphin-mistral-24b-venice-edition:free',
+    'nvidia/nemotron-3-nano-30b-a3b:free',
+    'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+    'minimax/minimax-m2.5:free',
   ],
   
   heavy: [
-    // Meta LLaMA: Large foundation models
-    'meta-llama/llama-3.3-70b-instruct:free',        // LLaMA 3.3 70B — Strong general-purpose large model
-    
-    // NousResearch: State-of-the-art variants
-    'nousresearch/hermes-3-llama-3.1-405b:free',     // Hermes 3 LLaMA 405B — Extremely capable reasoning
-    
-    // NVIDIA Nemotron: High-capability models
-    'nvidia/nemotron-3-super-120b-a12b:free',        // Nemotron 3 Super 120B — Complex task specialist
-    
-    // OpenAI: GPT-OSS series (open weights)
-    'openai/gpt-oss-120b:free',                       // GPT-OSS 120B — Strong general performance
-    'openai/gpt-oss-20b:free',                        // GPT-OSS 20B — Lighter heavy-tier option
-    
-    // Qwen: Large advanced model
-    'qwen/qwen3-next-80b-a3b-instruct:free',         // Qwen3 Next 80B — Advanced reasoning capabilities
-    
-    // Arcee: Specialized large model
-    'arcee-ai/trinity-large-preview:free',           // Trinity Large — Premium performance tier
-    
-    // Liquid: Reasoning-enhanced model
-    'liquid/lfm-2.5-1.2b-thinking:free',             // LFM 2.5 1.2B Thinking — Extended reasoning with token budget
+    'meta-llama/llama-3.3-70b-instruct:free',
+    'nousresearch/hermes-3-llama-3.1-405b:free',
+    'nvidia/nemotron-3-super-120b-a12b:free',
+    'qwen/qwen3-next-80b-a3b-instruct:free',
+    'openai/gpt-oss-120b:free',
+    'openai/gpt-oss-20b:free',
+    'inclusionai/ling-2.6-1t:free',
+    'liquid/lfm-2.5-1.2b-thinking:free',
   ],
   
   code: [
-    // Qwen: Code-optimized model
-    'qwen/qwen3-coder:free', // Qwen3 Coder — Specialized for programming tasks
+    'qwen/qwen3-coder:free',
+    'poolside/laguna-xs.2:free',
+    'poolside/laguna-m.1:free',
   ],
 }
 

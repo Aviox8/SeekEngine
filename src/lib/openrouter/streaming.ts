@@ -18,6 +18,13 @@ import { OPENROUTER_BASE_URL, TASK_POLICIES, MAX_MODEL_FAILURES, BASE_SYSTEM_PRO
 import { humanizeModel, classifyModel, modelFailures, logTelemetry, getModelsForTask } from './models'
 import { MAX_CONCURRENT_MODELS, SYSTEMIC_FAILURE_THRESHOLD_MS } from '../constants'
 import type { SearchContextItem } from '../search-context'
+import {
+  getApiKeyPlan,
+  markApiKeyAuthFailed,
+  markApiKeyBillingFailed,
+  markApiKeyRateLimited,
+  markApiKeySuccess,
+} from './key-pool'
 
 // ── Streaming AI Caller (SSE-Compatible) ─────────────────────────────────────
 /**
@@ -47,6 +54,7 @@ export async function* streamOpenRouter(
     yield { type: 'error', error: 'No OpenRouter API key configured' }
     return
   }
+  const apiKeyPlan = getApiKeyPlan(apiKeys)
 
   const policy = TASK_POLICIES[task]
   const allModels = await getModelsForTask(task)
@@ -298,17 +306,20 @@ export async function* streamOpenRouter(
     : MAX_CONCURRENT_MODELS
 
   keyLoop:
-  for (let keyIndex = 0; keyIndex < apiKeys.length; keyIndex++) {
+  for (let keyIndex = 0; keyIndex < apiKeyPlan.length; keyIndex++) {
     if (abortSignal?.aborted) {
       logger.debug('OpenRouter stream aborted before model race began')
       return
     }
 
-    const apiKey = apiKeys[keyIndex]
-    const keyLabel = `${keyIndex + 1}/${apiKeys.length}`
+    const { key: apiKey, label: keyLabel, cooldownRemainingMs } = apiKeyPlan[keyIndex]!
     const keyStartTime = Date.now()
 
-    logger.info(`Starting model race using OpenRouter key ${keyLabel}`, { raceBatchSize })
+    logger.info(`Starting model race using OpenRouter key ${keyLabel}`, {
+      raceBatchSize,
+      cooledDown: cooldownRemainingMs > 0,
+      cooldownRemainingMs,
+    })
 
     for (let i = 0; i < models.length; i += raceBatchSize) {
       if (abortSignal?.aborted) {
@@ -367,6 +378,7 @@ export async function* streamOpenRouter(
           attempts,
           key: keyLabel,
         })
+        markApiKeySuccess(apiKey)
 
         yield {
           type: 'model_selected',
@@ -498,6 +510,7 @@ export async function* streamOpenRouter(
         }
 
         if (messages.some(msg => msg.startsWith('AUTH_ERROR_'))) {
+          markApiKeyAuthFailed(apiKey)
           if (keyIndex < apiKeys.length - 1) {
             logger.warn(`Authentication failed on key ${keyLabel}; trying next key`)
             continue keyLoop
@@ -509,6 +522,7 @@ export async function* streamOpenRouter(
         }
 
         if (messages.some(msg => msg === 'BILLING_REQUIRED')) {
+          markApiKeyBillingFailed(apiKey)
           if (keyIndex < apiKeys.length - 1) {
             logger.warn(`Billing/credits issue on key ${keyLabel}; trying next key`)
             continue keyLoop
@@ -521,6 +535,7 @@ export async function* streamOpenRouter(
 
         const allRateLimited = messages.length > 0 && messages.every(msg => msg === 'RATE_LIMITED' || msg.includes('HTTP 429'))
         if (allRateLimited) {
+          markApiKeyRateLimited(apiKey)
           if (keyIndex < apiKeys.length - 1) {
             const backoffMs = 250 + (keyIndex * 200) + Math.floor(Math.random() * 250)
             logger.warn(`Rate limited across raced models on key ${keyLabel}; trying next key after ${backoffMs}ms backoff`)

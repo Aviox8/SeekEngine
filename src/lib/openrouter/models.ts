@@ -23,6 +23,8 @@ const MODEL_NAME_REGISTRY = [
   // Google Gemma models
   { pattern: /gemma-3n-e2b/i, name: 'Gemma 3N 2B' },
   { pattern: /gemma-3n-e4b/i, name: 'Gemma 3N 4B' },
+  { pattern: /gemma-4-26b-a4b/i, name: 'Gemma 4 26B A4B' },
+  { pattern: /gemma-4-31b/i, name: 'Gemma 4 31B' },
   { pattern: /gemma-3-27b/i, name: 'Gemma 3 27B' },
   { pattern: /gemma-3-12b/i, name: 'Gemma 3 12B' },
   { pattern: /gemma-3-4b/i, name: 'Gemma 3 4B' },
@@ -47,6 +49,10 @@ const MODEL_NAME_REGISTRY = [
   { pattern: /qwen3-next-80b/i, name: 'Qwen3 Next 80B' },
   { pattern: /qwen3-4b/i, name: 'Qwen3 4B' },
   { pattern: /qwen/i, name: 'Qwen' },
+
+  // Poolside models
+  { pattern: /laguna-xs\.?2/i, name: 'Laguna XS.2' },
+  { pattern: /laguna-m\.?1/i, name: 'Laguna M.1' },
   
   // DeepSeek models
   { pattern: /deepseek-r1/i, name: 'DeepSeek R1' },
@@ -55,6 +61,7 @@ const MODEL_NAME_REGISTRY = [
   
   // NVIDIA Nemotron models
   { pattern: /nemotron-3-super/i, name: 'Nemotron 3 Super' },
+  { pattern: /nemotron-3-nano-omni/i, name: 'Nemotron 3 Nano Omni' },
   { pattern: /nemotron-3-nano/i, name: 'Nemotron 3 Nano' },
   { pattern: /nemotron-nano/i, name: 'Nemotron Nano' },
   { pattern: /nemotron/i, name: 'Nemotron' },
@@ -69,9 +76,13 @@ const MODEL_NAME_REGISTRY = [
   // OpenRouter models
   { pattern: /hunter-alpha/i, name: 'Hunter Alpha' },
   { pattern: /healer-alpha/i, name: 'Healer Alpha' },
+  { pattern: /owl-alpha/i, name: 'Owl Alpha' },
   
   // Other notable models
   { pattern: /hermes.*405b/i, name: 'Hermes 405B' },
+  { pattern: /ling-2\.6-1t/i, name: 'Ling 2.6 1T' },
+  { pattern: /hy3-preview/i, name: 'Hy3 Preview' },
+  { pattern: /minimax-m2\.5/i, name: 'MiniMax M2.5' },
   { pattern: /trinity-large/i, name: 'Trinity Large' },
   { pattern: /trinity/i, name: 'Trinity' },
   { pattern: /gpt-oss-120b/i, name: 'GPT-OSS 120B' },
@@ -134,14 +145,22 @@ function isFree(model: OpenRouterModel): boolean {
 }
 
 function supportsText(model: OpenRouterModel): boolean {
-  return model.architecture?.output_modalities?.includes('text') ?? false
+  const outputModalities = model.architecture?.output_modalities ?? []
+  return outputModalities.length === 1 && outputModalities[0] === 'text'
+}
+
+function acceptsTextInput(model: OpenRouterModel): boolean {
+  return model.architecture?.input_modalities?.includes('text') ?? false
 }
 
 /** Filter out meta-routers (e.g. openrouter/free) that would cause double-routing */
 const EXCLUDED_MODEL_IDS = new Set(['openrouter/free'])
+const EXCLUDED_MODEL_PATTERNS = [
+  /ocr/i,
+] as const
 
 function isUsableModel(model: OpenRouterModel): boolean {
-  return !EXCLUDED_MODEL_IDS.has(model.id)
+  return !EXCLUDED_MODEL_IDS.has(model.id) && !EXCLUDED_MODEL_PATTERNS.some((pattern) => pattern.test(model.id))
 }
 
 // ── Model Health Memory ──────────────────────────────────────────────────────
@@ -215,7 +234,11 @@ export async function getModelsByTier(): Promise<Record<ModelTier, string[]>> {
     const models: OpenRouterModel[] = data?.data ?? []
     logger.debug(`Fetched ${models.length} raw models from OpenRouter`)
 
-    const freeTextModels = models.filter(isFree).filter(supportsText).filter(isUsableModel)
+    const freeTextModels = models
+      .filter(isFree)
+      .filter(acceptsTextInput)
+      .filter(supportsText)
+      .filter(isUsableModel)
     logger.debug(`Found ${freeTextModels.length} free text-capable models`)
 
     const tieredModels: Record<ModelTier, string[]> = {
