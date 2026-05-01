@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod'
+import { TIME_RANGES, type TimeRangeCode } from './constants'
 
 // Search query validation
 export const searchQuerySchema = z.object({
@@ -55,19 +56,44 @@ export function validateSearchQuery(searchParams: URLSearchParams): {
   query?: string
   error?: string
 } {
-  const q = searchParams.get('q')
-  
+  return validateSearchQueryValue(searchParams.get('q'))
+}
+
+export function validateSearchQueryValue(q: string | null | undefined): {
+  valid: boolean
+  query?: string
+  error?: string
+} {
   if (!q || q.trim().length === 0) {
     return { valid: false, error: 'Query is required' }
   }
-  
+
   if (q.length > 500) {
     return { valid: false, error: 'Query too long (max 500 characters)' }
   }
-  
+
   if (q.trim().length < 2) {
     return { valid: false, error: 'Query must be at least 2 characters' }
   }
-  
+
   return { valid: true, query: q.trim() }
+}
+
+export function validateTimeRange(value: string | null | undefined): {
+  valid: boolean
+  timeRange?: TimeRangeCode
+  error?: string
+} {
+  if (!value) {
+    return { valid: true }
+  }
+
+  if (value in TIME_RANGES) {
+    return { valid: true, timeRange: value as TimeRangeCode }
+  }
+
+  return {
+    valid: false,
+    error: `Invalid time range: ${value}. Valid values: ${Object.keys(TIME_RANGES).join(', ')}`,
+  }
 }

@@ -18,6 +18,24 @@ interface RateLimitEntry {
 
 const store = new Map<string, RateLimitEntry>()
 let lastCleanup = Date.now()
+const TRUSTED_IP_HEADERS = [
+  'x-vercel-forwarded-for',
+  'cf-connecting-ip',
+  'fly-client-ip',
+  'fastly-client-ip',
+  'true-client-ip',
+] as const
+
+function extractIpCandidate(headerValue: string | null): string | null {
+  if (!headerValue) return null
+
+  const candidate = headerValue.split(',')[0]?.trim()
+  if (!candidate) return null
+
+  const isIPv4 = /^(?:\d{1,3}\.){3}\d{1,3}$/.test(candidate)
+  const isIPv6 = /^[a-f0-9:]+$/i.test(candidate) && candidate.includes(':')
+  return isIPv4 || isIPv6 ? candidate : null
+}
 
 /**
  * Cleanup expired entries and maintain memory limits
@@ -113,12 +131,19 @@ export function checkRateLimit(
  * @returns Client IP address or 'unknown'
  */
 export function getClientIP(request: Request): string {
-  const forwarded = request.headers.get('x-forwarded-for')
-  if (forwarded) return forwarded.split(',')[0].trim()
-  
-  const realIp = request.headers.get('x-real-ip')
-  if (realIp) return realIp
-  
+  for (const header of TRUSTED_IP_HEADERS) {
+    const candidate = extractIpCandidate(request.headers.get(header))
+    if (candidate) return candidate
+  }
+
+  if (process.env.NODE_ENV !== 'production') {
+    const forwarded = extractIpCandidate(request.headers.get('x-forwarded-for'))
+    if (forwarded) return forwarded
+
+    const realIp = extractIpCandidate(request.headers.get('x-real-ip'))
+    if (realIp) return realIp
+  }
+
   return 'unknown'
 }
 

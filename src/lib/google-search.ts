@@ -6,6 +6,8 @@
 import { ENV } from './env'
 import { EXTERNAL_API_TIMEOUT_MS } from './constants'
 import { fetchWithTimeout } from './http-utils'
+import { Errors, SeekEngineError } from './errors'
+import { logger } from './logger'
 
 const GOOGLE_API_KEY = ENV.GOOGLE_SEARCH_API_KEY
 const GOOGLE_CX = ENV.GOOGLE_SEARCH_CX
@@ -28,11 +30,11 @@ export interface SearchResult {
 export async function getWebSearchResults(
   query: string,
   startIndex: number = 1,
-  dateRestrict?: string
+  dateRestrict?: string,
+  signal?: AbortSignal
 ): Promise<SearchResult[]> {
   if (!GOOGLE_API_KEY || !GOOGLE_CX) {
-    console.warn('⚠️ Google API Key or CX is missing. Search will be empty.')
-    return []
+    throw Errors.apiKeyMissing('Google Custom Search')
   }
 
   try {
@@ -46,11 +48,10 @@ export async function getWebSearchResults(
 
     // IMPROVED: Use shared fetchWithTimeout helper to prevent hanging requests
     // Centralizes timeout logic and reduces code duplication
-    const response = await fetchWithTimeout(url)
-    
+    const response = await fetchWithTimeout(url, EXTERNAL_API_TIMEOUT_MS, { signal })
+
     if (!response.ok) {
-      console.error(`❌ Google Search Error: ${response.status}`)
-      return []
+      throw Errors.externalApiFailed('Google Custom Search', response.status)
     }
 
     const data = await response.json()
@@ -65,12 +66,23 @@ export async function getWebSearchResults(
       snippet: item.snippet,
       displayLink: item.displayLink,
     }))
-  } catch (error) {
-    if ((error as Error).name === 'AbortError') {
-      console.error('Google Search request timeout')
-    } else {
-      console.error('Error fetching web search results:', error)
+      } catch (error) {
+    if (signal?.aborted) {
+      throw error
     }
-    return []
+
+    if (error instanceof SeekEngineError) {
+      throw error
+    }
+
+    if ((error as Error).name === 'AbortError') {
+      throw Errors.timeout('Google Custom Search', EXTERNAL_API_TIMEOUT_MS)
+    }
+
+    logger.error(
+      'Google Custom Search request failed',
+      error instanceof Error ? error : String(error),
+    )
+    throw Errors.externalApiFailed('Google Custom Search')
   }
 }

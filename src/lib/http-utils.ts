@@ -24,15 +24,26 @@ export async function fetchWithTimeout(
   options?: RequestInit
 ): Promise<Response> {
   const controller = new AbortController()
+  const externalSignal = options?.signal
+  const onAbort = () => controller.abort(externalSignal?.reason)
   const timeout = setTimeout(() => controller.abort(), timeoutMs)
-  
+
   try {
+    if (externalSignal?.aborted) {
+      controller.abort(externalSignal.reason)
+    } else if (externalSignal) {
+      externalSignal.addEventListener('abort', onAbort, { once: true })
+    }
+
     const response = await fetch(url.toString(), {
       ...options,
       signal: controller.signal,
     })
     return response
   } finally {
+    if (externalSignal) {
+      externalSignal.removeEventListener('abort', onAbort)
+    }
     clearTimeout(timeout)
   }
 }

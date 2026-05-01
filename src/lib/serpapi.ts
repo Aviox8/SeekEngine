@@ -6,6 +6,8 @@
 import { ENV } from './env'
 import { EXTERNAL_API_TIMEOUT_MS } from './constants'
 import { fetchWithTimeout } from './http-utils'
+import { Errors, SeekEngineError } from './errors'
+import { logger } from './logger'
 
 const SERPAPI_KEY = ENV.SERPAPI_KEY
 const SERPAPI_URL = 'https://serpapi.com/search'
@@ -20,10 +22,13 @@ export interface SerpResult {
 /**
  * Fetch real-time search results from SerpApi
  */
-export async function getSerpResults(query: string, timeRange?: string): Promise<SerpResult[]> {
+export async function getSerpResults(
+  query: string,
+  timeRange?: string,
+  signal?: AbortSignal
+): Promise<SerpResult[]> {
   if (!SERPAPI_KEY) {
-    console.warn('⚠️ SERPAPI_KEY is missing.')
-    return []
+    throw Errors.apiKeyMissing('SerpApi')
   }
 
   try {
@@ -36,11 +41,10 @@ export async function getSerpResults(query: string, timeRange?: string): Promise
 
     // IMPROVED: Use shared fetchWithTimeout helper to prevent hanging requests
     // Centralizes timeout logic and reduces code duplication
-    const response = await fetchWithTimeout(url)
-    
+    const response = await fetchWithTimeout(url, EXTERNAL_API_TIMEOUT_MS, { signal })
+
     if (!response.ok) {
-      console.error(`❌ SerpApi Error: ${response.status}`)
-      return []
+      throw Errors.externalApiFailed('SerpApi', response.status)
     }
 
     const data = await response.json()
@@ -56,11 +60,22 @@ export async function getSerpResults(query: string, timeRange?: string): Promise
       source: item.source || item.display_link || ''
     }))
   } catch (error) {
-    if ((error as Error).name === 'AbortError') {
-      console.error('SerpApi request timeout')
-    } else {
-      console.error('Error fetching SerpApi results:', error)
+    if (signal?.aborted) {
+      throw error
     }
-    return []
+
+    if (error instanceof SeekEngineError) {
+      throw error
+    }
+
+    if ((error as Error).name === 'AbortError') {
+      throw Errors.timeout('SerpApi', EXTERNAL_API_TIMEOUT_MS)
+    }
+
+    logger.error(
+      'SerpApi request failed',
+      error instanceof Error ? error : String(error),
+    )
+    throw Errors.externalApiFailed('SerpApi')
   }
 }
