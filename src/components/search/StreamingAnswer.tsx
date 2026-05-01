@@ -1,4 +1,4 @@
-﻿/**
+/**
  * StreamingAnswer Component
  * 
  * Modern AI answer streaming with gradient processing indicators,
@@ -594,13 +594,20 @@ export function StreamingAnswer({
   const [runCycle, setRunCycle] = useState(0)
   const requestKey = `${query}::${timeRange ?? ''}`
 
+  // PERF FIX: Serialize context to create a stable dependency key
+  // (array refs change every render, making useMemo pointless)
+  const contextKey = useMemo(() => JSON.stringify(
+    (context ?? []).map(r => r.link)
+  ), [context])
+
   const normalizedContext = useMemo<StreamContextItem[]>(() => {
     return (context ?? []).map(({ title, link, snippet }) => ({
       title,
       link,
       snippet,
     }))
-  }, [context])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contextKey])
 
   const reasoningScript = useMemo(() => {
     return buildReasoningScript(requestKey, runCycle)

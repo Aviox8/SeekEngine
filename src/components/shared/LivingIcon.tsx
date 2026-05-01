@@ -161,7 +161,7 @@ export default function LivingIcon({
             repeat: Infinity, 
             ease: 'easeInOut' 
           }}
-          filter="url(breathState === 'talking' ? #intensGlow : #orbGlow)"
+          filter={`url(#${breathState === 'talking' ? 'intensGlow' : 'orbGlow'})`}
           style={{ transformOrigin: '50px 50px' }}
         />
 

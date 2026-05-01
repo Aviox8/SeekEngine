@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useState, useEffect } from 'react'
 import { useLocation } from '../../hooks/useLocation'
 
 /**
@@ -11,6 +12,9 @@ import { useLocation } from '../../hooks/useLocation'
  */
 export default function ResultsFooter() {
   const { location, timeOfDay } = useLocation()
+  // FIX: Hydration-safe year — avoid mismatch if SSR timestamp crosses midnight
+  const [year, setYear] = useState<number | null>(null)
+  useEffect(() => { setYear(new Date().getFullYear()) }, [])
 
   return (
     <footer className="w-full mt-16 sm:mt-20 relative">
@@ -95,7 +99,7 @@ export default function ResultsFooter() {
         {/* Copyright */}
         <div className="flex flex-col items-center gap-1">
           <p className="text-center text-[9px] uppercase tracking-[0.15em] text-muted-foreground/15">
-            &copy; {new Date().getFullYear()} SeekEngine &middot; All rights reserved
+            &copy; {year ?? ''} SeekEngine &middot; All rights reserved
           </p>
         </div>
       </div>

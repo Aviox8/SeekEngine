@@ -6,7 +6,7 @@
  * understated controls, living icon feedback, natural conversational interface
  */
 
-import { useEffect, useRef, useState, useCallback, memo } from 'react'
+import { useEffect, useRef, useState, useCallback, memo, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSearch } from '../../hooks/useSearch'
 import { useSearchHistory } from '../../hooks/useSearchHistory'
@@ -39,6 +39,20 @@ export default memo(function SearchBar({
   const { history, removeEntry } = useSearchHistory()
   const isDark = resolvedTheme === 'dark'
   
+  // PERF: Memoize dropdown style objects (were recreated every render)
+  const dropdownStyle = useMemo(() => ({
+    background: isDark 
+      ? 'rgba(15, 15, 15, 0.98)'
+      : 'rgba(255, 255, 255, 0.98)',
+    backdropFilter: 'blur(40px)',
+    borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+    boxShadow: isDark 
+      ? '0 16px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)'
+      : '0 16px 40px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.5)',
+    maxHeight: '60vh',
+    overflowY: 'auto' as const
+  }), [isDark])
+
   const [isFocused, setIsFocused] = useState(false)
   const isCommand = query.startsWith('/')
   const isTyping = query.length > 0
@@ -250,18 +264,7 @@ export default memo(function SearchBar({
             <div 
               role="listbox"
               className="rounded-xl overflow-hidden border transition-all"
-              style={{
-                background: isDark 
-                  ? 'rgba(15, 15, 15, 0.98)'
-                  : 'rgba(255, 255, 255, 0.98)',
-                backdropFilter: 'blur(40px)',
-                borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
-                boxShadow: isDark 
-                  ? '0 16px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)'
-                  : '0 16px 40px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.5)',
-                maxHeight: '60vh',
-                overflowY: 'auto'
-              }}
+              style={dropdownStyle}
             >
                {suggestions.slice(0, 10).map((suggestion, index) => (
                  <div
@@ -323,18 +326,7 @@ export default memo(function SearchBar({
           >
             <div 
               className="rounded-xl overflow-hidden border transition-all"
-              style={{
-                background: isDark 
-                  ? 'rgba(15, 15, 15, 0.98)'
-                  : 'rgba(255, 255, 255, 0.98)',
-                backdropFilter: 'blur(40px)',
-                borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
-                boxShadow: isDark 
-                  ? '0 16px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)'
-                  : '0 16px 40px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.5)',
-                maxHeight: '60vh',
-                overflowY: 'auto'
-              }}
+              style={dropdownStyle}
             >
               <div className="px-4 py-2.5 border-b border-foreground/5 flex items-center gap-2 bg-foreground/[0.01]">
                 <Clock className="w-3.5 h-3.5 text-muted-foreground/40" />

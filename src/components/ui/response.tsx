@@ -41,16 +41,13 @@ const Response = React.forwardRef<HTMLDivElement, ResponseProps>(
       ),
       code: ({ inline, className, children, ...props }: MarkdownCodeProps) => {
         return !inline ? (
-          <motion.div 
+          <div 
             className="my-6 overflow-hidden rounded-xl border border-foreground/10 bg-foreground/[0.03] p-3 font-mono text-xs sm:p-4 sm:text-sm"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
           >
             <code className={cn(className, "block overflow-x-auto")} {...props}>
               {children}
             </code>
-          </motion.div>
+          </div>
         ) : (
           <code
             className="rounded-md border border-primary/20 bg-primary/5 px-1.5 py-0.5 font-mono text-[12px] text-primary sm:text-[13px]"
