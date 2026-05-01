@@ -18,12 +18,12 @@ export default function DynamicCanvasCrowd() {
       />
 
       {/* Canvas crowd animation */}
-      <div className="h-[45vh] relative">
+      <div className="relative h-[36vh] sm:h-[45vh]">
         <CrowdCanvas src="/images/peeps/all-peeps.png" rows={15} cols={7} />
       </div>
 
       {/* Footer content overlay */}
-      <div className="relative z-20 -mt-32 pb-8">
+      <div className="relative z-20 -mt-24 pb-8 sm:-mt-32">
         {/* Gradient fade from canvas to content */}
         <div
           className="h-32 pointer-events-none"
@@ -32,8 +32,8 @@ export default function DynamicCanvasCrowd() {
           }}
         />
 
-        <div className="bg-background px-6">
-          <div className="max-w-4xl mx-auto flex flex-col items-center gap-6">
+        <div className="bg-background px-4 sm:px-6">
+          <div className="mx-auto flex max-w-4xl flex-col items-center gap-6">
             {/* Logo + brand */}
             <Link href="/" className="flex items-center gap-2.5 group">
               <Image
@@ -52,7 +52,7 @@ export default function DynamicCanvasCrowd() {
             <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-foreground/8 to-transparent" />
 
             {/* Navigation links */}
-            <nav className="flex items-center gap-8">
+            <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3 sm:gap-8">
               {[
                 { label: 'About', href: '/about' },
                 { label: 'Terms', href: '/tos' },
@@ -65,7 +65,7 @@ export default function DynamicCanvasCrowd() {
                   href={link.href}
                   target={link.external ? '_blank' : undefined}
                   rel={link.external ? 'noopener noreferrer' : undefined}
-                  className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground/25 hover:text-foreground/60 transition-all duration-300 hover:tracking-[0.2em]"
+                  className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/25 transition-all duration-300 hover:text-foreground/60 hover:tracking-[0.16em] sm:tracking-[0.15em] sm:hover:tracking-[0.2em]"
                 >
                   {link.label}
                 </a>
@@ -74,10 +74,10 @@ export default function DynamicCanvasCrowd() {
 
             {/* Copyright + tagline */}
             <div className="flex flex-col items-center gap-2 pt-2">
-              <p className="text-[9px] tracking-[0.3em] uppercase text-muted-foreground/15">
+              <p className="text-center text-[9px] uppercase tracking-[0.22em] text-muted-foreground/15 sm:tracking-[0.3em]">
                 The future of discovery
               </p>
-              <p className="text-[9px] tracking-[0.2em] uppercase text-muted-foreground/20">
+              <p className="text-center text-[9px] uppercase tracking-[0.15em] text-muted-foreground/20 sm:tracking-[0.2em]">
                 &copy; {new Date().getFullYear()} SeekEngine &middot; All rights reserved
               </p>
             </div>

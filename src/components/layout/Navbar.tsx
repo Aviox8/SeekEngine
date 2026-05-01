@@ -9,7 +9,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion'
 
@@ -70,7 +70,6 @@ function TextRollLink({ children, href, isActive, external }: {
 
 export default function Navbar() {
   const { setTheme, resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
   const pathname = usePathname()
   const { scrollY } = useScroll()
   const [visible, setVisible] = useState(true)
@@ -86,8 +85,6 @@ export default function Navbar() {
     setScrolled(latest > 20)
   })
 
-  useEffect(() => { setMounted(true) }, [])
-
   const navLinks = [
     { label: 'Engine', href: '/' },
     { label: 'About', href: '/about' },
@@ -96,44 +93,70 @@ export default function Navbar() {
 
   ]
 
-  if (!mounted) {
-    return <div className="fixed top-0 left-0 right-0 h-12 pointer-events-none" />
-  }
-
   const isDarkMode = resolvedTheme === 'dark'
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 flex flex-col pointer-events-none">
       {/* Main navigation */}
-      <div className="flex justify-center px-4 sm:px-8 pt-3 pb-2">
+      <div className="flex justify-center px-3 pt-3 pb-2 sm:px-8">
         <motion.nav
           role="navigation"
           aria-label="Primary navigation"
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: visible ? 0 : -100, opacity: visible ? 1 : 0 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className={`flex items-center gap-1 sm:gap-1.5 p-1.5 sm:p-2 rounded-2xl pointer-events-auto transition-all duration-700 ${scrolled ? 'bg-background/60 backdrop-blur-2xl border border-foreground/[0.04] shadow-2xl' : 'bg-transparent'}`}
+          className={`pointer-events-auto flex w-full max-w-[min(100%,34rem)] flex-col gap-2 rounded-2xl p-2 transition-all duration-700 sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:gap-1.5 sm:p-2 ${
+            scrolled ? 'bg-background/75 backdrop-blur-2xl border border-foreground/[0.04] shadow-2xl' : 'bg-transparent'
+          }`}
         >
-          {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl overflow-hidden ml-0.5 sm:ml-1 flex-shrink-0 hover:scale-105 active:scale-95 transition-transform duration-300"
-          >
-            <Image
-              src="/logo.png"
-              alt="SeekEngine"
-              width={28}
-              height={28}
-              className="w-7 h-7 sm:w-8 sm:h-8"
-              priority
-            />
-          </Link>
+          <div className="flex items-center justify-between gap-3 sm:justify-start">
+            <Link
+              href="/"
+              className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl transition-transform duration-300 hover:scale-105 active:scale-95"
+            >
+              <Image
+                src="/logo.png"
+                alt="SeekEngine"
+                width={28}
+                height={28}
+                className="h-7 w-7 sm:h-8 sm:w-8"
+                priority
+              />
+            </Link>
 
-          {/* Separator */}
-          <div className="w-[1px] h-4 mx-1.5 bg-foreground/8" />
+            <div className="hidden h-4 w-[1px] bg-foreground/8 sm:block" />
 
-          {/* Nav Items with text-roll hover */}
-          <div className="flex items-center relative gap-0.5 sm:gap-1 px-1">
+            <div className="flex flex-1 items-center justify-center gap-1 sm:hidden">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/55">
+                SeekEngine
+              </span>
+            </div>
+
+            <button
+              onClick={() => setTheme(isDarkMode ? 'light' : 'dark')}
+              className="relative flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-all duration-300 hover:text-foreground active:scale-90 sm:mr-1"
+              aria-label="Toggle theme"
+            >
+              <div className="relative h-4 w-4 overflow-hidden pointer-events-none">
+                <motion.div
+                  animate={{ y: isDarkMode ? 0 : -32 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 26 }}
+                  className="flex flex-col items-center gap-4"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                </motion.div>
+              </div>
+            </button>
+          </div>
+
+          <div className="hidden h-4 w-[1px] bg-foreground/6 sm:block" />
+
+          <div className="flex flex-wrap items-center justify-center gap-1 px-0.5 sm:gap-1 sm:px-1">
             {navLinks.map((link) => {
               const isActive = link.external ? false : link.href === '/' ? pathname === '/' : pathname.startsWith(link.href)
               return (
@@ -148,33 +171,6 @@ export default function Navbar() {
               )
             })}
           </div>
-
-          {/* Separator */}
-          <div className="w-[1px] h-4 mx-1.5 bg-foreground/6" />
-
-          {/* Theme Toggle */}
-          <button
-            onClick={() => setTheme(isDarkMode ? 'light' : 'dark')}
-            className="relative w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl active:scale-90 transition-all duration-300 text-muted-foreground hover:text-foreground mr-0.5 sm:mr-1"
-            aria-label="Toggle theme"
-          >
-            <div className="relative w-4 h-4 overflow-hidden pointer-events-none">
-              <motion.div
-                animate={{ y: isDarkMode ? 0 : -32 }}
-                transition={{ type: "spring", stiffness: 300, damping: 26 }}
-                className="flex flex-col gap-4 items-center"
-              >
-                {/* Sun */}
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                {/* Moon */}
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              </motion.div>
-            </div>
-          </button>
         </motion.nav>
       </div>
     </div>

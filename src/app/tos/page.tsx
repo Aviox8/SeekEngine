@@ -49,36 +49,36 @@ export default function TermsOfService() {
   ]
 
   return (
-    <main className="min-h-screen bg-[#fbfbfd] dark:bg-[#000000] pt-24 pb-40 transition-colors duration-1000 relative selection:bg-blue-500/20 font-sans">
+    <main className="relative min-h-screen bg-[#fbfbfd] pt-20 pb-24 font-sans transition-colors duration-1000 selection:bg-blue-500/20 dark:bg-[#000000] sm:pt-24 sm:pb-40">
       {/* Background */}
       <div className="fixed inset-0 pointer-events-none bg-grid-black/[0.01] dark:bg-grid-white/[0.01]" />
 
-      <div className="max-w-4xl mx-auto px-6 relative z-10">
+      <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="mb-16 border-b border-black/5 dark:border-white/5 pb-12 text-left"
+          className="mb-12 border-b border-black/5 pb-10 text-left dark:border-white/5 sm:mb-16 sm:pb-12"
         >
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
               <span className="px-2.5 py-1 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[9px] font-bold uppercase tracking-wide border border-blue-200 dark:border-blue-800">
                 Open Source
               </span>
               <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">MIT License</span>
             </div>
-            <h1 className="text-5xl sm:text-6xl font-bold text-black dark:text-white tracking-tight leading-tight">
+            <h1 className="text-4xl font-bold leading-tight tracking-tight text-black dark:text-white sm:text-6xl">
               Terms of Service
             </h1>
-            <p className="text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-2xl">
+            <p className="max-w-2xl text-base leading-relaxed text-zinc-600 dark:text-zinc-400 sm:text-lg">
               SeekEngine is open source under the MIT License. This page explains the terms for using the public demo and what you get with the code.
             </p>
           </div>
         </motion.div>
 
         {/* Content Sections */}
-        <div className="space-y-10">
+        <div className="space-y-8 sm:space-y-10">
           {sections.map((section, idx) => (
             <motion.div
               key={idx}
@@ -88,16 +88,16 @@ export default function TermsOfService() {
               viewport={{ once: true, margin: '-100px' }}
               className="group"
             >
-              <div className="flex gap-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
                 {/* Section number indicator */}
                 <div className="relative shrink-0">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center sticky top-24">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 sm:sticky sm:top-24 sm:h-10 sm:w-10">
                     <span className="text-xs font-black text-white">
                       {idx + 1}
                     </span>
                   </div>
                   {idx < sections.length - 1 && (
-                    <div className="absolute top-10 left-4 w-0.5 h-20 bg-gradient-to-b from-blue-500 to-transparent opacity-30 group-hover:opacity-50 transition-opacity" />
+                    <div className="absolute left-4 top-10 hidden h-20 w-0.5 bg-gradient-to-b from-blue-500 to-transparent opacity-30 transition-opacity group-hover:opacity-50 sm:block" />
                   )}
                 </div>
 
@@ -121,7 +121,7 @@ export default function TermsOfService() {
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true }}
-          className="mt-20 pt-12 border-t border-black/5 dark:border-white/5 space-y-4"
+          className="mt-16 space-y-4 border-t border-black/5 pt-10 dark:border-white/5 sm:mt-20 sm:pt-12"
         >
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
             These terms were last updated in January 2026. For the complete license text, see the <Link href="https://github.com/archduke1337/SeekEngine/blob/main/LICENSE" target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline font-semibold">LICENSE</Link> file on GitHub.

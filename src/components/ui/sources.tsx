@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ExternalLink, Globe, FileText, ChevronRight } from 'lucide-react';
+import { Globe } from 'lucide-react';
 import { useState } from 'react';
 
 export interface Source {
@@ -57,11 +57,11 @@ export function Sources({ sources, isLoading, className, ...props }: SourcesProp
         {...props}
       >
         {[1, 2, 3].map((i) => (
-          <div 
-            key={i} 
-            className="flex-shrink-0 w-48 h-[68px] rounded-xl border border-foreground/[0.04] bg-foreground/[0.01] animate-pulse" 
-          />
-        ))}
+            <div
+              key={i}
+              className="h-[68px] w-40 flex-shrink-0 animate-pulse rounded-xl border border-foreground/[0.04] bg-foreground/[0.01] sm:w-48"
+            />
+          ))}
       </div>
     );
   }
@@ -101,7 +101,7 @@ export function Sources({ sources, isLoading, className, ...props }: SourcesProp
                 }}
                 whileHover={{ y: -4, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="flex-shrink-0 w-48 p-3 rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] hover:bg-foreground/[0.05] hover:border-foreground/[0.12] transition-all group/source focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary snap-center shadow-sm hover:shadow-md"
+                className="group/source snap-start flex w-40 flex-shrink-0 rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] p-3 shadow-sm transition-all hover:border-foreground/[0.12] hover:bg-foreground/[0.05] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-48 sm:snap-center"
                 aria-label={`${source.title} - ${displayUrl}`}
               >
                 <div className="flex items-center gap-2 mb-2">

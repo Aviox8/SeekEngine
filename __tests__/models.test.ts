@@ -20,6 +20,11 @@ describe('humanizeModel', () => {
       expect(humanizeModel('google/gemma-3-4b-it:free')).toBe('Gemma 3 4B')
     })
 
+    it('humanizes Gemma 4 models', () => {
+      expect(humanizeModel('google/gemma-4-26b-a4b-it:free')).toBe('Gemma 4 26B A4B')
+      expect(humanizeModel('google/gemma-4-31b-it:free')).toBe('Gemma 4 31B')
+    })
+
     it('humanizes Gemini', () => {
       expect(humanizeModel('google/gemini-2.0-flash:free')).toContain('Gemini')
     })
@@ -64,6 +69,17 @@ describe('humanizeModel', () => {
 
     it('humanizes Qwen3 4B', () => {
       expect(humanizeModel('qwen/qwen3-4b:free')).toBe('Qwen3 4B')
+    })
+  })
+
+  describe('New fallback models', () => {
+    it('humanizes Owl Alpha', () => {
+      expect(humanizeModel('openrouter/owl-alpha')).toBe('Owl Alpha')
+    })
+
+    it('humanizes Poolside Laguna models', () => {
+      expect(humanizeModel('poolside/laguna-xs.2:free')).toBe('Laguna XS.2')
+      expect(humanizeModel('poolside/laguna-m.1:free')).toBe('Laguna M.1')
     })
   })
 
@@ -130,6 +146,10 @@ describe('classifyModel', () => {
     it('classifies medium models as balanced', () => {
       expect(classifyModel('google/gemma-3-12b:free')).toBe('balanced')
     })
+
+    it('classifies Owl Alpha as balanced', () => {
+      expect(classifyModel('openrouter/owl-alpha')).toBe('balanced')
+    })
   })
 
   describe('Heavy tier models', () => {
@@ -165,6 +185,11 @@ describe('classifyModel', () => {
 
     it('classifies CodeLlama as code', () => {
       expect(classifyModel('meta-llama/codellama-34b:free')).toBe('code')
+    })
+
+    it('classifies Laguna as code', () => {
+      expect(classifyModel('poolside/laguna-m.1:free')).toBe('code')
+      expect(classifyModel('poolside/laguna-xs.2:free')).toBe('code')
     })
   })
 

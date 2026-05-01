@@ -56,36 +56,36 @@ export default function PrivacyPolicy() {
   ]
 
   return (
-    <main className="min-h-screen bg-[#fbfbfd] dark:bg-[#000000] pt-24 pb-40 transition-colors duration-1000 relative selection:bg-purple-500/20 font-sans">
+    <main className="relative min-h-screen bg-[#fbfbfd] pt-20 pb-24 font-sans transition-colors duration-1000 selection:bg-purple-500/20 dark:bg-[#000000] sm:pt-24 sm:pb-40">
       {/* Background */}
       <div className="fixed inset-0 pointer-events-none bg-grid-black/[0.01] dark:bg-grid-white/[0.01]" />
 
-      <div className="max-w-4xl mx-auto px-6 relative z-10">
+      <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="mb-16 border-b border-black/5 dark:border-white/5 pb-12 text-left"
+          className="mb-12 border-b border-black/5 pb-10 text-left dark:border-white/5 sm:mb-16 sm:pb-12"
         >
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
               <span className="px-2.5 py-1 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-[9px] font-bold uppercase tracking-wide border border-purple-200 dark:border-purple-800">
                 Open Source
               </span>
               <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Self-Hostable</span>
             </div>
-            <h1 className="text-5xl sm:text-6xl font-bold text-black dark:text-white tracking-tight leading-tight">
+            <h1 className="text-4xl font-bold leading-tight tracking-tight text-black dark:text-white sm:text-6xl">
               Privacy Policy
             </h1>
-            <p className="text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-2xl">
+            <p className="max-w-2xl text-base leading-relaxed text-zinc-600 dark:text-zinc-400 sm:text-lg">
               SeekEngine is open source. That means: your code is visible, your data practices are obvious, and you have full control. This policy covers the public demo. For your own instance, you decide the rules.
             </p>
           </div>
         </motion.div>
 
         {/* Content Sections */}
-        <div className="space-y-10">
+        <div className="space-y-8 sm:space-y-10">
           {sections.map((section, idx) => (
             <motion.div
               key={idx}
@@ -95,16 +95,16 @@ export default function PrivacyPolicy() {
               viewport={{ once: true, margin: '-100px' }}
               className="group"
             >
-              <div className="flex gap-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
                 {/* Section number indicator */}
                 <div className="relative shrink-0">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center sticky top-24">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 sm:sticky sm:top-24 sm:h-10 sm:w-10">
                     <span className="text-xs font-black text-white">
                       {idx + 1}
                     </span>
                   </div>
                   {idx < sections.length - 1 && (
-                    <div className="absolute top-10 left-4 w-0.5 h-20 bg-gradient-to-b from-purple-500 to-transparent opacity-30 group-hover:opacity-50 transition-opacity" />
+                    <div className="absolute left-4 top-10 hidden h-20 w-0.5 bg-gradient-to-b from-purple-500 to-transparent opacity-30 transition-opacity group-hover:opacity-50 sm:block" />
                   )}
                 </div>
 
@@ -128,14 +128,14 @@ export default function PrivacyPolicy() {
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true }}
-          className="mt-20 pt-12 border-t border-black/5 dark:border-white/5 space-y-4"
+          className="mt-16 space-y-4 border-t border-black/5 pt-10 dark:border-white/5 sm:mt-20 sm:pt-12"
         >
           <div className="bg-purple-50 dark:bg-purple-900/10 border border-purple-200 dark:border-purple-800 rounded-2xl p-6 space-y-3">
             <p className="text-sm font-semibold text-purple-900 dark:text-purple-100">
               The OpenSource Advantage
             </p>
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              With SeekEngine, you're not trusting a company's privacy promises—you can audit the code yourself. Run it on your own hardware. Modify it. That's the entire point of open source. Your data, your rules.
+              With SeekEngine, you&apos;re not trusting a company&apos;s privacy promises-you can audit the code yourself. Run it on your own hardware. Modify it. That&apos;s the entire point of open source. Your data, your rules.
             </p>
           </div>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">

@@ -88,6 +88,7 @@ export const MODEL_TIER_PATTERNS: Record<ModelTier, RegExp[]> = {
   ],
   code: [
     /coder/i,
+    /devstral/i,
     /deepseek.*code/i,
     /qwen.*coder/i,
     /codellama/i,

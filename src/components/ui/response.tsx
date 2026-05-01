@@ -4,11 +4,15 @@ import * as React from "react"
 import ReactMarkdown, { Components } from 'react-markdown'
 import rehypeSanitize from 'rehype-sanitize'
 import { cn } from "@/lib/utils"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 
 interface ResponseProps extends React.HTMLAttributes<HTMLDivElement> {
   children: string
   isStreaming?: boolean
+}
+
+type MarkdownCodeProps = React.ComponentPropsWithoutRef<'code'> & {
+  inline?: boolean
 }
 
 /**
@@ -21,10 +25,10 @@ const Response = React.forwardRef<HTMLDivElement, ResponseProps>(
     
     // PERFORMANCE: Memoize markdown components to avoid recreation during stream
     const markdownComponents = React.useMemo<Components>(() => ({
-      h1: (props) => <h1 className="text-2xl font-bold mt-8 mb-4 tracking-tight text-foreground first:mt-0" {...props} />,
-      h2: (props) => <h2 className="text-xl font-bold mt-8 mb-3 tracking-tight text-foreground first:mt-0" {...props} />,
-      h3: (props) => <h3 className="text-lg font-semibold mt-6 mb-3 text-foreground/90 first:mt-0" {...props} />,
-      p: (props) => <p className="mb-4 last:mb-0 leading-relaxed text-foreground/80" {...props} />,
+      h1: (props) => <h1 className="mt-8 mb-4 text-xl font-bold tracking-tight text-foreground first:mt-0 sm:text-2xl" {...props} />,
+      h2: (props) => <h2 className="mt-8 mb-3 text-lg font-bold tracking-tight text-foreground first:mt-0 sm:text-xl" {...props} />,
+      h3: (props) => <h3 className="mt-6 mb-3 text-base font-semibold text-foreground/90 first:mt-0 sm:text-lg" {...props} />,
+      p: (props) => <p className="mb-4 text-[15px] leading-relaxed text-foreground/80 last:mb-0 sm:text-base" {...props} />,
       a: ({ href, children }) => (
         <a 
           href={href} 
@@ -35,11 +39,10 @@ const Response = React.forwardRef<HTMLDivElement, ResponseProps>(
           {children}
         </a>
       ),
-      code: ({ inline, className, children, ...props }: any) => {
-        const match = /language-(\w+)/.exec(className || '')
+      code: ({ inline, className, children, ...props }: MarkdownCodeProps) => {
         return !inline ? (
           <motion.div 
-            className="my-6 rounded-xl overflow-hidden border border-foreground/10 bg-foreground/[0.03] p-4 font-mono text-sm"
+            className="my-6 overflow-hidden rounded-xl border border-foreground/10 bg-foreground/[0.03] p-3 font-mono text-xs sm:p-4 sm:text-sm"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
@@ -49,14 +52,12 @@ const Response = React.forwardRef<HTMLDivElement, ResponseProps>(
             </code>
           </motion.div>
         ) : (
-          <motion.code 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="px-1.5 py-0.5 rounded-md font-mono text-[13px] bg-primary/5 text-primary border border-primary/20"
+          <code
+            className="rounded-md border border-primary/20 bg-primary/5 px-1.5 py-0.5 font-mono text-[12px] text-primary sm:text-[13px]"
             {...props}
           >
             {children}
-          </motion.code>
+          </code>
         )
       },
       ul: (props) => <ul className="flex flex-col gap-3 mb-4 ml-1 list-none" {...props} />,
@@ -72,7 +73,7 @@ const Response = React.forwardRef<HTMLDivElement, ResponseProps>(
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ repeat: Infinity, duration: 2, delay: 0.5 }}
           />
-          <span className="text-[15px] leading-relaxed text-foreground/85">{children}</span>
+          <span className="text-[14px] leading-relaxed text-foreground/85 sm:text-[15px]">{children}</span>
         </motion.div>
       ),
       blockquote: (props) => (
@@ -82,7 +83,7 @@ const Response = React.forwardRef<HTMLDivElement, ResponseProps>(
     }), [])
 
     return (
-      <div className="w-full max-w-none">
+      <div ref={ref} className={cn("w-full max-w-none", className)} {...props}>
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
