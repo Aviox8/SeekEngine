@@ -116,7 +116,7 @@ export default function LivingIcon({
           fill="url(#orbGradient)"
           animate={{
             opacity: breathingVariants[breathState as keyof typeof breathingVariants].opacity,
-            r: [48, 52, 46, 50, 48],
+            scale: [1, 1.08, 0.96, 1.04, 1],
           }}
           transition={{ 
             duration: duration * 1.3, 
@@ -124,6 +124,7 @@ export default function LivingIcon({
             ease: 'easeInOut' 
           }}
           filter="url(#orbGlow)"
+          style={{ transformOrigin: '50px 50px' }}
         />
 
         {/* Middle energetic layer */}
@@ -136,7 +137,7 @@ export default function LivingIcon({
           strokeWidth="1"
           animate={{
             opacity: agentState === 'talking' ? [0.4, 0.8, 0.3, 0.7, 0.4] : [0.15, 0.3, 0.1, 0.25, 0.15],
-            r: [42, 48, 40, 45, 42],
+            scale: [1, 1.14, 0.95, 1.07, 1],
           }}
           transition={{ 
             duration: duration * 1.1, 
@@ -145,6 +146,7 @@ export default function LivingIcon({
             delay: 0.1
           }}
           filter="url(#orbGlow)"
+          style={{ transformOrigin: '50px 50px' }}
         />
 
         {/* Core sphere - main body */}
@@ -173,13 +175,14 @@ export default function LivingIcon({
           fill="url(#shimmerGrad)"
           animate={{
             opacity: [0.2, 0.4, 0.15, 0.35, 0.2],
-            r: [18, 22, 16, 20, 18],
+            scale: [1, 1.22, 0.89, 1.11, 1],
           }}
           transition={{ 
             duration: duration * 0.9, 
             repeat: Infinity, 
             ease: 'easeInOut' 
           }}
+          style={{ transformOrigin: '30px 30px' }}
         />
 
         {/* Inner core pulse - heartbeat effect */}
@@ -190,7 +193,7 @@ export default function LivingIcon({
           fill={typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.4)` : color}
           animate={{
             opacity: [0.3, 0.7, 0.2, 0.6, 0.3],
-            r: [28, 32, 26, 30, 28],
+            scale: [1, 1.14, 0.93, 1.07, 1],
           }}
           transition={{ 
             duration: duration * 0.85, 
@@ -198,6 +201,7 @@ export default function LivingIcon({
             ease: 'easeInOut',
             delay: 0.05
           }}
+          style={{ transformOrigin: '50px 50px' }}
         />
       </svg>
 
