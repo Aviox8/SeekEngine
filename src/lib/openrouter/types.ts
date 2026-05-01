@@ -13,6 +13,7 @@ export type OpenRouterModel = {
     completion?: number
   }
   architecture?: {
+    input_modalities?: string[]
     output_modalities?: string[]
   }
   context_length?: number
