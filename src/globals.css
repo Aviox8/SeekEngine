@@ -501,15 +501,16 @@ html.theme-transition *, html.theme-transition *::before, html.theme-transition 
    GEMINI ANIMATED BORDER
    Google Gemini-style rotating conic gradient — focus-only, scoped to border track
    Architecture:
-     Layer 1 (::before) — 1.5px masked border ring. Pure conic, no blur.
-     Layer 2 (::after)  — soft bloom, blur(10px), inset:0 so it can't leak outside.
+     Layer 1 (::before) — crisp 1.5px border ring. Masked to stroke only. No blur.
+     Layer 2 (::after)  — diffuse halo. Same mask trick, wider inset, blur(8px).
+                          Glow radiates from the border edge, never fills interior.
    Activates via .active class driven by isFocused state in SearchBar.
 */
 
 .gemini-border {
   /*
     @property --gemini-rotation declared in keyframes section above.
-    Define the gradient here so both pseudo-elements share one declaration.
+    Both pseudo-elements share this gradient via CSS custom property.
   */
   --_gem: conic-gradient(
     from var(--gemini-rotation) at 50% 50% in oklab,
@@ -533,11 +534,11 @@ html.theme-transition *, html.theme-transition *::before, html.theme-transition 
   border-radius: inherit;
   padding: 1.5px;
   background: var(--_gem);
-  /* Mask punches out the interior, leaving just the border stroke */
+  /* Mask punches out the interior, only the 1.5px stroke is visible */
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  z-index: 0;
+  z-index: 1;
   opacity: 0;
   transition-property: opacity;
   transition-duration: 400ms;
@@ -545,16 +546,24 @@ html.theme-transition *, html.theme-transition *::before, html.theme-transition 
   will-change: opacity;
 }
 
-/* Layer 2 — soft bloom, contained inside the border box, can't bleed to dropdowns */
+/*
+  Layer 2 — soft halo glow around the border ring.
+  Uses same mask technique (interior punched out) so color only lives in the
+  border track + radiates outward via blur. Never fills the input background.
+*/
 .gemini-border::after {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: -6px;
   border-radius: inherit;
+  padding: 6px;
   background: var(--_gem);
-  z-index: -1;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 0;
   opacity: 0;
-  filter: blur(10px);
+  filter: blur(8px);
   transition-property: opacity;
   transition-duration: 400ms;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
@@ -567,7 +576,7 @@ html.theme-transition *, html.theme-transition *::before, html.theme-transition 
   animation: gemini-rotate 6s linear infinite;
 }
 .gemini-border.active::after {
-  opacity: 0.30;
+  opacity: 0.55;
   animation: gemini-rotate 6s linear infinite;
 }
 
