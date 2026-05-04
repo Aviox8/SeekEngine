@@ -145,14 +145,14 @@ export default memo(function SearchBar({
 
   return (
     <div className="relative w-full z-[100]" ref={suggestionsRef}>
-      {/* Gemini animated border wrapper */}
+      {/* Gemini animated border — wraps ONLY the input box, not the dropdowns */}
       <div className={`gemini-border rounded-2xl${isFocused ? ' active' : ''}`}>
-      {/* Main search container */}
-      <div className={`relative z-50 rounded-2xl border transition-all duration-300 px-4 py-1.5 sm:px-5 ${
-        isFocused 
-          ? 'border-transparent bg-foreground/[0.02]' 
-          : 'border-foreground/[0.06] hover:border-foreground/10'
-      }`}>
+        {/* Main search container */}
+        <div className={`relative rounded-2xl border px-4 py-1.5 sm:px-5 transition-[border-color,background-color] duration-300 ${
+          isFocused
+            ? 'border-transparent bg-foreground/[0.02]'
+            : 'border-foreground/[0.06] hover:border-foreground/10'
+        }`}>
 
         {/* Input wrapper */}
         <div className="relative flex items-baseline gap-1.5">
@@ -252,8 +252,8 @@ export default memo(function SearchBar({
           </AnimatePresence>
         </div>
       </div>
-      {/* /gemini-border wrapper */}
       </div>
+      {/* /gemini-border — dropdowns render OUTSIDE this wrapper */}
 
       {/* Suggestions Dropdown */}
       <AnimatePresence>
