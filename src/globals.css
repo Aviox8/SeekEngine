@@ -238,9 +238,9 @@ html, body { width: 100%; overflow-x: hidden; }
 *:focus { outline: none; }
 *:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
 
-/* Theme transitions — list properties explicitly, never 'all' */
+/* Theme transitions */
 *, *::before, *::after {
-  transition-property: background-color, border-color, color, fill, stroke, box-shadow, opacity;
+  transition-property: background-color, border-color, color, fill, stroke, box-shadow;
   transition-duration: 0ms;
   transition-timing-function: ease;
 }
@@ -294,15 +294,7 @@ html.theme-transition *, html.theme-transition *::before, html.theme-transition 
 @property --border-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
 @keyframes border-rotate { from { --border-angle: 0deg; } to { --border-angle: 360deg; } }
 
-/* Gemini rotating conic border */
-@property --gemini-rotation {
-  syntax: '<angle>';
-  inherits: false;
-  initial-value: 0deg;
-}
-@keyframes gemini-rotate {
-  to { --gemini-rotation: 360deg; }
-}
+
 
 /* Scroll reveal */
 @keyframes scroll-reveal { from { opacity: 0; transform: translateY(24px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
@@ -497,96 +489,6 @@ html.theme-transition *, html.theme-transition *::before, html.theme-transition 
   opacity: 1;
 }
 
-/*
-   GEMINI ANIMATED BORDER
-   Google Gemini-style rotating conic gradient — focus-only, scoped to border track
-   Architecture:
-     Layer 1 (::before) — crisp 1.5px border ring. Masked to stroke only. No blur.
-     Layer 2 (::after)  — diffuse halo. Same mask trick, wider inset, blur(8px).
-                          Glow radiates from the border edge, never fills interior.
-   Activates via .active class driven by isFocused state in SearchBar.
-*/
-
-.gemini-border {
-  /*
-    @property --gemini-rotation declared in keyframes section above.
-    Both pseudo-elements share this gradient via CSS custom property.
-  */
-  --_gem: conic-gradient(
-    from var(--gemini-rotation) at 50% 50% in oklab,
-    oklch(0.63 0.20 251) 0%,
-    oklch(0.67 0.21  26) 18%,
-    oklch(0.90 0.19  94) 36%,
-    oklch(0.79 0.25 150) 54%,
-    oklch(0.72 0.21 151) 72%,
-    oklch(0.63 0.20 251) 100%
-  );
-  position: relative;
-  isolation: isolate;
-  border-radius: inherit;
-}
-
-/* Layer 1 — crisp 1.5px border ring, masked so only the stroke shows */
-.gemini-border::before {
-  content: '';
-  position: absolute;
-  inset: -1.5px;
-  border-radius: inherit;
-  padding: 1.5px;
-  background: var(--_gem);
-  /* Mask punches out the interior, only the 1.5px stroke is visible */
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  z-index: 1;
-  opacity: 0;
-  transition-property: opacity;
-  transition-duration: 400ms;
-  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity;
-}
-
-/*
-  Layer 2 — soft halo glow around the border ring.
-  Uses same mask technique (interior punched out) so color only lives in the
-  border track + radiates outward via blur. Never fills the input background.
-*/
-.gemini-border::after {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border-radius: inherit;
-  padding: 6px;
-  background: var(--_gem);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  z-index: 0;
-  opacity: 0;
-  filter: blur(8px);
-  transition-property: opacity;
-  transition-duration: 400ms;
-  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity;
-}
-
-/* Active state — triggered on focus */
-.gemini-border.active::before {
-  opacity: 1;
-  animation: gemini-rotate 6s linear infinite;
-}
-.gemini-border.active::after {
-  opacity: 0.55;
-  animation: gemini-rotate 6s linear infinite;
-}
-
-/* Respect user's motion preference — keep color, remove rotation */
-@media (prefers-reduced-motion: reduce) {
-  .gemini-border.active::before,
-  .gemini-border.active::after {
-    animation: none;
-  }
-}
 
 /*
    INPUT AND FORM STYLING
