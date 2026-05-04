@@ -145,10 +145,12 @@ export default memo(function SearchBar({
 
   return (
     <div className="relative w-full z-[100]" ref={suggestionsRef}>
-      {/* Main search container — subtle border for grounding */}
+      {/* Gemini animated border wrapper */}
+      <div className={`gemini-border rounded-2xl${isFocused ? ' active' : ''}`}>
+      {/* Main search container */}
       <div className={`relative z-50 rounded-2xl border transition-all duration-300 px-4 py-1.5 sm:px-5 ${
         isFocused 
-          ? 'border-foreground/15 bg-foreground/[0.02] shadow-sm' 
+          ? 'border-transparent bg-foreground/[0.02]' 
           : 'border-foreground/[0.06] hover:border-foreground/10'
       }`}>
 
@@ -249,6 +251,8 @@ export default memo(function SearchBar({
             )}
           </AnimatePresence>
         </div>
+      </div>
+      {/* /gemini-border wrapper */}
       </div>
 
       {/* Suggestions Dropdown */}

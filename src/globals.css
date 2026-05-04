@@ -294,6 +294,16 @@ html.theme-transition *, html.theme-transition *::before, html.theme-transition 
 @property --border-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
 @keyframes border-rotate { from { --border-angle: 0deg; } to { --border-angle: 360deg; } }
 
+/* Gemini rotating conic border */
+@property --gemini-rotation {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes gemini-rotate {
+  to { --gemini-rotation: 360deg; }
+}
+
 /* Scroll reveal */
 @keyframes scroll-reveal { from { opacity: 0; transform: translateY(24px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
@@ -485,6 +495,69 @@ html.theme-transition *, html.theme-transition *::before, html.theme-transition 
 }
 .ai-gradient-border.active::before {
   opacity: 1;
+}
+
+/*
+   GEMINI ANIMATED BORDER
+   Google Gemini-style rotating conic gradient border + ambient glow
+   Activates on focus via .active class
+*/
+
+.gemini-border {
+  --gemini-gradient: conic-gradient(
+    from var(--gemini-rotation) at 52% 49% in oklab,
+    oklch(0.63 0.2 251.22) 27%,
+    oklch(0.67 0.21 25.81) 33%,
+    oklch(0.9 0.19 93.93) 41%,
+    oklch(0.79 0.25 150.49) 49%,
+    oklch(0.63 0.2 251.22) 65%,
+    oklch(0.72 0.21 150.89) 93%,
+    oklch(0.63 0.2 251.22)
+  );
+  position: relative;
+  isolation: isolate;
+}
+
+/* Rotating conic border layer — masked to edge only */
+.gemini-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: var(--gemini-gradient);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 2px;
+}
+
+/* Ambient glow behind the border */
+.gemini-border::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  background: var(--gemini-gradient);
+  z-index: -2;
+  opacity: 0;
+  filter: blur(14px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Active state — triggered when isFocused = true */
+.gemini-border.active::before,
+.gemini-border.active::after {
+  animation: gemini-rotate 5s infinite linear;
+  opacity: 1;
+}
+
+.gemini-border.active::after {
+  opacity: 0.45;
 }
 
 /*
