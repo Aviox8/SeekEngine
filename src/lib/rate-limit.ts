@@ -59,13 +59,15 @@ function cleanup() {
     store.delete(key)
   }
 
-  // If still over limit after expiration cleanup, evict oldest entries
-  if (store.size > RATE_LIMIT_MAX_ENTRIES * 0.9) { // Alert at 90%
+  // If still over limit after expiration cleanup, evict oldest entries by resetAt
+  if (store.size > RATE_LIMIT_MAX_ENTRIES * 0.9) {
     const excess = store.size - Math.floor(RATE_LIMIT_MAX_ENTRIES * 0.8)
     const evictionKeys: string[] = []
-    for (const key of store.keys()) {
-      if (evictionKeys.length >= excess) break
-      evictionKeys.push(key)
+    // Sort by resetAt (oldest window first) to evict stale entries
+    const sorted = Array.from(store.entries())
+      .sort((a, b) => a[1].resetAt - b[1].resetAt)
+    for (let i = 0; i < Math.min(excess, sorted.length); i++) {
+      evictionKeys.push(sorted[i]![0])
     }
     for (const key of evictionKeys) {
       store.delete(key)
@@ -110,14 +112,13 @@ export function checkRateLimit(
     return { allowed: true, remaining: config.maxRequests - 1, resetAt }
   }
 
-  // Within window
-  if (entry.count < config.maxRequests) {
-    entry.count++
-    return { allowed: true, remaining: config.maxRequests - entry.count, resetAt: entry.resetAt }
+  // Within window — check before incrementing to prevent race condition overshoot
+  if (entry.count >= config.maxRequests) {
+    return { allowed: false, remaining: 0, resetAt: entry.resetAt }
   }
 
-  // Rate limited
-  return { allowed: false, remaining: 0, resetAt: entry.resetAt }
+  entry.count++
+  return { allowed: true, remaining: config.maxRequests - entry.count, resetAt: entry.resetAt }
 }
 
 /**
