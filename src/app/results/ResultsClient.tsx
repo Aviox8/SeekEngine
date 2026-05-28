@@ -254,8 +254,8 @@ export default function ResultsClient() {
         {/* Query Title — fluid, responsive */}
         <div className="mb-6 animate-fade-in-up sm:mb-8 lg:mb-10">
           <div className="flex items-center gap-2 mb-2 sm:mb-3">
-            <div className="w-0.5 h-3.5 rounded-full bg-foreground/20 sm:h-4" />
-            <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/50 sm:text-[10px] sm:tracking-[0.15em]">
+            <div className="w-1 h-4 rounded-full bg-primary/40 sm:h-5" />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/60 sm:text-xs sm:tracking-[0.15em]">
               Results
             </span>
           </div>
