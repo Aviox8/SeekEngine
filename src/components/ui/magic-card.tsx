@@ -208,7 +208,7 @@ export function Particles({
           }}
           animate={{
             y: [0, -40, 0],
-            x: [0, Math.random() * 20 - 10, 0],
+            x: [0, (p.id % 20) - 10, 0],
             opacity: [0, 0.8, 0],
           }}
           transition={{
