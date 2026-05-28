@@ -144,32 +144,21 @@ export default memo(function SearchBar({
       {/* ── Apple Intelligence wrapper ── */}
       <div className="relative">
 
-        {/* 1. Spinning rainbow ring border */}
+        {/* 1. Rainbow border ring — CSS mask technique (no opaque background) */}
         <div
-          className={`absolute -inset-[2px] rounded-full transition-opacity duration-500 overflow-hidden pointer-events-none ${
+          className={`absolute inset-0 rounded-full pointer-events-none transition-opacity duration-500 ${
             isTyping ? 'opacity-100' : 'opacity-0'
           }`}
-          style={{ zIndex: 0 }}
-        >
-          {/* Rotating gradient */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: '-80%',
-              background: 'conic-gradient(from var(--ai-angle, 0deg), #00c6fb, #7b2ff7, #ff2d78, #ff9500, #30d158, #00c6fb)',
-              animation: isTyping ? 'ai-ring-spin 3s linear infinite' : 'none',
-            }}
-          />
-          {/* Inner cutout — masks gradient to only border ring */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: '1.5px',
-              borderRadius: '9999px',
-              background: 'var(--background)',
-            }}
-          />
-        </div>
+          style={{
+            zIndex: 0,
+            padding: '1.5px',
+            background: 'conic-gradient(from var(--ai-angle, 0deg), #00c6fb, #7b2ff7, #ff2d78, #ff9500, #30d158, #00c6fb)',
+            animation: isTyping ? 'ai-ring-spin 3s linear infinite' : 'none',
+            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+            WebkitMaskComposite: 'xor',
+            maskComposite: 'exclude',
+          }}
+        />
 
         {/* 2. Spotlight glow beneath bar */}
         <div
