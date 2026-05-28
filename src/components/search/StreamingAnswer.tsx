@@ -442,17 +442,17 @@ function ReasoningPanel({
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-[11px] font-medium text-foreground/50">
+              <p className="text-[11px] sm:text-xs font-medium text-foreground/50">
                 {heading}
               </p>
               {/* Step counter */}
               {state === 'thinking' && (
-                <span className="text-[10px] font-medium text-foreground/30 tabular-nums">
+                <span className="text-[10px] sm:text-[11px] font-medium text-foreground/30 tabular-nums">
                   {activeStep + 1}/{totalSteps}
                 </span>
               )}
               {state === 'thinking' && (
-                <span className="inline-flex rounded-full bg-foreground/[0.04] px-2.5 py-0.5 text-[10px] font-medium text-foreground/50">
+                <span className="inline-flex rounded-full bg-foreground/[0.04] px-2.5 py-0.5 text-[10px] sm:text-[11px] font-medium text-foreground/50">
                   <ShimmeringText text={script.statusText} duration={1.8} spread={1.25} />
                 </span>
               )}
@@ -462,7 +462,7 @@ function ReasoningPanel({
               <AnimatePresence mode="wait" initial={false}>
                 <motion.p
                   key={`${state}:${activeStep}:${thoughtText}`}
-                  className="text-[12px] leading-relaxed text-foreground/70 sm:text-[13px]"
+                  className="text-xs sm:text-[13px] leading-relaxed text-foreground/70"
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
@@ -474,13 +474,13 @@ function ReasoningPanel({
             </div>
 
             {supportText && (
-              <p className="mt-0.5 text-[11px] leading-relaxed text-foreground/40">
+              <p className="mt-0.5 text-[11px] sm:text-xs leading-relaxed text-foreground/40">
                 {supportText}
               </p>
             )}
 
             {state === 'done' && content && (
-              <p className="mt-1 text-[11px] leading-relaxed text-foreground/35">
+              <p className="mt-1 text-[11px] sm:text-xs leading-relaxed text-foreground/35">
                 {content}
               </p>
             )}
@@ -571,7 +571,7 @@ function ModelBadge({
   return (
     <div className="flex items-center gap-2 mt-5 pt-4 flex-wrap border-t border-foreground/5 animate-fade-in sm:gap-3 sm:mt-7 sm:pt-5">
       {cached && (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium bg-amber-500/[0.08] text-amber-600 dark:text-amber-400 border border-amber-500/15 sm:gap-1.5 sm:px-3 sm:py-1 sm:text-[11px]">
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium bg-amber-500/[0.08] text-amber-600 dark:text-amber-400 border border-amber-500/15 sm:gap-1.5 sm:px-3 sm:py-1">
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
@@ -579,16 +579,16 @@ function ModelBadge({
         </span>
       )}
       
-      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium border sm:gap-1.5 sm:px-3 sm:py-1 sm:text-[11px] ${tierStyle.className}`}>
+      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium border sm:gap-1.5 sm:px-3 sm:py-1 ${tierStyle.className}`}>
         {tier}
       </span>
       
-      <span className="text-[9px] font-medium text-muted-foreground/70 uppercase tracking-wide sm:text-[10px]">
+      <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide sm:text-xs">
         {cached ? 'via' : 'by'}{' '}
         <span className="text-foreground/60 font-semibold">{modelHuman}</span>
       </span>
       
-      <span className="text-[9px] font-medium text-muted-foreground/50 uppercase tracking-wide ml-auto flex items-center gap-1.5 sm:text-[10px]">
+      <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground/50 uppercase tracking-wide ml-auto flex items-center gap-1.5 sm:text-xs">
         {cached ? (
           <>
             <svg className="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">

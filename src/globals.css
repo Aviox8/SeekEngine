@@ -214,18 +214,24 @@
   .text-overline { @apply text-[0.6875rem] font-semibold uppercase tracking-widest; }
 
   /* Touch target minimum — only for elements without explicit sizing */
-  button:not([class*="h-"]):not([class*="min-h-"]), a:not([class*="h-"]):not([class*="min-h-"]), [role="button"]:not([class*="h-"]):not([class*="min-h-"]) { min-height: 44px; min-width: 44px; }
+  /* Use .touch-ok class to opt out of the 44px minimum */
+  button:not(.touch-ok):not([class*="min-h-"]):not([class*="h-8"]):not([class*="h-9"]):not([class*="h-10"]):not([class*="h-11"]):not([class*="h-12"]),
+  a:not(.touch-ok):not([class*="min-h-"]):not([class*="h-8"]):not([class*="h-9"]):not([class*="h-10"]):not([class*="h-11"]):not([class*="h-12"]),
+  [role="button"]:not(.touch-ok):not([class*="min-h-"]):not([class*="h-8"]):not([class*="h-9"]):not([class*="h-10"]):not([class*="h-11"]):not([class*="h-12"]) {
+    min-height: 44px;
+    min-width: 44px;
+  }
   /* Except inline text links and tiny indicators */
   a:not([class]), .inline-link { min-height: unset; min-width: unset; }
   nav a, footer a { min-height: 44px; display: inline-flex; align-items: center; }
 
-  /* Focus states for improved accessibility */
+  /* Focus states — single consistent system */
   :focus-visible {
-    @apply outline-none ring-2 ring-offset-2 ring-primary;
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
   }
-
-  button:focus-visible { @apply ring-offset-background; }
-  input:focus-visible, textarea:focus-visible { @apply ring-primary; }
+  button:focus-visible { outline-offset: 2px; }
+  input:focus-visible, textarea:focus-visible { outline-color: hsl(var(--ring)); }
 
   /* Reduced motion — respect user preference */
   @media (prefers-reduced-motion: reduce) {
@@ -262,9 +268,6 @@ html, body { width: 100%; overflow-x: hidden; }
 ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.3); }
 
 ::selection { background: hsl(var(--foreground) / 0.1); color: inherit; }
-
-*:focus { outline: none; }
-*:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
 
 /* Theme transitions */
 *, *::before, *::after {

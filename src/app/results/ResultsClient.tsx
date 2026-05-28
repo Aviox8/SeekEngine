@@ -255,7 +255,7 @@ export default function ResultsClient() {
         <div className="mb-6 animate-fade-in-up sm:mb-8 lg:mb-10">
           <div className="flex items-center gap-2 mb-2 sm:mb-3">
             <div className="w-1 h-4 rounded-full bg-primary/40 sm:h-5" />
-            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/60 sm:text-xs sm:tracking-[0.15em]">
+            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground/60 sm:tracking-[0.15em]">
               Results
             </span>
           </div>
@@ -286,7 +286,7 @@ export default function ResultsClient() {
                     onClick={copyToClipboard}
                     disabled={!aiAnswer.trim()}
                     aria-label={copied ? 'Copied to clipboard' : 'Copy answer to clipboard'}
-                    className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide transition-all px-2 py-1.5 rounded-md text-muted-foreground/70 hover:text-foreground hover:bg-accent/10 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:gap-1.5 sm:text-xs sm:px-2.5 sm:rounded-lg"
+                    className="flex items-center gap-1 text-[10px] sm:text-xs font-semibold uppercase tracking-wide transition-all px-2 py-1.5 rounded-md text-muted-foreground/70 hover:text-foreground hover:bg-accent/10 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:gap-1.5 sm:px-2.5 sm:rounded-lg"
                   >
                     {copied ? (
                       <>
@@ -329,7 +329,7 @@ export default function ResultsClient() {
                     exit={{ opacity: 0, height: 0 }}
                     className="mt-4 pt-4 border-t border-foreground/5 sm:mt-6 sm:pt-5"
                   >
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground/50 mb-2 sm:text-xs">
+                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-muted-foreground/50 mb-2 sm:text-sm">
                       Suggested follow-ups
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -365,7 +365,7 @@ export default function ResultsClient() {
                     animate={{ opacity: 1, height: 'auto' }}
                     className="mt-4 pt-4 border-t border-foreground/5 sm:mt-6 sm:pt-5"
                   >
-                    <label className="block text-[10px] font-bold uppercase tracking-wide text-muted-foreground/60 mb-2 sm:text-xs sm:mb-3">
+                    <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-wide text-muted-foreground/60 mb-2 sm:text-sm sm:mb-3">
                       Follow-up Question
                     </label>
                     <div className="relative group">
@@ -410,38 +410,42 @@ export default function ResultsClient() {
 
           {/* RIGHT COLUMN: Web Sources */}
           <div className="w-full min-w-0 lg:w-[37%] animate-fade-in-up animate-delay-100">
-            <h3 className="text-[10px] font-semibold uppercase tracking-[0.15em] mb-3 text-muted-foreground/40 sm:text-[11px] sm:tracking-[0.2em] sm:mb-4">
+            <h3 className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.15em] mb-3 text-muted-foreground/40 sm:text-sm sm:tracking-[0.2em] sm:mb-4">
               Web Sources
             </h3>
 
-            {/* Time Filter — pill design with sliding indicator */}
-            <div className="relative flex gap-1.5 mb-4 overflow-x-auto scrollbar-none pb-1 -mx-1 px-1 sm:flex-wrap sm:mb-5 sm:overflow-x-visible sm:mx-0 sm:px-0 sm:pb-0">
-              {TIME_OPTIONS.map(opt => (
-                <motion.button
-                  type="button"
-                  key={opt.value}
-                  onClick={() => {
-                    setTimeFilter(opt.value)
-                    // Update URL with time filter for bookmarking
-                    const params = new URLSearchParams(searchParams.toString())
-                    if (opt.value) {
-                      params.set('time', opt.value)
-                    } else {
-                      params.delete('time')
-                    }
-                    router.push(`/results?${params.toString()}`, { scroll: false })
-                  }}
-                  className={`relative shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all duration-200 border whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 ${
-                    timeFilter === opt.value
-                      ? 'bg-foreground text-background border-foreground shadow-sm'
-                      : 'border-foreground/[0.06] text-muted-foreground hover:border-foreground/15 hover:text-foreground'
-                  }`}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  {opt.label}
-                </motion.button>
-              ))}
+            {/* Time Filter — pill design with sliding indicator and fade edge */}
+            <div className="relative">
+              <div className="flex gap-1.5 mb-4 overflow-x-auto scrollbar-none pb-1 -mx-1 px-1 sm:flex-wrap sm:mb-5 sm:overflow-x-visible sm:mx-0 sm:px-0 sm:pb-0">
+                {TIME_OPTIONS.map(opt => (
+                  <motion.button
+                    type="button"
+                    key={opt.value}
+                    onClick={() => {
+                      setTimeFilter(opt.value)
+                      // Update URL with time filter for bookmarking
+                      const params = new URLSearchParams(searchParams.toString())
+                      if (opt.value) {
+                        params.set('time', opt.value)
+                      } else {
+                        params.delete('time')
+                      }
+                      router.push(`/results?${params.toString()}`, { scroll: false })
+                    }}
+                    className={`relative shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all duration-200 border whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 ${
+                      timeFilter === opt.value
+                        ? 'bg-foreground text-background border-foreground shadow-sm'
+                        : 'border-foreground/[0.06] text-muted-foreground hover:border-foreground/15 hover:text-foreground'
+                    }`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {opt.label}
+                  </motion.button>
+                ))}
+              </div>
+              {/* Fade edge for mobile scroll */}
+              <div className="absolute top-0 right-0 bottom-1 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none sm:hidden" aria-hidden="true" />
             </div>
              
             {/* Results list — scrollable on large screens */}

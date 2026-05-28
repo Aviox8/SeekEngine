@@ -274,7 +274,7 @@ export default function Navbar() {
               <motion.button
                 type="button"
                 onClick={() => setTheme(isDarkMode ? 'light' : 'dark')}
-                className="relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-foreground/50 transition-all duration-300 hover:bg-foreground/[0.06] hover:text-foreground active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2"
+                className="relative flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-foreground/50 transition-all duration-300 hover:bg-foreground/[0.06] hover:text-foreground active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2"
                 aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
                 aria-pressed={isDarkMode}
                 whileTap={{ rotate: 180, scale: 0.85 }}
@@ -303,7 +303,7 @@ export default function Navbar() {
                 type="button"
                 ref={hamburgerRef}
                 onClick={() => setMobileOpen(o => !o)}
-                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-foreground/50 transition-all duration-300 hover:bg-foreground/[0.06] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2 sm:hidden"
+                className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-foreground/50 transition-all duration-300 hover:bg-foreground/[0.06] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2 sm:hidden"
                 aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
                 aria-expanded={mobileOpen}
                 aria-controls={mobileMenuId}
