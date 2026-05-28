@@ -3,9 +3,10 @@
  * Returns AI-powered search suggestions with semantic caching
  */
 
-import { getSearchSuggestions } from '../../../../lib/openrouter'
-import { validateSearchQuery } from '../../../../lib/validation'
-import { checkRateLimit, getClientIP, RATE_LIMITS, rateLimitResponse } from '../../../../lib/rate-limit'
+import { getSearchSuggestions } from '@/lib/openrouter'
+import { validateSearchQuery } from '@/lib/validation'
+import { checkRateLimit, getClientIP, RATE_LIMITS, rateLimitResponse } from '@/lib/rate-limit'
+import { createErrorResponse } from '@/lib/errors'
 import { NextRequest, NextResponse } from 'next/server'
 
 // Simple in-memory cache for suggestions (shorter TTL)
@@ -122,9 +123,10 @@ export async function GET(request: NextRequest) {
     )
   } catch (error) {
     console.error('Error in /api/ai/suggest:', error)
+    const errorResponse = createErrorResponse(error)
     return NextResponse.json(
-      { error: 'Failed to generate suggestions' },
-      { status: 500 }
+      errorResponse.error,
+      { status: errorResponse.status }
     )
   }
 }

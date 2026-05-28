@@ -114,7 +114,7 @@ export default function LivingIcon({
           cx="50"
           cy="50"
           r="48"
-          fill="url(#orbGradient)"
+          fill={`url(#${uniqueId}-orbGradient)`}
           animate={{
             opacity: breathingVariants[breathState as keyof typeof breathingVariants].opacity,
             scale: [1, 1.08, 0.96, 1.04, 1],
@@ -124,7 +124,7 @@ export default function LivingIcon({
             repeat: Infinity, 
             ease: 'easeInOut' 
           }}
-          filter="url(#orbGlow)"
+          filter={`url(#${uniqueId}-orbGlow)`}
           style={{ transformOrigin: '50px 50px' }}
         />
 
@@ -146,7 +146,7 @@ export default function LivingIcon({
             ease: 'easeInOut',
             delay: 0.1
           }}
-          filter="url(#orbGlow)"
+          filter={`url(#${uniqueId}-orbGlow)`}
           style={{ transformOrigin: '50px 50px' }}
         />
 
@@ -155,7 +155,7 @@ export default function LivingIcon({
           cx="50"
           cy="50"
           r="36"
-          fill="url(#orbGradient)"
+          fill={`url(#${uniqueId}-orbGradient)`}
           animate={{
             scale: breathingVariants[breathState as keyof typeof breathingVariants].scale,
           }}
@@ -164,7 +164,7 @@ export default function LivingIcon({
             repeat: Infinity, 
             ease: 'easeInOut' 
           }}
-          filter={`url(#${breathState === 'talking' ? 'intensGlow' : 'orbGlow'})`}
+          filter={`url(#${uniqueId}-${breathState === 'talking' ? 'intensGlow' : 'orbGlow'})`}
           style={{ transformOrigin: '50px 50px' }}
         />
 
@@ -173,7 +173,7 @@ export default function LivingIcon({
           cx="30"
           cy="30"
           r="18"
-          fill="url(#shimmerGrad)"
+          fill={`url(#${uniqueId}-shimmerGrad)`}
           animate={{
             opacity: [0.2, 0.4, 0.15, 0.35, 0.2],
             scale: [1, 1.22, 0.89, 1.11, 1],

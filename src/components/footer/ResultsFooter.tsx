@@ -83,7 +83,7 @@ export default function ResultsFooter() {
               { label: 'Developer', href: 'https://archduke.is-a.dev', external: true },
               { label: 'Source', href: 'https://github.com/archduke1337/SeekEngine', external: true },
             ].map((link) => (
-              <a
+              <Link
                 key={link.label}
                 href={link.href}
                 target={link.external ? '_blank' : undefined}
@@ -91,7 +91,7 @@ export default function ResultsFooter() {
                 className="text-[10px] font-medium uppercase tracking-[0.1em] text-muted-foreground/20 transition-colors duration-200 hover:text-foreground/50"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </nav>
         </div>
