@@ -6,7 +6,7 @@ import { useMemo, useId } from 'react'
 type AgentState = null | 'thinking' | 'listening' | 'talking'
 
 export default function LivingIcon({ 
-  color = '#6F6F6F',
+  color,
   className = '',
   size = 'w-16 h-16',
   agentState = null,
@@ -20,11 +20,13 @@ export default function LivingIcon({
   inputVolume?: number
   outputVolume?: number
 }) {
+  // Use CSS token for default color if not specified
+  const resolvedColor = color || 'var(--living-icon)'
   const uniqueId = useId()
-  // Parse hex color to RGB
+  // Parse hex color to RGB (skip if using CSS variable)
   const rgbColor = useMemo(() => {
-    if (!color.startsWith('#')) return color
-    const hex = color.replace('#', '')
+    if (!resolvedColor.startsWith('#')) return resolvedColor
+    const hex = resolvedColor.replace('#', '')
     const r = parseInt(hex.substring(0, 2), 16)
     const g = parseInt(hex.substring(2, 4), 16)
     const b = parseInt(hex.substring(4, 6), 16)
@@ -76,9 +78,9 @@ export default function LivingIcon({
         <defs>
           {/* Primary radial gradient */}
           <radialGradient id={`${uniqueId}-orbGradient`} cx="40%" cy="40%">
-            <stop offset="0%" stopColor={typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 1)` : color} />
-            <stop offset="50%" stopColor={typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.6)` : color} />
-            <stop offset="100%" stopColor={typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.15)` : color} />
+            <stop offset="0%" stopColor={typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 1)` : resolvedColor} />
+            <stop offset="50%" stopColor={typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.6)` : resolvedColor} />
+            <stop offset="100%" stopColor={typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.15)` : resolvedColor} />
           </radialGradient>
 
           {/* Subtle shimmer gradient */}
@@ -100,7 +102,7 @@ export default function LivingIcon({
           {/* Enhanced glow for talking state */}
           <filter id={`${uniqueId}-intensGlow`}>
             <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-            <feFlood floodColor={typeof rgbColor === 'object' ? rgbColor.css : color} result="glowColor"/>
+            <feFlood floodColor={typeof rgbColor === 'object' ? rgbColor.css : resolvedColor} result="glowColor"/>
             <feComposite in="glowColor" in2="coloredBlur" operator="in" result="softGlow"/>
             <feMerge>
               <feMergeNode in="softGlow"/>
@@ -134,7 +136,7 @@ export default function LivingIcon({
           cy="50"
           r="42"
           fill="none"
-          stroke={typeof rgbColor === 'object' ? rgbColor.css : color}
+          stroke={typeof rgbColor === 'object' ? rgbColor.css : resolvedColor}
           strokeWidth="1"
           animate={{
             opacity: agentState === 'talking' ? [0.4, 0.8, 0.3, 0.7, 0.4] : [0.15, 0.3, 0.1, 0.25, 0.15],
@@ -191,7 +193,7 @@ export default function LivingIcon({
           cx="50"
           cy="50"
           r="28"
-          fill={typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.4)` : color}
+          fill={typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.4)` : resolvedColor}
           animate={{
             opacity: [0.3, 0.7, 0.2, 0.6, 0.3],
             scale: [1, 1.14, 0.93, 1.07, 1],
@@ -219,10 +221,10 @@ export default function LivingIcon({
         }}
         className="absolute w-7 h-7 rounded-full"
         style={{
-          background: `radial-gradient(circle at 30% 30%, ${typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.95)` : color}, ${typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.3)` : color})`,
+          background: `radial-gradient(circle at 30% 30%, ${typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.95)` : resolvedColor}, ${typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.3)` : resolvedColor})`,
           boxShadow: `
-            0 0 16px ${typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.8)` : color},
-            0 0 32px ${typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.4)` : color},
+            0 0 16px ${typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.8)` : resolvedColor},
+            0 0 32px ${typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.4)` : resolvedColor},
             inset -1.5px -1.5px 6px rgba(0, 0, 0, 0.3),
             inset 2px 2px 6px rgba(255, 255, 255, 0.1)
           `,
@@ -247,7 +249,7 @@ export default function LivingIcon({
             style={{ 
               width: '80px',
               height: '80px',
-              borderColor: typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.8)` : color,
+              borderColor: typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.8)` : resolvedColor,
             }}
           />
 
@@ -267,7 +269,7 @@ export default function LivingIcon({
             style={{ 
               width: '80px',
               height: '80px',
-              borderColor: typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.4)` : color,
+              borderColor: typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.4)` : resolvedColor,
               borderWidth: '1px',
             }}
           />
@@ -288,7 +290,7 @@ export default function LivingIcon({
             style={{ 
               width: '80px',
               height: '80px',
-              borderColor: typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.2)` : color,
+              borderColor: typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.2)` : resolvedColor,
               borderWidth: '1px',
             }}
           />
@@ -311,7 +313,7 @@ export default function LivingIcon({
           style={{ 
             width: '72px',
             height: '72px',
-            borderColor: typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.9)` : color,
+            borderColor: typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.9)` : resolvedColor,
           }}
         />
       )}

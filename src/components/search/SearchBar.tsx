@@ -39,19 +39,15 @@ export default memo(function SearchBar({
   const { history, removeEntry } = useSearchHistory()
   const isDark = resolvedTheme === 'dark'
   
-  // PERF: Memoize dropdown style objects (were recreated every render)
+  // PERF: Memoize dropdown style objects using CSS tokens
   const dropdownStyle = useMemo(() => ({
-    background: isDark 
-      ? 'rgba(15, 15, 15, 0.98)'
-      : 'rgba(255, 255, 255, 0.98)',
+    background: 'var(--dropdown-surface)',
     backdropFilter: 'blur(40px)',
-    borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
-    boxShadow: isDark 
-      ? '0 16px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)'
-      : '0 16px 40px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.5)',
+    borderColor: 'var(--glass-border)',
+    boxShadow: 'var(--dropdown-shadow)',
     maxHeight: '60vh',
     overflowY: 'auto' as const
-  }), [isDark])
+  }), [])
 
   const [isFocused, setIsFocused] = useState(false)
   const isCommand = query.startsWith('/')

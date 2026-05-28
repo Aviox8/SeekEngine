@@ -376,9 +376,7 @@ export default function Navbar() {
               transition={{ duration: 0.18 }}
               className="fixed inset-0 z-40 backdrop-blur-sm sm:hidden"
               style={{
-                background: isDarkMode 
-                  ? 'linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.8) 100%)'
-                  : 'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.8) 100%)'
+                background: 'var(--nav-backdrop)'
               }}
               onClick={() => setMobileOpen(false)}
               aria-hidden="true"

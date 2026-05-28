@@ -105,7 +105,7 @@ export function Sources({ sources, isLoading, className, ...props }: SourcesProp
                 aria-label={`${source.title} - ${displayUrl}`}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-4 h-4 rounded shadow-sm bg-white dark:bg-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
+                  <div className="w-4 h-4 rounded shadow-sm bg-card flex items-center justify-center overflow-hidden shrink-0">
                     {source.favicon && !faviconFailed ? (
                       <img 
                         src={source.favicon} 

@@ -49,7 +49,7 @@ const PromptInput = React.forwardRef<HTMLTextAreaElement, PromptInputProps>(
         <div className="flex items-start gap-3 p-4">
           <motion.div 
             className="mt-1 flex-shrink-0"
-            animate={{ color: isFocused ? 'rgb(59, 130, 246)' : 'rgb(100, 100, 100)' }}
+            animate={{ color: isFocused ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }}
             transition={{ duration: 0.2 }}
           >
             {isLoading ? (
