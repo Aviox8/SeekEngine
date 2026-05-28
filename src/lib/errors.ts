@@ -60,7 +60,9 @@ export function createErrorResponse(error: unknown): {
     return {
       error: {
         code: 'INTERNAL_ERROR',
-        message: error.message || 'An unexpected error occurred',
+        message: process.env.NODE_ENV === 'production'
+          ? 'An unexpected error occurred'
+          : (error.message || 'An unexpected error occurred'),
         retryable: false,
       },
       status: 500,

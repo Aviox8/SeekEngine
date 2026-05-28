@@ -24,7 +24,7 @@ export async function generateAIAnswer(
       role: 'system',
       content: `You are SeekEngine AI. Concise markdown. ${
         contextText ? `Source base:\n${contextText}` : ''
-      } Cite as [1], [2].`,
+      } Cite sources as [n].`,
     },
     {
       role: 'user',

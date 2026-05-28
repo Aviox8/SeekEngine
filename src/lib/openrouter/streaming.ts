@@ -233,7 +233,11 @@ export async function* streamOpenRouter(
         throw new Error('No token found')
       }
 
-      const firstToken = await Promise.race([readFirstChunk(), ttftTimeout])
+      const firstToken = await Promise.race([readFirstChunk(), ttftTimeout]).catch(async (err) => {
+        // Cancel the reader if TTFT timeout fires — prevents resource leak
+        try { await reader.cancel() } catch { /* ignore cleanup error */ }
+        throw err
+      })
       if (ttftTimeoutId) clearTimeout(ttftTimeoutId)
       clearTimeout(connectTimeoutId)
 

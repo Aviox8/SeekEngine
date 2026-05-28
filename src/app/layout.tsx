@@ -102,12 +102,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-        <link rel="preconnect" href="https://openrouter.ai" />
-        <link rel="preconnect" href="https://www.googleapis.com" />
-        <link rel="preconnect" href="https://serpapi.com" />
         <link rel="manifest" href="/manifest.json" />
         {/* JSON-LD Structured Data for Search Engines */}
         <script
@@ -136,7 +130,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans antialiased min-h-screen flex flex-col overflow-x-hidden">
+      <body className={`${spaceGrotesk.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} font-sans antialiased min-h-screen flex flex-col overflow-x-hidden`}>
         <Providers>
           <ErrorBoundary>
             <Navbar />

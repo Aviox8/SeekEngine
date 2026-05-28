@@ -187,6 +187,11 @@ export async function callOpenRouter(
         }
 
         logTelemetry({ task, model, tier, latency, success: false, error: 'Empty response' })
+        const failInfo = modelFailures.get(model)
+        modelFailures.set(model, {
+          failures: (failInfo?.failures || 0) + 1,
+          lastFailedAt: Date.now()
+        })
       } catch (err: unknown) {
         clearTimeout(timeoutId)
         const error = err as Error

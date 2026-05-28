@@ -72,8 +72,8 @@ export function validateSearchQueryValue(q: string | null | undefined): {
     return { valid: false, error: 'Query too long (max 500 characters)' }
   }
 
-  if (q.trim().length < 2) {
-    return { valid: false, error: 'Query must be at least 2 characters' }
+  if (q.trim().length < 1) {
+    return { valid: false, error: 'Query must be at least 1 character' }
   }
 
   return { valid: true, query: q.trim() }
