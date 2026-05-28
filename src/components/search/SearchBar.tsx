@@ -288,13 +288,15 @@ export default memo(function SearchBar({
             </div>
 
             {/* Right controls - minimal and inline */}
-            <AnimatePresence>
-              {query && (
+            <AnimatePresence mode="wait">
+              {query ? (
                 <motion.div
+                  key="controls"
                   initial={{ opacity: 0, width: 0 }}
                   animate={{ opacity: 1, width: 'auto' }}
                   exit={{ opacity: 0, width: 0 }}
-                  className="flex items-baseline gap-0.5 flex-shrink-0 flex-nowrap"
+                  transition={{ duration: 0.2 }}
+                  className="flex items-center gap-1 flex-shrink-0"
                 >
                   {/* Clear button - subtle */}
                   <motion.button
@@ -306,16 +308,27 @@ export default memo(function SearchBar({
                       updateQuery('')
                       textareaRef.current?.focus()
                     }}
-                    className="p-0.5 transition-opacity text-muted-foreground/40 hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:text-foreground"
+                    className="p-1 rounded-md transition-colors duration-150 text-muted-foreground/30 hover:text-foreground/60 hover:bg-foreground/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20"
                     aria-label="Clear search"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3.5 h-3.5" />
                   </motion.button>
                   
-                  {/* Submit hint - text only */}
-                  <span className="text-xs text-muted-foreground/25 font-medium">↵</span>
+                  {/* Submit hint */}
+                  <span className="text-[11px] text-muted-foreground/20 font-medium px-1">↵</span>
                 </motion.div>
-              )}
+              ) : isFocused ? (
+                <motion.div
+                  key="hints"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex items-center gap-1.5 flex-shrink-0"
+                >
+                  <kbd className="text-[10px] text-muted-foreground/20 font-medium px-1 py-0.5 rounded border border-foreground/[0.06] bg-foreground/[0.02]">/</kbd>
+                </motion.div>
+              ) : null}
             </AnimatePresence>
           </div>
         </div>
