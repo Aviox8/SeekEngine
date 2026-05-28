@@ -346,6 +346,7 @@ export default memo(function SearchBar({
                   <Clock className="w-3.5 h-3.5 shrink-0 text-muted-foreground/25 group-hover:text-muted-foreground/40 transition-colors" />
                   <span className="flex-1 truncate text-foreground/70 group-hover:text-foreground/90 transition-colors">{entry.query}</span>
                   <motion.button
+                    type="button"
                     initial={{ opacity: 0 }}
                     whileHover={{ opacity: 1 }}
                     onClick={(e) => {
@@ -353,7 +354,7 @@ export default memo(function SearchBar({
                       removeEntry(entry.query)
                     }}
                     aria-label={`Remove ${entry.query} from history`}
-                    className="opacity-0 group-hover:opacity-100 p-1 rounded transition-all text-muted-foreground/30 hover:text-destructive hover:bg-destructive/5"
+                    className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-1 rounded transition-all text-muted-foreground/30 hover:text-destructive hover:bg-destructive/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:text-destructive"
                   >
                     <X className="w-3 h-3" />
                   </motion.button>
