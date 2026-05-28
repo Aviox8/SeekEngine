@@ -297,6 +297,28 @@ html.theme-transition *, html.theme-transition *::before, html.theme-transition 
 @property --border-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
 @keyframes border-rotate { from { --border-angle: 0deg; } to { --border-angle: 360deg; } }
 
+/* Apple Intelligence AI ring animations */
+@property --ai-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes ai-ring-spin {
+  to { --ai-angle: 360deg; }
+}
+
+@keyframes ai-brush-sweep {
+  0%   { left: -100%; opacity: 0; }
+  15%  { opacity: 1; }
+  100% { left: 120%; opacity: 0; }
+}
+
+@keyframes ai-siri-wave {
+  0%, 100% { transform: scaleY(0.4); opacity: 0.4; }
+  50%       { transform: scaleY(1.6); opacity: 1; }
+}
+
 /* Scroll fade — needs @supports, not in tailwind */
 @keyframes fade-top {
   0% { --ft: 0; }

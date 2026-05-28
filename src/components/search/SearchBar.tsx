@@ -141,140 +141,218 @@ export default memo(function SearchBar({
 
   return (
     <div className="relative w-full z-[100]" ref={suggestionsRef}>
-      {/* Main search container — Apple Intelligence spotlight */}
-      <div className={`relative z-50 rounded-full transition-all duration-700 ease-out ${
-        isFocused 
-          ? 'shadow-[0_0_40px_-8px_rgba(124,58,237,0.25),0_0_80px_-12px_rgba(124,58,237,0.15)]' 
-          : 'shadow-none'
-      }`}>
-        {/* Apple Intelligence spotlight border — rotating aurora gradient */}
-        <div className={`absolute -inset-[2px] rounded-full overflow-hidden transition-all duration-700 ease-out ${
-          isFocused ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-        }`}>
-          {/* Rotating gradient layer */}
-          <div 
-            className="absolute inset-0"
+      {/* ── Apple Intelligence wrapper ── */}
+      <div className="relative">
+
+        {/* 1. Spinning rainbow ring border */}
+        <div
+          className={`absolute -inset-[2px] rounded-full transition-opacity duration-500 overflow-hidden pointer-events-none ${
+            isTyping ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{ zIndex: 0 }}
+        >
+          {/* Rotating gradient */}
+          <div
             style={{
-              background: 'conic-gradient(from 0deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #54a0ff, #5f27cd, #ff6b6b)',
-              animation: 'ai-rotate 3s linear infinite',
+              position: 'absolute',
+              inset: '-80%',
+              background: 'conic-gradient(from var(--ai-angle, 0deg), #00c6fb, #7b2ff7, #ff2d78, #ff9500, #30d158, #00c6fb)',
+              animation: isTyping ? 'ai-ring-spin 3s linear infinite' : 'none',
             }}
           />
-          {/* Inner cutout — creates the border ring effect */}
-          <div 
-            className="absolute rounded-full"
+          {/* Inner cutout — creates the border-only ring */}
+          <div
             style={{
+              position: 'absolute',
               inset: '2px',
+              borderRadius: '9999px',
               background: 'var(--background)',
             }}
           />
         </div>
-        
-        {/* Inner container — glass surface */}
-        <div className={`relative rounded-full transition-all duration-500 px-5 py-2.5 ${
-          isFocused 
-            ? 'bg-background/95 backdrop-blur-xl border border-transparent' 
-            : 'bg-foreground/[0.02] border border-foreground/[0.06] hover:border-foreground/[0.10] hover:bg-foreground/[0.03]'
+
+        {/* 2. Spotlight glow beneath bar */}
+        <div
+          className={`absolute -bottom-4 left-1/2 -translate-x-1/2 w-3/4 h-8 rounded-full pointer-events-none transition-opacity duration-500 ${
+            isTyping ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{
+            background: 'conic-gradient(from var(--ai-angle, 0deg), #00c6fb33, #7b2ff733, #ff2d7833, #ff950033, #30d15833, #00c6fb33)',
+            filter: 'blur(14px)',
+            animation: isTyping ? 'ai-ring-spin 3s linear infinite' : 'none',
+            zIndex: 0,
+          }}
+        />
+
+        {/* 3. One-shot brush sweep on first keystroke */}
+        <AnimatePresence>
+          {isTyping && (
+            <motion.div
+              key="brush-sweep"
+              className="absolute inset-0 rounded-full pointer-events-none overflow-hidden"
+              style={{ zIndex: 10 }}
+              initial={{ opacity: 1 }}
+              animate={{ opacity: 0 }}
+              transition={{ duration: 0.01, delay: 0.7 }}
+            >
+              <motion.div
+                initial={{ left: '-100%', opacity: 0 }}
+                animate={{ left: '120%', opacity: [0, 1, 1, 0] }}
+                transition={{ duration: 0.65, ease: [0.25, 0.46, 0.45, 0.94] }}
+                style={{
+                  position: 'absolute',
+                  top: '-20%',
+                  width: '55%',
+                  height: '140%',
+                  background: 'linear-gradient(105deg, transparent, rgba(0,198,251,0.2) 20%, rgba(123,47,247,0.3) 45%, rgba(255,45,120,0.25) 65%, rgba(255,149,0,0.15) 85%, transparent)',
+                  filter: 'blur(3px)',
+                  transform: 'skewX(-12deg)',
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* 4. Main search bar */}
+        <div className={`relative z-[1] rounded-full border transition-all duration-300 px-5 py-2 ${
+          isFocused
+            ? 'border-transparent bg-background/95 backdrop-blur-xl'
+            : 'border-foreground/[0.06] bg-foreground/[0.01] hover:border-foreground/[0.10]'
         }`}>
 
-        {/* Input wrapper */}
-        <div className="relative flex items-baseline gap-1.5">
-          {/* Living icon - appears while typing */}
-          <AnimatePresence>
-            {isTyping && (
-              <motion.div
-                key="typing"
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.2 }}
-                className="flex-shrink-0 mt-0.5"
-              >
-                {isLoading ? (
-                  <Loader2 className="w-4 h-4 text-primary/60 animate-spin" />
-                ) : (
-                  <LivingIcon size="w-4 h-4" color="#6F6F6F" />
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Textarea - plain text input */}
-          <div className="relative flex-1">
-            {/* Ghost text prediction */}
-            {ghostText && (
-              <div className="absolute inset-0 flex items-baseline pointer-events-none text-[15px] sm:text-[16px] tracking-normal overflow-hidden whitespace-pre">
-                <span className="opacity-0">{query}</span>
-                <span className="text-muted-foreground/25">{ghostText}</span>
-              </div>
-            )}
-
-            <textarea
-              ref={textareaRef}
-              value={query}
-              onChange={(e) => {
-                updateQuery(e.target.value)
-                setShowSuggestions(e.target.value.trim().length > 0)
-                setSelectedIndex(-1)
-              }}
-              onFocus={() => {
-                setIsFocused(true)
-                if(suggestions.length > 0) setShowSuggestions(true)
-              }}
-              onBlur={(e) => {
-                const relatedTarget = e.relatedTarget as Node | null
-                if (relatedTarget && suggestionsRef.current?.contains(relatedTarget)) return
-                if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current)
-                blurTimeoutRef.current = setTimeout(() => setIsFocused(false), 150)
-              }}
-              onKeyDown={handleKeyDown}
-              rows={1}
-              placeholder="Search anything…"
-              aria-label="Search query input"
-              aria-describedby="search-hint"
-              aria-haspopup="listbox"
-              className="w-full bg-transparent border-none outline-none text-[15px] sm:text-[16px] font-normal tracking-normal text-foreground placeholder:text-muted-foreground/35 resize-none p-0 min-h-[44px] max-h-[160px] leading-normal"
-              style={{ caretColor: 'hsl(var(--primary))' }}
-              spellCheck={false}
-              autoComplete="off"
-              autoFocus={autoFocus}
-            />
-            <p id="search-hint" className="sr-only">
-              Press Enter to search. Press Shift and Enter for a new line. Press Tab to accept a suggestion.
-            </p>
-          </div>
-
-          {/* Right controls - minimal and inline */}
-          <AnimatePresence>
-            {query && (
-              <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={{ opacity: 0, width: 0 }}
-                className="flex items-baseline gap-0.5 flex-shrink-0 flex-nowrap"
-              >
-                {/* Clear button - subtle */}
-                <motion.button
-                  type="button"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  onClick={() => {
-                    updateQuery('')
-                    textareaRef.current?.focus()
-                  }}
-                  className="p-0.5 transition-opacity text-muted-foreground/40 hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:text-foreground"
-                  aria-label="Clear search"
+          {/* Input wrapper */}
+          <div className="relative flex items-baseline gap-1.5">
+            {/* Living icon - appears while typing */}
+            <AnimatePresence>
+              {isTyping && (
+                <motion.div
+                  key="typing"
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 'auto' }}
+                  exit={{ opacity: 0, width: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex-shrink-0 mt-0.5"
                 >
-                  <X className="w-4 h-4" />
-                </motion.button>
-                
-                {/* Submit hint - text only */}
-                <span className="text-xs text-muted-foreground/25 font-medium">↵</span>
-              </motion.div>
-            )}
-           </AnimatePresence>
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 text-primary/60 animate-spin" />
+                  ) : (
+                    <LivingIcon size="w-4 h-4" color="#6F6F6F" />
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Textarea - plain text input */}
+            <div className="relative flex-1">
+              {/* Ghost text prediction */}
+              {ghostText && (
+                <div className="absolute inset-0 flex items-baseline pointer-events-none text-[15px] sm:text-[16px] tracking-normal overflow-hidden whitespace-pre">
+                  <span className="opacity-0">{query}</span>
+                  <span className="text-muted-foreground/25">{ghostText}</span>
+                </div>
+              )}
+
+              <textarea
+                ref={textareaRef}
+                value={query}
+                onChange={(e) => {
+                  updateQuery(e.target.value)
+                  setShowSuggestions(e.target.value.trim().length > 0)
+                  setSelectedIndex(-1)
+                }}
+                onFocus={() => {
+                  setIsFocused(true)
+                  if(suggestions.length > 0) setShowSuggestions(true)
+                }}
+                onBlur={(e) => {
+                  const relatedTarget = e.relatedTarget as Node | null
+                  if (relatedTarget && suggestionsRef.current?.contains(relatedTarget)) return
+                  if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current)
+                  blurTimeoutRef.current = setTimeout(() => setIsFocused(false), 150)
+                }}
+                onKeyDown={handleKeyDown}
+                rows={1}
+                placeholder="Search anything…"
+                aria-label="Search query input"
+                aria-describedby="search-hint"
+                aria-haspopup="listbox"
+                className="w-full bg-transparent border-none outline-none text-[15px] sm:text-[16px] font-normal tracking-normal text-foreground placeholder:text-muted-foreground/35 resize-none p-0 min-h-[44px] max-h-[160px] leading-normal"
+                style={{ caretColor: 'hsl(var(--primary))' }}
+                spellCheck={false}
+                autoComplete="off"
+                autoFocus={autoFocus}
+              />
+              <p id="search-hint" className="sr-only">
+                Press Enter to search. Press Shift and Enter for a new line. Press Tab to accept a suggestion.
+              </p>
+            </div>
+
+            {/* Right controls - minimal and inline */}
+            <AnimatePresence>
+              {query && (
+                <motion.div
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 'auto' }}
+                  exit={{ opacity: 0, width: 0 }}
+                  className="flex items-baseline gap-0.5 flex-shrink-0 flex-nowrap"
+                >
+                  {/* Clear button - subtle */}
+                  <motion.button
+                    type="button"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    onClick={() => {
+                      updateQuery('')
+                      textareaRef.current?.focus()
+                    }}
+                    className="p-0.5 transition-opacity text-muted-foreground/40 hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:text-foreground"
+                    aria-label="Clear search"
+                  >
+                    <X className="w-4 h-4" />
+                  </motion.button>
+                  
+                  {/* Submit hint - text only */}
+                  <span className="text-xs text-muted-foreground/25 font-medium">↵</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
-        </div>
+
+        {/* 5. Siri-style animated bars (right side, inside bar) */}
+        <AnimatePresence>
+          {isTyping && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.2 }}
+              className="absolute right-5 top-1/2 -translate-y-1/2 z-[2] flex items-center gap-[3px] pointer-events-none"
+            >
+              {[
+                { h: 8,  color: '#00c6fb', delay: '0s' },
+                { h: 14, color: '#7b2ff7', delay: '0.15s' },
+                { h: 10, color: '#ff2d78', delay: '0.3s' },
+                { h: 16, color: '#ff9500', delay: '0.45s' },
+                { h: 8,  color: '#30d158', delay: '0.6s' },
+              ].map((bar, i) => (
+                <div
+                  key={i}
+                  style={{
+                    width: 3,
+                    height: bar.h,
+                    borderRadius: 2,
+                    background: bar.color,
+                    transformOrigin: 'bottom center',
+                    animation: `ai-siri-wave 1.2s ease-in-out infinite ${bar.delay}`,
+                  }}
+                />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
       </div>
 
       {/* Suggestions Dropdown */}
