@@ -89,7 +89,6 @@ export default function Navbar() {
   const { setTheme, resolvedTheme } = useTheme()
   const pathname = usePathname()
   const { scrollY } = useScroll()
-  const [visible, setVisible] = useState(true)
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const mobileMenuId = useId()
@@ -101,11 +100,6 @@ export default function Navbar() {
   const scrolledRef = useRef(false)
 
   useMotionValueEvent(scrollY, 'change', (latest) => {
-    const previous = scrollY.getPrevious() ?? 0
-    const diff = latest - previous
-    if (Math.abs(diff) < 12) return
-    const shouldBeVisible = !(latest > previous && latest > 150)
-    setVisible(v => (v === shouldBeVisible ? v : shouldBeVisible))
     // Guard: only update state if value actually changed
     const nextScrolled = latest > 24
     if (scrolledRef.current !== nextScrolled) {
