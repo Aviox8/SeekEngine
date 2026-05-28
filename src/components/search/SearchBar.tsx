@@ -214,7 +214,7 @@ export default memo(function SearchBar({
         </AnimatePresence>
 
         {/* 4. Main search bar */}
-        <div className="relative z-[1] rounded-full px-5 py-2.5 border border-foreground/[0.06]">
+        <div className="relative z-[1] rounded-full px-5 py-2.5">
 
           {/* Input wrapper */}
           <div className="relative flex items-baseline gap-1.5">
@@ -329,38 +329,7 @@ export default memo(function SearchBar({
           </div>
         </div>
 
-        {/* 5. Siri-style animated bars (left side, outside input area) */}
-        <AnimatePresence>
-          {isTyping && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.2 }}
-              className="absolute -left-12 top-1/2 -translate-y-1/2 z-[2] flex items-center gap-[3px] pointer-events-none"
-            >
-              {[
-                { h: 8,  color: '#00c6fb', delay: '0s' },
-                { h: 14, color: '#7b2ff7', delay: '0.15s' },
-                { h: 10, color: '#ff2d78', delay: '0.3s' },
-                { h: 16, color: '#ff9500', delay: '0.45s' },
-                { h: 8,  color: '#30d158', delay: '0.6s' },
-              ].map((bar, i) => (
-                <div
-                  key={i}
-                  style={{
-                    width: 3,
-                    height: bar.h,
-                    borderRadius: 2,
-                    background: bar.color,
-                    transformOrigin: 'bottom center',
-                    animation: `ai-siri-wave 1.2s ease-in-out infinite ${bar.delay}`,
-                  }}
-                />
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+
 
       </div>
 
