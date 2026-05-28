@@ -3,7 +3,7 @@
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
-import { User, CornerDownRight } from "lucide-react"
+import { User } from "lucide-react"
 import LivingIcon from "../shared/LivingIcon"
 
 interface MessageProps extends React.HTMLAttributes<HTMLDivElement> {
