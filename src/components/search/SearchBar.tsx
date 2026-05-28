@@ -144,28 +144,7 @@ export default memo(function SearchBar({
       {/* ── Apple Intelligence wrapper ── */}
       <div className="relative group">
 
-        {/* 1. Rotating gradient border ring */}
-        <div
-          className={`absolute -inset-[2px] rounded-full pointer-events-none transition-all duration-700 overflow-hidden ${
-            isTyping 
-              ? 'opacity-100 scale-100' 
-              : isFocused 
-                ? 'opacity-40 scale-[0.998]' 
-                : 'opacity-0 scale-95'
-          }`}
-          style={{ zIndex: 0 }}
-        >
-          <div
-            style={{
-              position: 'absolute',
-              inset: '-50%',
-              background: 'conic-gradient(from var(--search-rotation) at 50% 50% in oklab, oklch(0.63 0.2 251.22) 0%, oklch(0.67 0.21 25.81) 15%, oklch(0.9 0.19 93.93) 30%, oklch(0.79 0.25 150.49) 45%, oklch(0.63 0.2 251.22) 60%, oklch(0.72 0.21 150.89) 80%, oklch(0.63 0.2 251.22) 100%)',
-              animation: (isTyping || isFocused) ? 'search-border-rotate 4s linear infinite' : 'none',
-            }}
-          />
-        </div>
-
-        {/* 2. Blurred glow behind border */}
+        {/* 1. Blurred glow — soft halo behind the border */}
         <div
           className={`absolute -inset-[2px] rounded-full pointer-events-none transition-all duration-700 ${
             isTyping 
@@ -175,10 +154,30 @@ export default memo(function SearchBar({
                 : 'opacity-0'
           }`}
           style={{
-            zIndex: -1,
+            zIndex: 0,
             background: 'conic-gradient(from var(--search-rotation) at 50% 50% in oklab, oklch(0.63 0.2 251.22) 0%, oklch(0.67 0.21 25.81) 15%, oklch(0.9 0.19 93.93) 30%, oklch(0.79 0.25 150.49) 45%, oklch(0.63 0.2 251.22) 60%, oklch(0.72 0.21 150.89) 80%, oklch(0.63 0.2 251.22) 100%)',
             filter: isTyping ? 'blur(18px)' : 'blur(12px)',
             animation: (isTyping || isFocused) ? 'search-border-rotate 4s linear infinite' : 'none',
+          }}
+        />
+
+        {/* 2. Gradient border ring — CSS mask cuts out center, only 2px border shows gradient */}
+        <div
+          className={`absolute inset-0 rounded-full pointer-events-none transition-all duration-700 ${
+            isTyping 
+              ? 'opacity-100' 
+              : isFocused 
+                ? 'opacity-40' 
+                : 'opacity-0'
+          }`}
+          style={{
+            zIndex: 1,
+            padding: '2px',
+            background: 'conic-gradient(from var(--search-rotation) at 50% 50% in oklab, oklch(0.63 0.2 251.22) 0%, oklch(0.67 0.21 25.81) 15%, oklch(0.9 0.19 93.93) 30%, oklch(0.79 0.25 150.49) 45%, oklch(0.63 0.2 251.22) 60%, oklch(0.72 0.21 150.89) 80%, oklch(0.63 0.2 251.22) 100%)',
+            animation: (isTyping || isFocused) ? 'search-border-rotate 4s linear infinite' : 'none',
+            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+            WebkitMaskComposite: 'xor',
+            maskComposite: 'exclude',
           }}
         />
 
@@ -211,26 +210,7 @@ export default memo(function SearchBar({
           )}
         </AnimatePresence>
 
-        {/* 4. Inner mask — cuts out the center, leaving only the border visible */}
-        <div
-          className={`absolute inset-0 rounded-full pointer-events-none transition-all duration-700 ${
-            isTyping 
-              ? 'opacity-100' 
-              : isFocused 
-                ? 'opacity-40' 
-                : 'opacity-0'
-          }`}
-          style={{
-            zIndex: 1,
-            padding: '2px',
-            background: 'var(--background)',
-            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-            WebkitMaskComposite: 'xor',
-            maskComposite: 'exclude',
-          }}
-        />
-
-        {/* 5. Main search bar — subtle glass on focus */}
+        {/* 4. Main search bar — fully transparent, sits on top */}
         <div className={`relative z-[2] rounded-full px-5 py-2.5 transition-all duration-500 ${
           isFocused && !isTyping 
             ? 'bg-foreground/[0.02]' 
