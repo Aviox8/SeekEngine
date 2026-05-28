@@ -80,7 +80,7 @@ function validateEnv(): EnvType {
     }
   }
 
-  return env.success ? env.data : ({} as EnvType)
+  return env.success ? env.data : ({} as unknown as EnvType)
 }
 
 export const ENV = validateEnv()

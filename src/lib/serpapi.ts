@@ -64,7 +64,7 @@ export async function getSerpResults(
       throw Errors.externalApiFailed('SerpApi', response.status)
     }
 
-    const data = await response.json() as SerpApiResponse
+    const data: SerpApiResponse = await response.json()
 
     if (!data.organic_results) {
       return []

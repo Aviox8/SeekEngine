@@ -65,7 +65,7 @@ export async function getWebSearchResults(
       throw Errors.externalApiFailed('Google Custom Search', response.status)
     }
 
-    const data = await response.json() as GoogleCustomSearchResponse
+    const data: GoogleCustomSearchResponse = await response.json()
 
     if (!data.items) {
       return []
