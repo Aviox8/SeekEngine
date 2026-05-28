@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import { Space_Grotesk, Instrument_Serif, JetBrains_Mono } from 'next/font/google'
 import Navbar from '../components/layout/Navbar'
 import Providers from '../components/layout/Providers'
 import PageTransition from '../components/layout/PageTransition'
@@ -9,6 +10,25 @@ import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import ConditionalFooter from '../components/layout/ConditionalFooter'
 import '../globals.css'
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+})
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-display',
+  display: 'swap',
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'SeekEngine | Sync of Human Intent',
@@ -43,15 +63,7 @@ export const metadata: Metadata = {
     creator: '@archduke1337',
     images: ['/og-image.png'],
   },
-  verification: {
-    google: 'google-site-verification-placeholder',
-    yandex: 'yandex-verification-placeholder',
-    yahoo: 'yahoo-site-verification-placeholder',
-    other: {
-      'msvalidate.01': 'bing-verification-placeholder',
-      'facebook-domain-verification': 'facebook-verification-placeholder',
-    },
-  },
+  verification: {},
   icons: {
     icon: [
       { url: '/logo.png', type: 'image/png' },
