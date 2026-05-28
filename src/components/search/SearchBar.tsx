@@ -147,27 +147,28 @@ export default memo(function SearchBar({
           ? 'shadow-[0_2px_20px_rgba(124,58,237,0.08)]' 
           : ''
       }`}>
-        {/* AI gradient border — visible on focus */}
-        <div className={`absolute -inset-[1px] rounded-full transition-opacity duration-500 ${
+        {/* AI gradient border — rotating conic gradient with overflow hidden */}
+        <div className={`absolute -inset-[1px] rounded-full overflow-hidden transition-opacity duration-500 ${
           isFocused ? 'opacity-100' : 'opacity-0'
-        }`}
-          style={{
-            background: 'conic-gradient(from 0deg, #f59e0b, #e11d48, #7c3aed, #0284c7, #059669, #f59e0b)',
-            animation: 'ai-rotate 4s linear infinite',
-          }}
-        />
-        {/* Border mask */}
-        <div className={`absolute -inset-[1px] rounded-full transition-opacity duration-500 ${
-          isFocused ? 'opacity-100' : 'opacity-0'
-        }`}
-          style={{
-            background: 'linear-gradient(var(--background), var(--background))',
-            padding: '1px',
-            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-            WebkitMaskComposite: 'xor',
-            maskComposite: 'exclude',
-          }}
-        />
+        }`}>
+          {/* Rotating gradient — oversized to cover rotation */}
+          <div 
+            className="absolute"
+            style={{
+              inset: '-100%',
+              background: 'conic-gradient(from 0deg, #f59e0b, #e11d48, #7c3aed, #0284c7, #059669, #f59e0b)',
+              animation: 'ai-rotate 4s linear infinite',
+            }}
+          />
+          {/* Inner cutout — reveals only the border ring */}
+          <div 
+            className="absolute rounded-full"
+            style={{
+              inset: '1.5px',
+              background: 'var(--background)',
+            }}
+          />
+        </div>
         {/* Inner container */}
         <div className={`relative rounded-full border transition-all duration-300 px-5 py-2 ${
           isFocused 
