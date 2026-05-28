@@ -12,11 +12,11 @@ describe('validateSearchQuery', () => {
     expect(validateSearchQuery(params).valid).toBe(false)
   })
 
-  it('rejects single character query', () => {
+  it('accepts single character query', () => {
     const params = new URLSearchParams({ q: 'a' })
     const result = validateSearchQuery(params)
-    expect(result.valid).toBe(false)
-    expect(result.error).toContain('at least 2')
+    expect(result.valid).toBe(true)
+    expect(result.query).toBe('a')
   })
 
   it('rejects query > 500 chars', () => {
