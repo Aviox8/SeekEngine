@@ -386,7 +386,7 @@ export default function ResultsClient() {
                         style={{ caretColor: 'hsl(var(--primary))' }}
                       />
                       <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:right-2">
-                        <kbd className="hidden sm:inline-flex items-center justify-center px-2 py-1 text-[9px] font-semibold rounded border border-border/50 text-muted-foreground/40 bg-muted/30">/</kbd>
+                        <kbd className="hidden sm:inline-flex items-center justify-center px-2 py-1 text-[10px] sm:text-[11px] font-semibold rounded border border-border/50 text-muted-foreground/40 bg-muted/30">/</kbd>
                         <motion.button 
                           type="button"
                           onClick={handleFollowUp}
