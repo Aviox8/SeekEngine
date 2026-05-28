@@ -75,21 +75,21 @@ export default function LivingIcon({
       >
         <defs>
           {/* Primary radial gradient */}
-          <radialGradient id="orbGradient" cx="40%" cy="40%">
+          <radialGradient id={`${uniqueId}-orbGradient`} cx="40%" cy="40%">
             <stop offset="0%" stopColor={typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 1)` : color} />
             <stop offset="50%" stopColor={typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.6)` : color} />
             <stop offset="100%" stopColor={typeof rgbColor === 'object' ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.15)` : color} />
           </radialGradient>
 
           {/* Subtle shimmer gradient */}
-          <linearGradient id="shimmerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={`${uniqueId}-shimmerGrad`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="white" stopOpacity="0.3" />
             <stop offset="50%" stopColor="white" stopOpacity="0" />
             <stop offset="100%" stopColor="white" stopOpacity="0.1" />
           </linearGradient>
 
           {/* Glow filter */}
-          <filter id="orbGlow">
+          <filter id={`${uniqueId}-orbGlow`}>
             <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
             <feMerge>
               <feMergeNode in="coloredBlur"/>
@@ -98,7 +98,7 @@ export default function LivingIcon({
           </filter>
 
           {/* Enhanced glow for talking state */}
-          <filter id="intensGlow">
+          <filter id={`${uniqueId}-intensGlow`}>
             <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
             <feFlood floodColor={typeof rgbColor === 'object' ? rgbColor.css : color} result="glowColor"/>
             <feComposite in="glowColor" in2="coloredBlur" operator="in" result="softGlow"/>
