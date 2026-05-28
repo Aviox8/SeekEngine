@@ -1,5 +1,11 @@
 import { Suspense } from 'react'
+import type { Metadata } from 'next'
 import ResultsClient from './ResultsClient'
+
+export const metadata: Metadata = {
+  title: 'Search Results | SeekEngine',
+  description: 'AI-powered search results with synthesized answers and web sources.',
+}
 
 export default function ResultsPage() {
   return (
