@@ -1,10 +1,10 @@
 'use client'
 
 /**
- * Navigation Bar — Floating glassmorphic pill nav
- * Design: Always-visible subtle pill · heavier glass on scroll · layered elevation
+ * Navigation Bar — Apple-inspired glassmorphic nav
+ * Design: Ultra-clean · subtle glass · refined typography · smooth scroll transitions
  * UX:     prefers-reduced-motion · visible focus rings · proper ARIA · 44px touch targets
- * Motion: Staggered entrance · text-roll hover (desktop) · spring hide/show on scroll
+ * Motion: Spring-based transitions · clean hover states · scroll-reactive background
  */
 
 import Link from 'next/link'
@@ -41,10 +41,9 @@ const NAV_ICONS: Record<string, React.ReactNode> = {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Text Roll hover — character-staggered reveal (desktop only)
-   Disabled automatically via CSS when prefers-reduced-motion
+   Apple-style Nav Link — clean hover with subtle underline
 ───────────────────────────────────────────────────────────── */
-function TextRollLink({ children, href, isActive, external }: {
+function NavLink({ children, href, isActive, external }: {
   children: string
   href: string
   isActive: boolean
@@ -57,59 +56,37 @@ function TextRollLink({ children, href, isActive, external }: {
       rel={external ? 'noopener noreferrer' : undefined}
       aria-label={external ? `${children} (opens in new tab)` : children}
       aria-current={isActive ? 'page' : undefined}
-      className={`group/roll relative px-3 py-2.5 text-[11px] sm:text-xs font-semibold tracking-[0.07em] uppercase rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-1 ${
+      className={`group relative px-3 py-2 text-[13px] font-medium tracking-[-0.01em] rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 ${
         isActive
           ? 'text-foreground'
-          : 'text-muted-foreground hover:text-foreground'
+          : 'text-foreground/60 hover:text-foreground'
       }`}
     >
-      {/* Active pill indicator — shared layout animation */}
+      {/* Active indicator — subtle background */}
       {isActive && (
         <motion.div
           layoutId="seekengine-nav-active"
-          className="absolute inset-0 rounded-xl bg-foreground/[0.1] border border-foreground/[0.12]"
-          transition={{ type: 'spring', bounce: 0.18, duration: 0.55 }}
+          className="absolute inset-0 rounded-full bg-foreground/[0.08]"
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
         />
       )}
 
-      {/* Default visible text */}
-      <span className="relative z-10 inline-flex overflow-hidden h-[1em]">
-        <span className="inline-flex motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out motion-safe:group-hover/roll:-translate-y-full">
-          {children.split('').map((char, i) => (
-            <span
-              key={i}
-              className="inline-block motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out"
-              style={{ transitionDelay: `${i * 18}ms` }}
-            >
-              {char === ' ' ? '\u00A0' : char}
-            </span>
-          ))}
-        </span>
-      </span>
+      {/* Link text */}
+      <span className="relative z-10">{children}</span>
 
-      {/* Rolled-up clone — desktop only, aria-hidden */}
-      <span
-        className="absolute inset-x-3 top-2.5 z-10 hidden sm:inline-flex overflow-hidden h-[1em] pointer-events-none"
-        aria-hidden="true"
-      >
-        <span className="inline-flex motion-safe:translate-y-full motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out motion-safe:group-hover/roll:translate-y-0">
-          {children.split('').map((char, i) => (
-            <span
-              key={i}
-              className="inline-block motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out"
-              style={{ transitionDelay: `${i * 18}ms` }}
-            >
-              {char === ' ' ? '\u00A0' : char}
-            </span>
-          ))}
-        </span>
-      </span>
+      {/* Hover underline — Apple style */}
+      <motion.div
+        className="absolute bottom-1 left-3 right-3 h-px bg-foreground/30 origin-left"
+        initial={{ scaleX: 0 }}
+        whileHover={{ scaleX: 1 }}
+        transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+      />
     </Link>
   )
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Main Navbar
+   Main Navbar — Apple-inspired design
 ───────────────────────────────────────────────────────────── */
 export default function Navbar() {
   const { setTheme, resolvedTheme } = useTheme()
@@ -129,18 +106,17 @@ export default function Navbar() {
 
   // Motion values for scroll-based effects
   const scrollProgress = useMotionValue(0)
-  const borderOpacity = useTransform(scrollProgress, [0, 1], [0.05, 0.12])
-  const shadowIntensity = useTransform(scrollProgress, [0, 1], [0, 0.15])
+  const shadowIntensity = useTransform(scrollProgress, [0, 1], [0, 0.08])
 
   useMotionValueEvent(scrollY, 'change', (latest) => {
     // Guard: only update state if value actually changed
-    const nextScrolled = latest > 24
+    const nextScrolled = latest > 20
     if (scrolledRef.current !== nextScrolled) {
       scrolledRef.current = nextScrolled
       setScrolled(nextScrolled)
     }
-    // Update scroll progress for motion values (0-100px range)
-    scrollProgress.set(Math.min(latest / 100, 1))
+    // Update scroll progress for motion values (0-120px range for smoother transition)
+    scrollProgress.set(Math.min(latest / 120, 1))
   })
 
   // Measure nav height for dynamic mobile menu positioning
@@ -224,112 +200,111 @@ export default function Navbar() {
     return () => { document.body.style.overflow = '' }
   }, [])
 
-  /* Nav pill styles — enhanced glass effect with scroll-based intensity */
+  /* Nav pill styles — Apple-style refined glass with smooth scroll transitions */
   const pillClass = scrolled
-    ? 'bg-background/85 backdrop-blur-2xl border-foreground/[0.09] shadow-xl shadow-black/[0.1]'
-    : 'bg-background/40 backdrop-blur-md border-foreground/[0.05]'
+    ? 'bg-background/80 backdrop-blur-xl border-foreground/[0.08] shadow-[0_2px_20px_rgba(0,0,0,0.06)]'
+    : 'bg-background/60 backdrop-blur-lg border-foreground/[0.05]'
 
   return (
     <>
       <div className="fixed top-0 left-0 right-0 z-50 flex flex-col pointer-events-none">
-        <div className="flex justify-center px-3 pt-3 pb-2 sm:px-6">
+        <div className="flex justify-center px-4 pt-3 pb-2 sm:px-6 sm:pt-4">
           <motion.nav
             ref={navRef}
             id="primary-nav"
             aria-label="Primary navigation"
-            initial={{ y: -80, opacity: 0 }}
+            initial={{ y: -100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-            className={`pointer-events-auto flex w-full max-w-[min(100%,40rem)] items-center justify-between gap-2 rounded-2xl border p-2 transition-[background-color,backdrop-filter,border-color] duration-500 sm:w-auto sm:max-w-none sm:gap-1.5 ${pillClass}`}
+            transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+            className={`pointer-events-auto flex w-full max-w-[min(100%,42rem)] items-center justify-between gap-2 rounded-full border px-2 py-1.5 transition-all duration-700 ease-out sm:w-auto sm:max-w-none sm:gap-1 sm:px-2.5 sm:py-1.5 ${pillClass}`}
             style={{
-              boxShadow: scrolled ? `0 10px 40px -10px rgba(0,0,0,${shadowIntensity.get()})` : undefined,
+              boxShadow: scrolled 
+                ? `0 4px 24px -4px rgba(0,0,0,${shadowIntensity.get()})` 
+                : undefined,
             }}
           >
-            {/* ── Logo with hover glow ── */}
+            {/* ── Logo — refined with subtle scale ── */}
             <Link
               href="/"
               aria-label="SeekEngine — go to homepage"
-              className="group relative flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl transition-[box-shadow,transform] duration-300 hover:shadow-[0_0_0_2px_hsl(var(--foreground)/0.12),0_0_20px_rgba(124,58,237,0.15)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
+              className="group relative flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full transition-all duration-300 hover:bg-foreground/[0.04] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2"
             >
               <Image
                 src="/logo.png"
                 alt=""
-                width={28}
-                height={28}
-                className="h-7 w-7 transition-transform duration-300 motion-safe:group-hover:scale-105"
+                width={26}
+                height={26}
+                className="h-6.5 w-6.5 transition-transform duration-300 motion-safe:group-hover:scale-105"
                 priority
               />
             </Link>
 
-            {/* ── Desktop nav links ── */}
-            <div className="hidden sm:flex items-center gap-0.5">
-              {/* Decorative separator */}
-              <div aria-hidden="true" className="h-4 w-px bg-foreground/[0.07] mx-2" />
+            {/* ── Desktop nav links — Apple-style minimal ── */}
+            <div className="hidden sm:flex items-center">
               {navLinks.map((link, i) => {
                 const isActive = isLinkActive(link.href, link.external)
                 return (
                   <motion.div
                     key={link.label}
-                    initial={{ opacity: 0, y: -6 }}
+                    initial={{ opacity: 0, y: -8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.05 + i * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ delay: 0.08 + i * 0.05, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                   >
-                    <TextRollLink href={link.href} isActive={isActive} external={link.external}>
+                    <NavLink href={link.href} isActive={isActive} external={link.external}>
                       {link.label}
-                    </TextRollLink>
+                    </NavLink>
                   </motion.div>
                 )
               })}
-              <div aria-hidden="true" className="h-4 w-px bg-foreground/[0.05] mx-2" />
             </div>
 
-            {/* ── Right actions ── */}
+            {/* ── Right actions — clean and minimal ── */}
             <div className="flex items-center gap-0.5">
-              {/* Theme toggle with rotation animation */}
+              {/* Theme toggle — smooth rotation */}
               <motion.button
                 type="button"
                 onClick={() => setTheme(isDarkMode ? 'light' : 'dark')}
-                className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl text-muted-foreground transition-[color,background-color] duration-200 hover:bg-foreground/[0.05] hover:text-foreground active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
+                className="relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-foreground/50 transition-all duration-300 hover:bg-foreground/[0.06] hover:text-foreground active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2"
                 aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
                 aria-pressed={isDarkMode}
-                whileTap={{ rotate: 180, scale: 0.9 }}
+                whileTap={{ rotate: 180, scale: 0.85 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               >
                 <div className="relative h-4 w-4 overflow-hidden pointer-events-none">
                   <motion.div
                     animate={{ y: isDarkMode ? 0 : -32 }}
-                    transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                     className="flex flex-col items-center gap-4"
                   >
                     {/* Sun */}
                     <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                     {/* Moon */}
                     <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                     </svg>
                   </motion.div>
                 </div>
               </motion.button>
 
-              {/* Mobile hamburger */}
+              {/* Mobile hamburger — Apple-style clean */}
               <motion.button
                 type="button"
                 ref={hamburgerRef}
                 onClick={() => setMobileOpen(o => !o)}
-                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl text-muted-foreground transition-[color,background-color] duration-200 hover:bg-foreground/[0.05] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:hidden"
+                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-foreground/50 transition-all duration-300 hover:bg-foreground/[0.06] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2 sm:hidden"
                 aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
                 aria-expanded={mobileOpen}
                 aria-controls={mobileMenuId}
                 whileTap={{ scale: 0.9 }}
               >
                 <motion.svg
-                  className="w-5 h-5"
+                  className="w-[18px] h-[18px]"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
-                  strokeWidth={2}
+                  strokeWidth={1.5}
                   aria-hidden="true"
                 >
                   <AnimatePresence mode="wait" initial={false}>
@@ -342,7 +317,7 @@ export default function Navbar() {
                         initial={{ pathLength: 0, opacity: 0 }}
                         animate={{ pathLength: 1, opacity: 1 }}
                         exit={{ pathLength: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
+                        transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
                       />
                     ) : (
                       <motion.path
@@ -353,7 +328,7 @@ export default function Navbar() {
                         initial={{ pathLength: 0, opacity: 0 }}
                         animate={{ pathLength: 1, opacity: 1 }}
                         exit={{ pathLength: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
+                        transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
                       />
                     )}
                   </AnimatePresence>
@@ -364,37 +339,34 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* ── Mobile menu overlay ── */}
+      {/* ── Mobile menu overlay — Apple-style sheet ── */}
       <AnimatePresence>
         {mobileOpen && (
           <>
-            {/* Backdrop with gradient */}
+            {/* Backdrop with subtle blur */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              className="fixed inset-0 z-40 backdrop-blur-sm sm:hidden"
-              style={{
-                background: 'var(--nav-backdrop)'
-              }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40 bg-background/40 backdrop-blur-xl sm:hidden"
               onClick={() => setMobileOpen(false)}
               aria-hidden="true"
             />
 
-            {/* Menu panel with dynamic positioning */}
+            {/* Menu panel — refined Apple sheet style */}
             <motion.div
               ref={mobileMenuRef}
               id={mobileMenuId}
               role="dialog"
               aria-modal="true"
               aria-label="Mobile navigation"
-              initial={{ opacity: 0, y: -10, scale: 0.97 }}
+              initial={{ opacity: 0, y: -8, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.97 }}
-              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              exit={{ opacity: 0, y: -8, scale: 0.98 }}
+              transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
               onKeyDown={handleMobileMenuKeyDown}
-              className="fixed left-3 right-3 z-50 rounded-2xl border border-foreground/[0.08] bg-background/96 backdrop-blur-2xl p-2 shadow-2xl shadow-black/[0.12] sm:hidden"
+              className="fixed left-4 right-4 z-50 rounded-3xl border border-foreground/[0.06] bg-background/90 backdrop-blur-2xl p-1.5 shadow-[0_8px_40px_rgba(0,0,0,0.12)] sm:hidden"
               style={{ top: navHeight }}
             >
               <nav className="flex flex-col gap-0.5" aria-label="Mobile navigation">
@@ -403,9 +375,9 @@ export default function Navbar() {
                   return (
                     <motion.div
                       key={link.label}
-                      initial={{ opacity: 0, x: -8 }}
+                      initial={{ opacity: 0, x: -6 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05, duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                      transition={{ delay: i * 0.04, duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
                     >
                       <Link
                         href={link.href}
@@ -413,19 +385,19 @@ export default function Navbar() {
                         rel={link.external ? 'noopener noreferrer' : undefined}
                         onClick={() => setMobileOpen(false)}
                         aria-current={isActive ? 'page' : undefined}
-                        className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium tracking-wide transition-[color,background-color] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 ${
+                        className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[15px] font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2 ${
                           isActive
-                            ? 'bg-foreground/[0.07] text-foreground border border-foreground/[0.08]'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]'
+                            ? 'bg-foreground/[0.06] text-foreground'
+                            : 'text-foreground/60 hover:text-foreground hover:bg-foreground/[0.04]'
                         }`}
                       >
-                        <span className="text-muted-foreground/60">
+                        <span className="text-foreground/30">
                           {NAV_ICONS[link.label] || null}
                         </span>
                         {link.label}
                         {link.external && (
                           <svg
-                            className="w-3.5 h-3.5 ml-auto opacity-35"
+                            className="w-3.5 h-3.5 ml-auto opacity-30"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -443,15 +415,15 @@ export default function Navbar() {
                 })}
               </nav>
 
-              {/* Mobile footer — theme toggle row */}
-              <div className="mt-1.5 pt-2 border-t border-foreground/[0.05] px-4 pb-1 flex items-center justify-between">
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/40">
+              {/* Mobile footer — minimal theme toggle */}
+              <div className="mt-1 pt-2 border-t border-foreground/[0.04] px-3 pb-1 flex items-center justify-between">
+                <span className="text-[11px] font-medium text-foreground/30 tracking-wide">
                   Appearance
                 </span>
                 <motion.button
                   type="button"
                   onClick={() => setTheme(isDarkMode ? 'light' : 'dark')}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04] transition-[color,background-color] duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full text-[13px] font-medium text-foreground/50 hover:text-foreground hover:bg-foreground/[0.04] transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2"
                   aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
                   aria-pressed={isDarkMode}
                   whileTap={{ scale: 0.95 }}
