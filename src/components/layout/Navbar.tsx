@@ -12,7 +12,33 @@ import Image from 'next/image'
 import { useTheme } from 'next-themes'
 import { useState, useId, useEffect, useCallback, useRef, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
-import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'framer-motion'
+import { motion, useScroll, useMotionValueEvent, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
+
+/* ─────────────────────────────────────────────────────────────
+   Nav Link Icons — Visual hierarchy for mobile menu
+───────────────────────────────────────────────────────────── */
+const NAV_ICONS: Record<string, React.ReactNode> = {
+  Engine: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+    </svg>
+  ),
+  About: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+    </svg>
+  ),
+  Research: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+    </svg>
+  ),
+  Dev: (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+    </svg>
+  ),
+}
 
 /* ─────────────────────────────────────────────────────────────
    Text Roll hover — character-staggered reveal (desktop only)
@@ -95,9 +121,16 @@ export default function Navbar() {
   const mobileMenuRef = useRef<HTMLDivElement>(null)
   const hamburgerRef = useRef<HTMLButtonElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
+  const navRef = useRef<HTMLElement>(null)
+  const [navHeight, setNavHeight] = useState(72)
 
   // Guard to prevent unnecessary re-renders from scroll events
   const scrolledRef = useRef(false)
+
+  // Motion values for scroll-based effects
+  const scrollProgress = useMotionValue(0)
+  const borderOpacity = useTransform(scrollProgress, [0, 1], [0.05, 0.12])
+  const shadowIntensity = useTransform(scrollProgress, [0, 1], [0, 0.15])
 
   useMotionValueEvent(scrollY, 'change', (latest) => {
     // Guard: only update state if value actually changed
@@ -106,7 +139,17 @@ export default function Navbar() {
       scrolledRef.current = nextScrolled
       setScrolled(nextScrolled)
     }
+    // Update scroll progress for motion values (0-100px range)
+    scrollProgress.set(Math.min(latest / 100, 1))
   })
+
+  // Measure nav height for dynamic mobile menu positioning
+  useEffect(() => {
+    if (navRef.current) {
+      const height = navRef.current.offsetHeight + 12 // Add padding
+      setNavHeight(height)
+    }
+  }, [])
 
   const navLinks = useMemo(() => [
     { label: 'Engine',   href: '/' },
@@ -181,10 +224,7 @@ export default function Navbar() {
     return () => { document.body.style.overflow = '' }
   }, [])
 
-  /* Nav pill styles — 3 states:
-     idle     → faint border + near-transparent bg (always readable as a pill)
-     scrolled → heavy glass backdrop + stronger border + shadow
-  */
+  /* Nav pill styles — enhanced glass effect with scroll-based intensity */
   const pillClass = scrolled
     ? 'bg-background/85 backdrop-blur-2xl border-foreground/[0.09] shadow-xl shadow-black/[0.1]'
     : 'bg-background/40 backdrop-blur-md border-foreground/[0.05]'
@@ -194,18 +234,22 @@ export default function Navbar() {
       <div className="fixed top-0 left-0 right-0 z-50 flex flex-col pointer-events-none">
         <div className="flex justify-center px-3 pt-3 pb-2 sm:px-6">
           <motion.nav
+            ref={navRef}
             id="primary-nav"
             aria-label="Primary navigation"
             initial={{ y: -80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-            className={`pointer-events-auto flex w-full max-w-[min(100%,40rem)] items-center justify-between gap-2 rounded-2xl border p-2 transition-[background-color,backdrop-filter,border-color,box-shadow] duration-500 sm:w-auto sm:max-w-none sm:gap-1.5 ${pillClass}`}
+            className={`pointer-events-auto flex w-full max-w-[min(100%,40rem)] items-center justify-between gap-2 rounded-2xl border p-2 transition-[background-color,backdrop-filter,border-color] duration-500 sm:w-auto sm:max-w-none sm:gap-1.5 ${pillClass}`}
+            style={{
+              boxShadow: scrolled ? `0 10px 40px -10px rgba(0,0,0,${shadowIntensity.get()})` : undefined,
+            }}
           >
-            {/* ── Logo ── */}
+            {/* ── Logo with hover glow ── */}
             <Link
               href="/"
               aria-label="SeekEngine — go to homepage"
-              className="group flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl transition-[box-shadow,transform] duration-300 hover:shadow-[0_0_0_2px_hsl(var(--foreground)/0.12)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
+              className="group relative flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl transition-[box-shadow,transform] duration-300 hover:shadow-[0_0_0_2px_hsl(var(--foreground)/0.12),0_0_20px_rgba(124,58,237,0.15)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
             >
               <Image
                 src="/logo.png"
@@ -241,13 +285,15 @@ export default function Navbar() {
 
             {/* ── Right actions ── */}
             <div className="flex items-center gap-0.5">
-              {/* Theme toggle */}
-              <button
+              {/* Theme toggle with rotation animation */}
+              <motion.button
                 type="button"
                 onClick={() => setTheme(isDarkMode ? 'light' : 'dark')}
                 className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl text-muted-foreground transition-[color,background-color] duration-200 hover:bg-foreground/[0.05] hover:text-foreground active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
                 aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
                 aria-pressed={isDarkMode}
+                whileTap={{ rotate: 180, scale: 0.9 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               >
                 <div className="relative h-4 w-4 overflow-hidden pointer-events-none">
                   <motion.div
@@ -265,10 +311,10 @@ export default function Navbar() {
                     </svg>
                   </motion.div>
                 </div>
-              </button>
+              </motion.button>
 
               {/* Mobile hamburger */}
-              <button
+              <motion.button
                 type="button"
                 ref={hamburgerRef}
                 onClick={() => setMobileOpen(o => !o)}
@@ -276,6 +322,7 @@ export default function Navbar() {
                 aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
                 aria-expanded={mobileOpen}
                 aria-controls={mobileMenuId}
+                whileTap={{ scale: 0.9 }}
               >
                 <motion.svg
                   className="w-5 h-5"
@@ -311,7 +358,7 @@ export default function Navbar() {
                     )}
                   </AnimatePresence>
                 </motion.svg>
-              </button>
+              </motion.button>
             </div>
           </motion.nav>
         </div>
@@ -321,18 +368,23 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <>
-            {/* Backdrop */}
+            {/* Backdrop with gradient */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.18 }}
-              className="fixed inset-0 z-40 bg-background/50 backdrop-blur-sm sm:hidden"
+              className="fixed inset-0 z-40 backdrop-blur-sm sm:hidden"
+              style={{
+                background: isDarkMode 
+                  ? 'linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.8) 100%)'
+                  : 'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.8) 100%)'
+              }}
               onClick={() => setMobileOpen(false)}
               aria-hidden="true"
             />
 
-            {/* Menu panel */}
+            {/* Menu panel with dynamic positioning */}
             <motion.div
               ref={mobileMenuRef}
               id={mobileMenuId}
@@ -344,7 +396,8 @@ export default function Navbar() {
               exit={{ opacity: 0, y: -10, scale: 0.97 }}
               transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
               onKeyDown={handleMobileMenuKeyDown}
-              className="fixed top-[72px] left-3 right-3 z-50 rounded-2xl border border-foreground/[0.08] bg-background/96 backdrop-blur-2xl p-2 shadow-2xl shadow-black/[0.12] sm:hidden"
+              className="fixed left-3 right-3 z-50 rounded-2xl border border-foreground/[0.08] bg-background/96 backdrop-blur-2xl p-2 shadow-2xl shadow-black/[0.12] sm:hidden"
+              style={{ top: navHeight }}
             >
               <nav className="flex flex-col gap-0.5" aria-label="Mobile navigation">
                 {navLinks.map((link, i) => {
@@ -368,6 +421,9 @@ export default function Navbar() {
                             : 'text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]'
                         }`}
                       >
+                        <span className="text-muted-foreground/60">
+                          {NAV_ICONS[link.label] || null}
+                        </span>
                         {link.label}
                         {link.external && (
                           <svg
@@ -394,15 +450,16 @@ export default function Navbar() {
                 <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/40">
                   Appearance
                 </span>
-                <button
+                <motion.button
                   type="button"
                   onClick={() => setTheme(isDarkMode ? 'light' : 'dark')}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04] transition-[color,background-color] duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
                   aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
                   aria-pressed={isDarkMode}
+                  whileTap={{ scale: 0.95 }}
                 >
                   {isDarkMode ? 'Light mode' : 'Dark mode'}
-                </button>
+                </motion.button>
               </div>
             </motion.div>
           </>

@@ -11,7 +11,7 @@ import { useEffect, useRef, useState, CSSProperties, useMemo, memo } from 'react
 import { useStreamingAnswer, StreamState } from '../../hooks/useStreamingAnswer'
 import type { StreamContextItem } from '../../hooks/useStreamingAnswer'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Loader2, AlertCircle, RefreshCw } from 'lucide-react'
+import { AlertCircle, RefreshCw } from 'lucide-react'
 import { ShimmeringText } from '../ui/shimmering-text'
 import { Response } from '../ui/response'
 import { Sources } from '../ui/sources'
@@ -387,6 +387,7 @@ function ReasoningPanel({
   script: ReasoningScript
 }) {
   const activeStep = Math.min(Math.max(step, 0), script.steps.length - 1)
+  const totalSteps = script.steps.length
   const heading = state === 'thinking'
     ? script.headings.thinking
     : state === 'streaming'
@@ -401,59 +402,84 @@ function ReasoningPanel({
       ? script.leads.streaming
       : script.leads.done
 
+  // Gradient border color based on state
+  const borderColor = state === 'thinking' 
+    ? 'from-primary/20 via-primary/10 to-transparent'
+    : state === 'streaming'
+      ? 'from-primary/30 via-primary/15 to-transparent'
+      : 'from-emerald-500/20 via-emerald-500/10 to-transparent'
+
   return (
     <motion.div 
-      className="mb-3 rounded-lg border border-foreground/[0.07] bg-background/75 px-3 py-2.5 sm:mb-4 sm:rounded-xl sm:px-4 sm:py-3.5"
+      className="mb-3 rounded-lg sm:mb-4 sm:rounded-xl sm:px-4 sm:py-3.5 relative overflow-hidden"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="flex items-start gap-2.5">
-        <div className="mt-[1px] flex h-4 w-4 items-center justify-center rounded-full border border-foreground/10">
-          {state === 'thinking' || state === 'streaming' ? (
-            <Loader2 className="h-2.5 w-2.5 text-primary animate-spin" />
-          ) : (
-            <span className="h-1.5 w-1.5 rounded-full bg-primary/60" aria-hidden="true" />
-          )}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/80">
-              {heading}
-            </p>
-            {state === 'thinking' && (
-              <span className="inline-flex rounded-full border border-primary/20 bg-primary/[0.05] px-2 py-0.5 text-[10px] font-medium text-primary/70">
-                <ShimmeringText text={script.statusText} duration={1.8} spread={1.25} />
-              </span>
+      {/* Animated gradient border */}
+      <div className={`absolute inset-0 rounded-lg sm:rounded-xl bg-gradient-to-r ${borderColor} opacity-50`} />
+      <div className="absolute inset-[1px] rounded-lg sm:rounded-xl bg-background/90 backdrop-blur-sm" />
+      
+      <div className="relative px-3 py-2.5">
+        <div className="flex items-start gap-2.5">
+          <div className="mt-[1px] flex h-4 w-4 items-center justify-center rounded-full border border-foreground/10">
+            {state === 'thinking' || state === 'streaming' ? (
+              <div className="flex items-center gap-0.5">
+                <span className="w-1 h-1 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-1 h-1 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-1 h-1 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            ) : (
+              <svg className="w-2.5 h-2.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
             )}
           </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/80">
+                {heading}
+              </p>
+              {/* Step counter */}
+              {state === 'thinking' && (
+                <span className="text-[9px] font-medium text-muted-foreground/50 tabular-nums">
+                  {activeStep + 1}/{totalSteps}
+                </span>
+              )}
+              {state === 'thinking' && (
+                <span className="inline-flex rounded-full border border-primary/20 bg-primary/[0.05] px-2 py-0.5 text-[10px] font-medium text-primary/70">
+                  <ShimmeringText text={script.statusText} duration={1.8} spread={1.25} />
+                </span>
+              )}
+            </div>
 
-          <div className="mt-1 min-h-[38px]">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.p
-                key={`${state}:${activeStep}:${thoughtText}`}
-                className="text-[11px] leading-relaxed text-foreground/82 sm:text-[12px]"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.28, ease: 'easeInOut' }}
-              >
-                {thoughtText}
-              </motion.p>
-            </AnimatePresence>
+            <div className="mt-1 min-h-[38px]">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.p
+                  key={`${state}:${activeStep}:${thoughtText}`}
+                  className="text-[11px] leading-relaxed text-foreground/82 sm:text-[12px]"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.28, ease: 'easeInOut' }}
+                >
+                  {thoughtText}
+                </motion.p>
+              </AnimatePresence>
+            </div>
+
+            {supportText && (
+              <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground/75">
+                {supportText}
+              </p>
+            )}
+
+            {state === 'done' && content && (
+              <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground/70">
+                {content}
+              </p>
+            )}
           </div>
-
-          {supportText && (
-            <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground/75">
-              {supportText}
-            </p>
-          )}
-
-          {state === 'done' && content && (
-            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground/70">
-              {content}
-            </p>
-          )}
         </div>
       </div>
     </motion.div>
@@ -534,6 +560,9 @@ function ModelBadge({
 }) {
   const tierStyle = getTierStyles(tier)
   
+  // Latency bar width (max 100px for 5000ms)
+  const latencyBarWidth = Math.min((latencyMs / 5000) * 100, 100)
+  
   return (
     <div className="flex items-center gap-2 mt-5 pt-4 flex-wrap border-t border-foreground/5 animate-fade-in sm:gap-3 sm:mt-7 sm:pt-5">
       {cached && (
@@ -554,9 +583,30 @@ function ModelBadge({
         <span className="text-foreground/60 font-semibold">{modelHuman}</span>
       </span>
       
-      <span className="text-[9px] font-medium text-muted-foreground/50 uppercase tracking-wide ml-auto sm:text-[10px]">
-        {cached ? '⚡ Instant' : `⏱ ${latencyMs}ms`}
-        {!cached && attempts > 1 && <span className="ml-1 text-muted-foreground/40">• {attempts} attempts</span>}
+      <span className="text-[9px] font-medium text-muted-foreground/50 uppercase tracking-wide ml-auto flex items-center gap-1.5 sm:text-[10px]">
+        {cached ? (
+          <>
+            <svg className="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+            </svg>
+            <span>Instant</span>
+          </>
+        ) : (
+          <>
+            <svg className="w-3 h-3 text-muted-foreground/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{latencyMs}ms</span>
+            {/* Latency bar visualization */}
+            <span className="hidden sm:inline-flex w-12 h-1 rounded-full bg-foreground/10 overflow-hidden">
+              <span 
+                className="h-full rounded-full bg-foreground/30 transition-all duration-500"
+                style={{ width: `${latencyBarWidth}%` }}
+              />
+            </span>
+          </>
+        )}
+        {!cached && attempts > 1 && <span className="text-muted-foreground/40">• {attempts} attempts</span>}
       </span>
     </div>
   )
@@ -757,10 +807,15 @@ export function StreamingAnswer({
             transition={{ duration: 0.3 }}
           >
             <div className="flex items-start gap-2 sm:gap-3">
-              <AlertCircle className="w-4 h-4 shrink-0 text-destructive mt-0.5 sm:w-5 sm:h-5" />
-              <span className="text-xs font-medium text-destructive flex-1 sm:text-sm">{error || 'Failed to generate answer'}</span>
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center">
+                <AlertCircle className="w-4 h-4 text-destructive sm:w-5 sm:h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-destructive sm:text-sm">{error || 'Failed to generate answer'}</p>
+                <p className="text-[10px] text-muted-foreground/60 mt-0.5 sm:text-xs">This might be a temporary issue. Please try again.</p>
+              </div>
             </div>
-            <button 
+            <motion.button 
               type="button"
               onClick={() => {
                 completed.current = false
@@ -769,10 +824,12 @@ export function StreamingAnswer({
                 startCurrentStream()
               }}
               className="w-full px-3 py-2 text-[10px] font-semibold uppercase tracking-wide rounded-md transition-all active:scale-95 bg-destructive/10 border border-destructive/20 text-destructive hover:bg-destructive/15 flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-xs sm:gap-2 sm:rounded-lg"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               <RefreshCw className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               Try Again
-            </button>
+            </motion.button>
           </motion.div>
         )
         
@@ -790,7 +847,33 @@ export function StreamingAnswer({
       <div className="relative">
         {/* Subtle background glow on streaming */}
         {state === 'streaming' && (
-          <div className="absolute -inset-8 rounded-2xl bg-gradient-to-br from-primary/5 to-transparent pointer-events-none opacity-40" />
+          <motion.div 
+            className="absolute -inset-8 rounded-2xl pointer-events-none"
+            style={{
+              background: 'radial-gradient(ellipse at center, hsl(var(--primary) / 0.08) 0%, transparent 70%)',
+            }}
+            animate={{
+              opacity: [0.3, 0.5, 0.3],
+              scale: [1, 1.02, 1],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
+        )}
+        {/* Success glow on done */}
+        {state === 'done' && (
+          <motion.div 
+            className="absolute -inset-8 rounded-2xl pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.3 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              background: 'radial-gradient(ellipse at center, hsl(142 76% 36% / 0.08) 0%, transparent 70%)',
+            }}
+          />
         )}
         <div className="relative">
           {renderContent()}

@@ -264,15 +264,15 @@ export default function ResultsClient() {
           </h1>
         </div>
 
-        {/* Two-column layout — stacks on mobile */}
+        {/* Two-column layout — stacks on mobile, synthesis sticky on desktop */}
         <div className="flex flex-col gap-6 lg:flex-row lg:gap-10">
             
-          {/* LEFT COLUMN: Synthesis */}
-          <div className="w-full min-w-0 lg:w-[63%] animate-fade-in-up">
+          {/* LEFT COLUMN: Synthesis — sticky on desktop */}
+          <div className="w-full min-w-0 lg:w-[63%] animate-fade-in-up lg:sticky lg:top-24 lg:self-start">
             <div className="relative overflow-hidden rounded-xl p-4 group border border-foreground/[0.06] bg-foreground/[0.01] sm:rounded-2xl sm:p-6 md:p-8">
                
-              {/* Top accent line */}
-              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
+              {/* Top accent line with gradient */}
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
                
               {/* Header: icon + title + copy */}
               <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-foreground/5 sm:gap-3 sm:mb-6 sm:pb-4">
@@ -288,11 +288,22 @@ export default function ResultsClient() {
                     aria-label={copied ? 'Copied to clipboard' : 'Copy answer to clipboard'}
                     className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide transition-all px-2 py-1.5 rounded-md text-muted-foreground/70 hover:text-foreground hover:bg-accent/10 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:gap-1.5 sm:text-xs sm:px-2.5 sm:rounded-lg"
                   >
-                    <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                      <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-                    </svg>
-                    {copied ? 'Copied' : 'Copy'}
+                    {copied ? (
+                      <>
+                        <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                        </svg>
+                        Copy
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
@@ -309,13 +320,50 @@ export default function ResultsClient() {
                 className="text-[15px] leading-relaxed sm:text-base"
               />
 
-              {/* Follow-up */}
+              {/* Suggestion chips — show when answer is complete */}
+              <AnimatePresence>
+                {aiAnswer && !followUpQuery && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mt-4 pt-4 border-t border-foreground/5 sm:mt-6 sm:pt-5"
+                  >
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground/50 mb-2 sm:text-xs">
+                      Suggested follow-ups
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        'Tell me more about this',
+                        'What are the alternatives?',
+                        'How does this compare?',
+                      ].map((suggestion) => (
+                        <motion.button
+                          key={suggestion}
+                          type="button"
+                          onClick={() => {
+                            setFollowUpQuery(suggestion)
+                            handleSearch(suggestion)
+                          }}
+                          className="px-3 py-1.5 text-[11px] font-medium rounded-full border border-foreground/10 text-muted-foreground hover:text-foreground hover:border-foreground/20 hover:bg-foreground/[0.02] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-xs"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          {suggestion}
+                        </motion.button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Follow-up input */}
               <AnimatePresence>
                 {aiAnswer && (
                   <motion.div 
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
-                    className="mt-6 pt-4 border-t border-foreground/5 sm:mt-8 sm:pt-6"
+                    className="mt-4 pt-4 border-t border-foreground/5 sm:mt-6 sm:pt-5"
                   >
                     <label className="block text-[10px] font-bold uppercase tracking-wide text-muted-foreground/60 mb-2 sm:text-xs sm:mb-3">
                       Follow-up Question
@@ -339,17 +387,19 @@ export default function ResultsClient() {
                       />
                       <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:right-2">
                         <kbd className="hidden sm:inline-flex items-center justify-center px-2 py-1 text-[9px] font-semibold rounded border border-border/50 text-muted-foreground/40 bg-muted/30">/</kbd>
-                        <button 
+                        <motion.button 
                           type="button"
                           onClick={handleFollowUp}
                           disabled={!followUpQuery.trim()}
                           aria-label="Submit follow-up question"
-                          className="p-1.5 rounded-md transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed bg-primary text-primary-foreground hover:brightness-110 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:p-2 sm:rounded-lg sm:shadow-md"
+                          className="p-1.5 rounded-md transition-all disabled:opacity-30 disabled:cursor-not-allowed bg-primary text-primary-foreground hover:brightness-110 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:p-2 sm:rounded-lg sm:shadow-md"
+                          whileHover={{ scale: followUpQuery.trim() ? 1.05 : 1 }}
+                          whileTap={{ scale: followUpQuery.trim() ? 0.95 : 1 }}
                         >
                           <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                           </svg>
-                        </button>
+                        </motion.button>
                       </div>
                     </div>
                   </motion.div>
@@ -364,10 +414,10 @@ export default function ResultsClient() {
               Web Sources
             </h3>
 
-            {/* Time Filter — horizontal scroll on mobile, wrap on desktop */}
-            <div className="flex gap-1.5 mb-4 overflow-x-auto scrollbar-none pb-1 -mx-1 px-1 sm:flex-wrap sm:mb-5 sm:overflow-x-visible sm:mx-0 sm:px-0 sm:pb-0">
+            {/* Time Filter — pill design with sliding indicator */}
+            <div className="relative flex gap-1.5 mb-4 overflow-x-auto scrollbar-none pb-1 -mx-1 px-1 sm:flex-wrap sm:mb-5 sm:overflow-x-visible sm:mx-0 sm:px-0 sm:pb-0">
               {TIME_OPTIONS.map(opt => (
-                <button
+                <motion.button
                   type="button"
                   key={opt.value}
                   onClick={() => {
@@ -381,14 +431,16 @@ export default function ResultsClient() {
                     }
                     router.push(`/results?${params.toString()}`, { scroll: false })
                   }}
-                  className={`shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-200 border whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 ${
+                  className={`relative shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all duration-200 border whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 ${
                     timeFilter === opt.value
-                      ? 'bg-foreground text-background border-foreground'
+                      ? 'bg-foreground text-background border-foreground shadow-sm'
                       : 'border-foreground/[0.06] text-muted-foreground hover:border-foreground/15 hover:text-foreground'
                   }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   {opt.label}
-                </button>
+                </motion.button>
               ))}
             </div>
              
@@ -399,19 +451,23 @@ export default function ResultsClient() {
               ) : resultsError ? (
                 <div className="p-4 text-center rounded-xl border border-dashed border-destructive/30 sm:p-6">
                   <div className="flex justify-center mb-2 sm:mb-3">
-                    <svg className="w-6 h-6 text-destructive/50 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4v2m0-10a8 8 0 100 16 8 8 0 000-16z" />
-                    </svg>
+                    <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-destructive/60 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4v2m0-10a8 8 0 100 16 8 8 0 000-16z" />
+                      </svg>
+                    </div>
                   </div>
                   <p className="text-xs text-destructive font-medium mb-1 sm:text-sm">{resultsError}</p>
                   <p className="text-[10px] text-muted-foreground/60 mb-3 sm:text-xs sm:mb-4">Try a different query or check your connection.</p>
-                  <button
+                  <motion.button
                     type="button"
                     onClick={() => setRetryToken(t => t + 1)}
                     className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-xs"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     Retry
-                  </button>
+                  </motion.button>
                 </div>
               ) : results.length > 0 ? (
                 results.map((result, index) => (
@@ -420,11 +476,13 @@ export default function ResultsClient() {
               ) : (
                 <div className="p-4 text-center rounded-xl border border-dashed border-foreground/10 sm:p-6">
                   <div className="flex justify-center mb-2 sm:mb-3">
-                    <svg className="w-6 h-6 text-muted-foreground/30 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    <div className="w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-muted-foreground/30 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
                   </div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1 sm:text-sm sm:mb-2">No results found for {query}</p>
+                  <p className="text-xs font-medium text-muted-foreground mb-1 sm:text-sm">No results found for {query}</p>
                   <p className="text-[10px] text-muted-foreground/60 sm:text-xs">Try rephrasing your query, check spelling, or try broader terms.</p>
                 </div>
               )}
