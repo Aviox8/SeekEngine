@@ -234,12 +234,6 @@ export default function Navbar() {
                 }}
               />
             )}
-            style={{
-              boxShadow: scrolled 
-                ? `0 4px 24px -4px rgba(0,0,0,${shadowIntensity.get()})` 
-                : undefined,
-            }}
-          >
             {/* ── Logo — refined with subtle scale ── */}
             <Link
               href="/"
