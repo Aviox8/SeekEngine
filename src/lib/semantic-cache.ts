@@ -146,33 +146,13 @@ export function setCachedAnswer(
 }
 
 /**
- * Check if a query has a valid cache entry
+ * Check if a query has a valid cache entry (read-only, no side effects)
  */
 export function hasCachedAnswer(query: string, task?: string): boolean {
-  return getCachedAnswer(query, task) !== null
-}
-
-/**
- * Evict the least recently used entry
- * PERF: Single-pass O(n) approach is optimal for small cache (<1000 entries)
- * Called infrequently (only when cache full), so O(n) is acceptable
- */
-function evictLRU(): void {
-  let oldestKey: string | null = null
-  let oldestTime = Infinity
-  
-  // Single pass to find minimum - O(n) but very fast in practice
-  for (const [key, entry] of cache.entries()) {
-    if (entry.lastAccessedAt < oldestTime) {
-      oldestTime = entry.lastAccessedAt
-      oldestKey = key
-    }
-  }
-  
-  if (oldestKey) {
-    cache.delete(oldestKey)
-    console.log(`🗑️ Evicted LRU cache entry (freed ${(cache.size + 1).toString()} → ${cache.size.toString()} entries)`)
-  }
+  const key = generateCacheKey(query, task)
+  const entry = cache.get(key)
+  if (!entry) return false
+  return Date.now() - entry.createdAt <= TTL
 }
 
 /**
