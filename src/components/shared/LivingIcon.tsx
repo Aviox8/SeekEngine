@@ -20,6 +20,7 @@ export default function LivingIcon({
   inputVolume?: number
   outputVolume?: number
 }) {
+  const uniqueId = useId()
   // Parse hex color to RGB
   const rgbColor = useMemo(() => {
     if (!color.startsWith('#')) return color
