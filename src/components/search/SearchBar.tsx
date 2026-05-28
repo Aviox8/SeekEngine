@@ -160,11 +160,11 @@ export default memo(function SearchBar({
               animation: isTyping ? 'ai-ring-spin 3s linear infinite' : 'none',
             }}
           />
-          {/* Inner cutout — creates the border-only ring */}
+          {/* Inner cutout — masks gradient to only border ring */}
           <div
             style={{
               position: 'absolute',
-              inset: '2px',
+              inset: '1.5px',
               borderRadius: '9999px',
               background: 'var(--background)',
             }}
@@ -213,7 +213,7 @@ export default memo(function SearchBar({
           )}
         </AnimatePresence>
 
-        {/* 4. Main search bar */}
+        {/* 4. Main search bar — fully transparent, no bg/border of its own */}
         <div className="relative z-[1] rounded-full px-5 py-2.5">
 
           {/* Input wrapper */}
