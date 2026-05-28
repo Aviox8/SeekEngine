@@ -214,7 +214,7 @@ export default memo(function SearchBar({
         </AnimatePresence>
 
         {/* 4. Main search bar */}
-        <div className="relative z-[1] rounded-full px-5 py-2.5">
+        <div className="relative z-[1] rounded-full px-5 py-2.5 border border-foreground/[0.06]">
 
           {/* Input wrapper */}
           <div className="relative flex items-baseline gap-1.5">
