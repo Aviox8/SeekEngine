@@ -271,7 +271,8 @@ export default memo(function SearchBar({
                 <span className="text-xs text-muted-foreground/25 font-medium">↵</span>
               </motion.div>
             )}
-          </AnimatePresence>
+           </AnimatePresence>
+        </div>
         </div>
       </div>
 
@@ -326,8 +327,7 @@ export default memo(function SearchBar({
                     >
                       ↵
                     </motion.kbd>
-        </div>
-      </div>
+                  </div>
                ))}
                
                <div className="px-4 py-2 border-t border-foreground/5 flex justify-between items-center bg-foreground/[0.01]">

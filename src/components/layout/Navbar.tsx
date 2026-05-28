@@ -12,7 +12,7 @@ import Image from 'next/image'
 import { useTheme } from 'next-themes'
 import { useState, useId, useEffect, useCallback, useRef, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
-import { motion, useScroll, useMotionValueEvent, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
+import { motion, useScroll, useMotionValueEvent, AnimatePresence, useMotionValue } from 'framer-motion'
 
 /* ─────────────────────────────────────────────────────────────
    Nav Link Icons — Visual hierarchy for mobile menu
@@ -106,7 +106,6 @@ export default function Navbar() {
 
   // Motion values for scroll-based effects
   const scrollProgress = useMotionValue(0)
-  const shadowIntensity = useTransform(scrollProgress, [0, 1], [0, 0.08])
 
   useMotionValueEvent(scrollY, 'change', (latest) => {
     // Guard: only update state if value actually changed
