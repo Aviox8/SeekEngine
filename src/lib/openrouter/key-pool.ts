@@ -48,7 +48,7 @@ function cleanupState(keys: string[], now = Date.now()): void {
     if (state && state.cooldownUntil <= now && state.lastFailureReason !== 'auth' && state.lastFailureReason !== 'billing') {
       state.cooldownUntil = 0
       state.lastFailureReason = undefined
-      state.consecutiveRateLimits = 0
+      // Keep consecutiveRateLimits so backoff escalation persists across cooldown cycles
     }
   }
 }
