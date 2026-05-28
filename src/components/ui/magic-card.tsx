@@ -7,7 +7,7 @@
 
 import { cn } from '@/lib/utils'
 import { motion, useMotionTemplate, useMotionValue } from 'framer-motion'
-import { useCallback, useEffect, useRef, useMemo } from 'react'
+import { useCallback, useRef } from 'react'
 
 interface MagicCardProps {
   children: React.ReactNode
@@ -184,14 +184,14 @@ export function Particles({
   color?: string
   className?: string
 }) {
-  const particles = useMemo(() => Array.from({ length: count }, (_, i) => ({
+  const particlesRef = useRef(Array.from({ length: count }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
     y: Math.random() * 100,
     size: Math.random() * 2 + 0.5,
     duration: Math.random() * 20 + 15,
     delay: Math.random() * 10,
-  })), [count])
+  })))
 
   return (
     <div className={cn('absolute inset-0 overflow-hidden pointer-events-none', className)}>
