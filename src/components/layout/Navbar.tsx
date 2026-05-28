@@ -220,16 +220,10 @@ export default function Navbar() {
             {/* Subtle AI gradient glow when scrolled — Apple Intelligence style */}
             {scrolled && (
               <div 
-                className="absolute -inset-[1px] rounded-full opacity-[0.15] pointer-events-none"
+                className="absolute -inset-[1px] rounded-full opacity-[0.08] pointer-events-none"
                 style={{
-                  background: 'conic-gradient(from 0deg, #f59e0b, #e11d48, #7c3aed, #0284c7, #059669, #f59e0b)',
-                  animation: 'ai-rotate 8s linear infinite',
+                  background: 'linear-gradient(135deg, #f59e0b22, #7c3aed22, #0284c722, #05966922)',
                   filter: 'blur(8px)',
-                  mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                  WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                  WebkitMaskComposite: 'xor',
-                  maskComposite: 'exclude',
-                  padding: '1px',
                 }}
               />
             )}
