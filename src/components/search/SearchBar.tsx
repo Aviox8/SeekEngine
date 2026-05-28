@@ -428,32 +428,35 @@ export default memo(function SearchBar({
       <AnimatePresence>
         {showHistory && (
           <motion.div
-            initial={{ opacity: 0, y: -12, scale: 0.96 }}
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
             animate={{ opacity: 1, y: 8, scale: 1 }}
-            exit={{ opacity: 0, y: -12, scale: 0.96 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className="absolute top-full left-0 right-0 z-40 overflow-hidden"
           >
             <div 
-              className="rounded-xl overflow-hidden border transition-all"
+              className="rounded-2xl overflow-hidden border border-foreground/[0.08] shadow-lg shadow-black/5 dark:shadow-black/20"
               style={dropdownStyle}
             >
-              <div className="px-4 py-2.5 border-b border-foreground/5 flex items-center gap-2 bg-foreground/[0.01]">
-                <Clock className="w-3.5 h-3.5 text-muted-foreground/40" />
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/40">recent</span>
+              <div className="px-4 py-2.5 border-b border-foreground/[0.05] flex items-center gap-2">
+                <Clock className="w-3.5 h-3.5 text-muted-foreground/30" />
+                <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/30">recent</span>
               </div>
-              {history.slice(0, 8).map((entry) => (
-                <div
+              {history.slice(0, 8).map((entry, index) => (
+                <motion.div
                   key={entry.timestamp}
-                  className="px-4 py-3.5 cursor-pointer flex items-center gap-3 text-[14px] font-medium transition-all group hover:bg-foreground/[0.03]"
+                  initial={{ opacity: 0, x: -4 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.03, duration: 0.2 }}
+                  className="px-4 py-3 cursor-pointer flex items-center gap-3 text-[14px] font-medium transition-all group hover:bg-foreground/[0.03]"
                   onClick={() => {
                     updateQuery(entry.query)
                     handleSearch(entry.query)
                     setShowSuggestions(false)
                   }}
                 >
-                  <Clock className="w-3.5 h-3.5 shrink-0 text-muted-foreground/25 group-hover:text-muted-foreground/40 transition-colors" />
-                  <span className="flex-1 truncate text-foreground/70 group-hover:text-foreground/90 transition-colors">{entry.query}</span>
+                  <Clock className="w-3.5 h-3.5 shrink-0 text-muted-foreground/20 group-hover:text-muted-foreground/40 transition-colors duration-150" />
+                  <span className="flex-1 truncate text-foreground/60 group-hover:text-foreground/80 transition-colors duration-150">{entry.query}</span>
                   <motion.button
                     type="button"
                     initial={{ opacity: 0 }}
@@ -463,11 +466,11 @@ export default memo(function SearchBar({
                       removeEntry(entry.query)
                     }}
                     aria-label={`Remove ${entry.query} from history`}
-                    className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-1 rounded transition-all text-muted-foreground/30 hover:text-destructive hover:bg-destructive/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:text-destructive"
+                    className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-1 rounded-md transition-all duration-150 text-muted-foreground/25 hover:text-destructive hover:bg-destructive/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:text-destructive"
                   >
                     <X className="w-3 h-3" />
                   </motion.button>
-                </div>
+                </motion.div>
               ))}
             </div>
           </motion.div>
