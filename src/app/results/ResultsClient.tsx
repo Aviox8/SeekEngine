@@ -243,8 +243,9 @@ export default function ResultsClient() {
         {/* Compact header — share + action buttons */}
         <header className="mb-3 flex items-center justify-end gap-2 py-2 sm:mb-5 sm:py-4">
           <button 
+            type="button"
             onClick={shareResults}
-            className="px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all active:scale-95 border border-foreground/[0.08] text-muted-foreground hover:text-foreground hover:border-foreground/15 hover:bg-foreground/[0.02] sm:px-3.5 sm:py-2 sm:rounded-xl sm:text-xs"
+            className="px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all active:scale-95 border border-foreground/[0.08] text-muted-foreground hover:text-foreground hover:border-foreground/15 hover:bg-foreground/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:px-3.5 sm:py-2 sm:rounded-xl sm:text-xs"
           >
             {shareCopied ? 'Link Copied' : 'Share'}
           </button>
@@ -281,9 +282,11 @@ export default function ResultsClient() {
                 </h2>
                 <div className="ml-auto shrink-0">
                   <button 
+                    type="button"
                     onClick={copyToClipboard}
                     disabled={!aiAnswer.trim()}
-                    className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide transition-all px-2 py-1.5 rounded-md text-muted-foreground/70 hover:text-foreground hover:bg-accent/10 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed sm:gap-1.5 sm:text-xs sm:px-2.5 sm:rounded-lg"
+                    aria-label={copied ? 'Copied to clipboard' : 'Copy answer to clipboard'}
+                    className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide transition-all px-2 py-1.5 rounded-md text-muted-foreground/70 hover:text-foreground hover:bg-accent/10 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:gap-1.5 sm:text-xs sm:px-2.5 sm:rounded-lg"
                   >
                     <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
@@ -337,9 +340,11 @@ export default function ResultsClient() {
                       <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:right-2">
                         <kbd className="hidden sm:inline-flex items-center justify-center px-2 py-1 text-[9px] font-semibold rounded border border-border/50 text-muted-foreground/40 bg-muted/30">/</kbd>
                         <button 
+                          type="button"
                           onClick={handleFollowUp}
                           disabled={!followUpQuery.trim()}
-                          className="p-1.5 rounded-md transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed bg-primary text-primary-foreground hover:brightness-110 shadow-sm sm:p-2 sm:rounded-lg sm:shadow-md"
+                          aria-label="Submit follow-up question"
+                          className="p-1.5 rounded-md transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed bg-primary text-primary-foreground hover:brightness-110 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:p-2 sm:rounded-lg sm:shadow-md"
                         >
                           <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
