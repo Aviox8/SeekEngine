@@ -74,6 +74,7 @@ export async function fetchJSON<T>(
     const err = error as Error
     if (err.name === 'AbortError') {
       console.error('Request timeout')
+      onError?.(err)
     } else {
       console.error('Fetch error:', err.message)
       onError?.(err)
