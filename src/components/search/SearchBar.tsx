@@ -359,41 +359,44 @@ export default memo(function SearchBar({
       <AnimatePresence>
         {showSuggestionsList && (
           <motion.div
-            initial={{ opacity: 0, y: -12, scale: 0.96 }}
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
             animate={{ opacity: 1, y: 8, scale: 1 }}
-            exit={{ opacity: 0, y: -12, scale: 0.96 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className="absolute top-full left-0 right-0 z-40 overflow-hidden"
           >
             <div 
               role="listbox"
-              className="rounded-xl overflow-hidden border transition-all"
+              className="rounded-2xl overflow-hidden border border-foreground/[0.08] shadow-lg shadow-black/5 dark:shadow-black/20"
               style={dropdownStyle}
             >
                {suggestions.slice(0, 10).map((suggestion, index) => (
-                 <div
+                 <motion.div
                    key={`${suggestion}-${index}`}
                    role="option"
                    aria-selected={index === selectedIndex}
+                   initial={{ opacity: 0, x: -4 }}
+                   animate={{ opacity: 1, x: 0 }}
+                   transition={{ delay: index * 0.03, duration: 0.2 }}
                    onClick={() => {
                      updateQuery(suggestion)
                      handleSearch(suggestion)
                      setShowSuggestions(false)
                    }}
                    onMouseEnter={() => setSelectedIndex(index)}
-                   className={`px-4 py-3.5 cursor-pointer flex items-center gap-3 text-[14px] font-medium transition-all duration-100 ${
+                   className={`px-4 py-3 cursor-pointer flex items-center gap-3 text-[14px] font-medium transition-all duration-150 ${
                      index === selectedIndex 
-                       ? 'bg-primary/8' 
+                       ? 'bg-primary/[0.06]' 
                        : 'hover:bg-foreground/[0.03]'
                    }`}
                  >
-                    <Search className={`w-4 h-4 shrink-0 transition-colors ${index === selectedIndex ? 'text-primary/60' : 'text-muted-foreground/30'}`} />
+                    <Search className={`w-4 h-4 shrink-0 transition-colors duration-150 ${index === selectedIndex ? 'text-primary/60' : 'text-muted-foreground/30'}`} />
                     
-                    <span className="text-foreground/80 truncate">
+                    <span className="text-foreground/80 truncate flex-1">
                       {suggestion.toLowerCase().startsWith(query.toLowerCase()) ? (
                         <>
                           <span className="text-foreground font-semibold">{query}</span>
-                          <span className="text-foreground/50">{suggestion.slice(query.length)}</span>
+                          <span className="text-foreground/40">{suggestion.slice(query.length)}</span>
                         </>
                       ) : (
                         suggestion
@@ -402,16 +405,19 @@ export default memo(function SearchBar({
                     
                     <motion.kbd
                       animate={{ opacity: index === selectedIndex ? 1 : 0 }}
-                      className="ml-auto text-[10px] px-1.5 py-0.5 rounded border border-primary/20 bg-primary/5 text-primary/60"
+                      transition={{ duration: 0.15 }}
+                      className="text-[10px] px-1.5 py-0.5 rounded-md border border-foreground/10 text-muted-foreground/40 bg-foreground/[0.02]"
                     >
                       ↵
                     </motion.kbd>
-                  </div>
+                 </motion.div>
                ))}
                
-               <div className="px-4 py-2 border-t border-foreground/5 flex justify-between items-center bg-foreground/[0.01]">
-                  <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/40">{suggestions.length > 10 ? `${suggestions.length} suggestions` : 'suggestions'}</span>
-                  <kbd className="px-1.5 py-0.5 text-[10px] rounded border border-foreground/10 text-muted-foreground/40 bg-muted/40">enter</kbd>
+               <div className="px-4 py-2 border-t border-foreground/[0.05] flex justify-between items-center">
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/30">{suggestions.length > 10 ? `${suggestions.length} results` : 'suggestions'}</span>
+                  <div className="flex items-center gap-1.5">
+                    <kbd className="px-1.5 py-0.5 text-[10px] rounded border border-foreground/10 text-muted-foreground/30 bg-foreground/[0.02]">↵</kbd>
+                  </div>
                </div>
             </div>
           </motion.div>
