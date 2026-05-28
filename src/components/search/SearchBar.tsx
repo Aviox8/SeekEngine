@@ -230,6 +230,7 @@ export default memo(function SearchBar({
               >
                 {/* Clear button - subtle */}
                 <motion.button
+                  type="button"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
@@ -237,8 +238,8 @@ export default memo(function SearchBar({
                     updateQuery('')
                     textareaRef.current?.focus()
                   }}
-                  className="p-0.5 transition-opacity text-muted-foreground/40 hover:text-muted-foreground"
-                  title="Clear"
+                  className="p-0.5 transition-opacity text-muted-foreground/40 hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:text-foreground"
+                  aria-label="Clear search"
                 >
                   <X className="w-4 h-4" />
                 </motion.button>

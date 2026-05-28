@@ -10,7 +10,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
-import { useState, useId, useEffect, useCallback } from 'react'
+import { useState, useId, useEffect, useCallback, useRef, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'framer-motion'
 
@@ -41,7 +41,7 @@ function TextRollLink({ children, href, isActive, external }: {
       {isActive && (
         <motion.div
           layoutId="seekengine-nav-active"
-          className="absolute inset-0 rounded-xl bg-foreground/[0.07] border border-foreground/[0.1]"
+          className="absolute inset-0 rounded-xl bg-foreground/[0.1] border border-foreground/[0.12]"
           transition={{ type: 'spring', bounce: 0.18, duration: 0.55 }}
         />
       )}
@@ -93,44 +93,106 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const mobileMenuId = useId()
+  const mobileMenuRef = useRef<HTMLDivElement>(null)
+  const hamburgerRef = useRef<HTMLButtonElement>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
 
-  // Close mobile menu on Escape key
-  const handleEscapeKey = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape' && mobileOpen) {
-      e.preventDefault()
-      setMobileOpen(false)
-    }
-  }, [mobileOpen])
-
-  useEffect(() => {
-    document.addEventListener('keydown', handleEscapeKey)
-    return () => document.removeEventListener('keydown', handleEscapeKey)
-  }, [handleEscapeKey])
+  // Guard to prevent unnecessary re-renders from scroll events
+  const scrolledRef = useRef(false)
 
   useMotionValueEvent(scrollY, 'change', (latest) => {
     const previous = scrollY.getPrevious() ?? 0
     const diff = latest - previous
     if (Math.abs(diff) < 12) return
-    const shouldBeVisible = !(latest > previous && latest > 180)
+    const shouldBeVisible = !(latest > previous && latest > 150)
     setVisible(v => (v === shouldBeVisible ? v : shouldBeVisible))
-    setScrolled(latest > 24)
+    // Guard: only update state if value actually changed
+    const nextScrolled = latest > 24
+    if (scrolledRef.current !== nextScrolled) {
+      scrolledRef.current = nextScrolled
+      setScrolled(nextScrolled)
+    }
   })
 
-  const navLinks = [
+  const navLinks = useMemo(() => [
     { label: 'Engine',   href: '/' },
     { label: 'About',    href: '/about' },
     { label: 'Research', href: 'https://archduke.is-a.dev/research/seekengine', external: true },
     { label: 'Dev',      href: 'https://archduke.is-a.dev/about',              external: true },
-  ]
+  ], [])
 
   const isDarkMode = resolvedTheme === 'dark'
+
+  // Helper to check if a link is active
+  const isLinkActive = useCallback((href: string, external?: boolean) => {
+    if (external) return false
+    return href === '/' ? pathname === '/' : pathname.startsWith(href)
+  }, [pathname])
+
+  // Focus trap for mobile menu
+  const handleMobileMenuKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key !== 'Tab' || !mobileMenuRef.current) return
+    
+    const focusableElements = mobileMenuRef.current.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+    const firstElement = focusableElements[0]
+    const lastElement = focusableElements[focusableElements.length - 1]
+
+    if (e.shiftKey) {
+      if (document.activeElement === firstElement) {
+        e.preventDefault()
+        lastElement?.focus()
+      }
+    } else {
+      if (document.activeElement === lastElement) {
+        e.preventDefault()
+        firstElement?.focus()
+      }
+    }
+  }, [])
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      previousFocusRef.current = document.activeElement as HTMLElement
+      document.body.style.overflow = 'hidden'
+      // Focus first item after animation
+      const timer = setTimeout(() => {
+        const firstLink = mobileMenuRef.current?.querySelector<HTMLElement>('a, button')
+        firstLink?.focus()
+      }, 100)
+      return () => clearTimeout(timer)
+    } else {
+      document.body.style.overflow = ''
+      previousFocusRef.current?.focus()
+      previousFocusRef.current = null
+    }
+  }, [mobileOpen])
+
+  // Close mobile menu on Escape key
+  useEffect(() => {
+    const handleEscapeKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && mobileOpen) {
+        e.preventDefault()
+        setMobileOpen(false)
+      }
+    }
+    document.addEventListener('keydown', handleEscapeKey)
+    return () => document.removeEventListener('keydown', handleEscapeKey)
+  }, [mobileOpen])
+
+  // Cleanup body scroll on unmount
+  useEffect(() => {
+    return () => { document.body.style.overflow = '' }
+  }, [])
 
   /* Nav pill styles — 3 states:
      idle     → faint border + near-transparent bg (always readable as a pill)
      scrolled → heavy glass backdrop + stronger border + shadow
   */
   const pillClass = scrolled
-    ? 'bg-background/85 backdrop-blur-2xl border-foreground/[0.09] shadow-lg shadow-black/[0.08]'
+    ? 'bg-background/85 backdrop-blur-2xl border-foreground/[0.09] shadow-xl shadow-black/[0.1]'
     : 'bg-background/40 backdrop-blur-md border-foreground/[0.05]'
 
   return (
@@ -139,10 +201,9 @@ export default function Navbar() {
         <div className="flex justify-center px-3 pt-3 pb-2 sm:px-6">
           <motion.nav
             id="primary-nav"
-            role="navigation"
             aria-label="Primary navigation"
             initial={{ y: -80, opacity: 0 }}
-            animate={{ y: visible ? 0 : -100, opacity: visible ? 1 : 0 }}
+            animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
             className={`pointer-events-auto flex w-full max-w-[min(100%,40rem)] items-center justify-between gap-2 rounded-2xl border p-2 transition-[background-color,backdrop-filter,border-color,box-shadow] duration-500 sm:w-auto sm:max-w-none sm:gap-1.5 ${pillClass}`}
           >
@@ -167,11 +228,7 @@ export default function Navbar() {
               {/* Decorative separator */}
               <div aria-hidden="true" className="h-4 w-px bg-foreground/[0.07] mx-2" />
               {navLinks.map((link, i) => {
-                const isActive = link.external
-                  ? false
-                  : link.href === '/'
-                  ? pathname === '/'
-                  : pathname.startsWith(link.href)
+                const isActive = isLinkActive(link.href, link.external)
                 return (
                   <motion.div
                     key={link.label}
@@ -192,9 +249,11 @@ export default function Navbar() {
             <div className="flex items-center gap-0.5">
               {/* Theme toggle */}
               <button
+                type="button"
                 onClick={() => setTheme(isDarkMode ? 'light' : 'dark')}
                 className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl text-muted-foreground transition-[color,background-color] duration-200 hover:bg-foreground/[0.05] hover:text-foreground active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
                 aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
+                aria-pressed={isDarkMode}
               >
                 <div className="relative h-4 w-4 overflow-hidden pointer-events-none">
                   <motion.div
@@ -216,6 +275,8 @@ export default function Navbar() {
 
               {/* Mobile hamburger */}
               <button
+                type="button"
+                ref={hamburgerRef}
                 onClick={() => setMobileOpen(o => !o)}
                 className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl text-muted-foreground transition-[color,background-color] duration-200 hover:bg-foreground/[0.05] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:hidden"
                 aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
@@ -228,8 +289,6 @@ export default function Navbar() {
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                   strokeWidth={2}
-                  animate={{ rotate: mobileOpen ? 45 : 0 }}
-                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                   aria-hidden="true"
                 >
                   <AnimatePresence mode="wait" initial={false}>
@@ -281,20 +340,21 @@ export default function Navbar() {
 
             {/* Menu panel */}
             <motion.div
+              ref={mobileMenuRef}
               id={mobileMenuId}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Mobile navigation"
               initial={{ opacity: 0, y: -10, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.97 }}
               transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              onKeyDown={handleMobileMenuKeyDown}
               className="fixed top-[72px] left-3 right-3 z-50 rounded-2xl border border-foreground/[0.08] bg-background/96 backdrop-blur-2xl p-2 shadow-2xl shadow-black/[0.12] sm:hidden"
             >
               <nav className="flex flex-col gap-0.5" aria-label="Mobile navigation">
                 {navLinks.map((link, i) => {
-                  const isActive = link.external
-                    ? false
-                    : link.href === '/'
-                    ? pathname === '/'
-                    : pathname.startsWith(link.href)
+                  const isActive = isLinkActive(link.href, link.external)
                   return (
                     <motion.div
                       key={link.label}
@@ -341,9 +401,11 @@ export default function Navbar() {
                   Appearance
                 </span>
                 <button
+                  type="button"
                   onClick={() => setTheme(isDarkMode ? 'light' : 'dark')}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04] transition-[color,background-color] duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
                   aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
+                  aria-pressed={isDarkMode}
                 >
                   {isDarkMode ? 'Light mode' : 'Dark mode'}
                 </button>

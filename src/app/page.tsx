@@ -15,7 +15,7 @@ export default function Home() {
     <main className="min-h-screen bg-background text-foreground overflow-x-hidden transition-colors duration-700 relative">
 
       {/* Subtle noise texture */}
-      <div className="fixed inset-0 pointer-events-none z-50 noise" />
+      <div className="fixed inset-0 pointer-events-none z-[40] noise" />
 
       {/* MAIN CONTENT */}
       <div className="relative z-10 flex min-h-[100dvh] flex-col items-center justify-center px-5 pb-20 sm:px-6 sm:pb-24">
