@@ -185,8 +185,8 @@
   .text-caption { @apply text-xs font-medium uppercase tracking-wide; }
   .text-overline { @apply text-[0.6875rem] font-semibold uppercase tracking-widest; }
 
-  /* Touch target minimum */
-  button, a, [role="button"] { min-height: 44px; min-width: 44px; }
+  /* Touch target minimum — only for elements without explicit sizing */
+  button:not([class*="h-"]):not([class*="min-h-"]), a:not([class*="h-"]):not([class*="min-h-"]), [role="button"]:not([class*="h-"]):not([class*="min-h-"]) { min-height: 44px; min-width: 44px; }
   /* Except inline text links and tiny indicators */
   a:not([class]), .inline-link { min-height: unset; min-width: unset; }
   nav a, footer a { min-height: 44px; display: inline-flex; align-items: center; }
