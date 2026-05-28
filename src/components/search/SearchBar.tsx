@@ -142,34 +142,35 @@ export default memo(function SearchBar({
   return (
     <div className="relative w-full z-[100]" ref={suggestionsRef}>
       {/* ── Apple Intelligence wrapper ── */}
-      <div className="relative">
+      <div className="relative group">
 
-        {/* 1. Rainbow border ring — CSS mask technique (no opaque background) */}
+        {/* 1. Rotating gradient border ring */}
         <div
-          className={`absolute inset-0 rounded-full pointer-events-none transition-opacity duration-500 ${
+          className={`absolute -inset-[2px] rounded-full pointer-events-none transition-opacity duration-700 overflow-hidden ${
             isTyping ? 'opacity-100' : 'opacity-0'
           }`}
-          style={{
-            zIndex: 0,
-            padding: '1.5px',
-            background: 'conic-gradient(from var(--ai-angle, 0deg), #00c6fb, #7b2ff7, #ff2d78, #ff9500, #30d158, #00c6fb)',
-            animation: isTyping ? 'ai-ring-spin 3s linear infinite' : 'none',
-            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-            WebkitMaskComposite: 'xor',
-            maskComposite: 'exclude',
-          }}
-        />
+          style={{ zIndex: 0 }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              inset: '-50%',
+              background: 'conic-gradient(from var(--search-rotation) at 50% 50% in oklab, oklch(0.63 0.2 251.22) 0%, oklch(0.67 0.21 25.81) 15%, oklch(0.9 0.19 93.93) 30%, oklch(0.79 0.25 150.49) 45%, oklch(0.63 0.2 251.22) 60%, oklch(0.72 0.21 150.89) 80%, oklch(0.63 0.2 251.22) 100%)',
+              animation: isTyping ? 'search-border-rotate 4s linear infinite' : 'none',
+            }}
+          />
+        </div>
 
-        {/* 2. Spotlight glow beneath bar */}
+        {/* 2. Blurred glow behind border */}
         <div
-          className={`absolute -bottom-4 left-1/2 -translate-x-1/2 w-3/4 h-8 rounded-full pointer-events-none transition-opacity duration-500 ${
-            isTyping ? 'opacity-100' : 'opacity-0'
+          className={`absolute -inset-[2px] rounded-full pointer-events-none transition-opacity duration-700 ${
+            isTyping ? 'opacity-60' : 'opacity-0'
           }`}
           style={{
-            background: 'conic-gradient(from var(--ai-angle, 0deg), #00c6fb33, #7b2ff733, #ff2d7833, #ff950033, #30d15833, #00c6fb33)',
-            filter: 'blur(14px)',
-            animation: isTyping ? 'ai-ring-spin 3s linear infinite' : 'none',
-            zIndex: 0,
+            zIndex: -1,
+            background: 'conic-gradient(from var(--search-rotation) at 50% 50% in oklab, oklch(0.63 0.2 251.22) 0%, oklch(0.67 0.21 25.81) 15%, oklch(0.9 0.19 93.93) 30%, oklch(0.79 0.25 150.49) 45%, oklch(0.63 0.2 251.22) 60%, oklch(0.72 0.21 150.89) 80%, oklch(0.63 0.2 251.22) 100%)',
+            filter: 'blur(16px)',
+            animation: isTyping ? 'search-border-rotate 4s linear infinite' : 'none',
           }}
         />
 
@@ -193,8 +194,8 @@ export default memo(function SearchBar({
                   top: '-30%',
                   width: '60%',
                   height: '160%',
-                  background: 'linear-gradient(105deg, transparent, rgba(0,198,251,0.35) 20%, rgba(123,47,247,0.45) 45%, rgba(255,45,120,0.4) 65%, rgba(255,149,0,0.25) 85%, transparent)',
-                  filter: 'blur(4px)',
+                  background: 'linear-gradient(105deg, transparent, oklch(0.63 0.2 251.22 / 0.25) 20%, oklch(0.67 0.21 25.81 / 0.3) 45%, oklch(0.9 0.19 93.93 / 0.25) 65%, oklch(0.79 0.25 150.49 / 0.15) 85%, transparent)',
+                  filter: 'blur(3px)',
                   transform: 'skewX(-12deg)',
                 }}
               />
@@ -202,8 +203,23 @@ export default memo(function SearchBar({
           )}
         </AnimatePresence>
 
-        {/* 4. Main search bar — fully transparent, no bg/border of its own */}
-        <div className="relative z-[1] rounded-full px-5 py-2.5">
+        {/* 4. Inner mask — cuts out the center, leaving only the border visible */}
+        <div
+          className={`absolute inset-0 rounded-full pointer-events-none transition-opacity duration-700 ${
+            isTyping ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{
+            zIndex: 1,
+            padding: '2px',
+            background: 'var(--background)',
+            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+            WebkitMaskComposite: 'xor',
+            maskComposite: 'exclude',
+          }}
+        />
+
+        {/* 5. Main search bar — fully transparent */}
+        <div className="relative z-[2] rounded-full px-5 py-2.5">
 
           {/* Input wrapper */}
           <div className="relative flex items-baseline gap-1.5">
