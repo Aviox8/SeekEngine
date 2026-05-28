@@ -2,33 +2,32 @@
  * API Route: /api/ai/cache/stats
  * Returns semantic cache statistics for monitoring
  * 
- * SECURITY: Requires API key authentication + rate limiting
+ * SECURITY: Requires ADMIN_SECRET authentication + rate limiting
  */
 
 import { getCacheStats, clearExpiredEntries } from '@/lib/semantic-cache'
 import { checkRateLimit, getClientIP, rateLimitResponse } from '@/lib/rate-limit'
-import { getOpenRouterApiKeys } from '@/lib/env'
 import { NextResponse, NextRequest } from 'next/server'
 
 export const runtime = 'edge'
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
-  // Require API key for authentication
+  // Require admin secret for authentication (not API keys)
   const authHeader = request.headers.get('authorization')
-  const apiKeys = getOpenRouterApiKeys()
-  
-  if (apiKeys.length === 0) {
+  const adminSecret = process.env.CACHE_STATS_SECRET || process.env.ADMIN_SECRET
+
+  if (!adminSecret) {
     return NextResponse.json(
-      { error: { code: 'API_KEY_MISSING', message: 'No API keys configured', retryable: false } },
+      { error: { code: 'SERVER_MISCONFIGURED', message: 'Cache stats endpoint not configured', retryable: false } },
       { status: 500 }
     )
   }
 
-  const providedKey = authHeader?.replace('Bearer ', '')
-  if (!providedKey || !apiKeys.includes(providedKey)) {
+  const providedSecret = authHeader?.replace('Bearer ', '')
+  if (!providedSecret || providedSecret !== adminSecret) {
     return NextResponse.json(
-      { error: { code: 'UNAUTHORIZED', message: 'Invalid or missing API key', retryable: false } },
+      { error: { code: 'UNAUTHORIZED', message: 'Invalid or missing admin secret', retryable: false } },
       { status: 401 }
     )
   }
