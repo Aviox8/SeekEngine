@@ -238,7 +238,7 @@ export default function ResultsClient() {
       {/* Noise */}
       <div className="fixed inset-0 pointer-events-none z-[1] noise" />
 
-      <div className="relative z-10 mx-auto w-full max-w-5xl px-4 sm:px-6">
+      <div className="relative z-10 mx-auto w-full max-w-5xl px-5 sm:px-6">
 
         {/* Compact header — share + action buttons */}
         <header className="mb-3 flex items-center justify-end gap-2 py-2 sm:mb-5 sm:py-4">
