@@ -58,7 +58,7 @@ export default memo(function ResultCard({ result, index = 0 }: { result: SearchR
       }}
       whileHover={{ y: -2, transition: { duration: 0.15, ease: 'easeOut' } }}
       whileTap={{ scale: 0.98 }}
-      className="block p-3 rounded-lg group relative overflow-hidden transition-all duration-200 border border-foreground/[0.06] hover:border-foreground/[0.12] hover:bg-foreground/[0.02] hover:shadow-sm sm:p-4 sm:rounded-xl md:p-5"
+      className="block p-4 rounded-2xl group relative overflow-hidden transition-all duration-300 border border-foreground/[0.04] hover:border-foreground/[0.08] hover:bg-foreground/[0.02] hover:shadow-[0_2px_16px_rgba(0,0,0,0.04)] sm:p-5 md:p-6"
     >
        <div className="relative z-10 space-y-1.5 sm:space-y-2.5">
           {/* Source */}

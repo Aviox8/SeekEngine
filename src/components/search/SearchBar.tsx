@@ -141,12 +141,12 @@ export default memo(function SearchBar({
 
   return (
     <div className="relative w-full z-[100]" ref={suggestionsRef}>
-      {/* Main search container — subtle border for grounding */}
-      <div className={`relative z-50 rounded-2xl border transition-all duration-300 px-4 py-1.5 sm:px-5 ${
-        isFocused 
-          ? 'border-foreground/15 bg-foreground/[0.02] shadow-sm' 
-          : 'border-foreground/[0.06] hover:border-foreground/10'
-      }`}>
+        {/* Main search container — Apple-style clean */}
+        <div className={`relative z-50 rounded-full border transition-all duration-300 px-5 py-2 ${
+          isFocused 
+            ? 'border-foreground/10 bg-foreground/[0.02] shadow-[0_2px_12px_rgba(0,0,0,0.04)]' 
+            : 'border-foreground/[0.06] hover:border-foreground/[0.10] bg-foreground/[0.01]'
+        }`}>
 
         {/* Input wrapper */}
         <div className="relative flex items-baseline gap-1.5">

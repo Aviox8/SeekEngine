@@ -1,11 +1,11 @@
 ﻿/**
- * Skeleton loading components — Modern Design
+ * Skeleton loading components — Apple-style clean design
  */
 
 export function SkeletonLine({ width = '100%', height = 'h-4', className = '' }: { width?: string; height?: string; className?: string }) {
   return (
     <div
-      className={`${height} rounded-md animate-pulse bg-foreground/[0.04] dark:bg-foreground/[0.06] ${className}`}
+      className={`${height} rounded-full animate-pulse bg-foreground/[0.04] dark:bg-foreground/[0.06] ${className}`}
       style={{ width }}
     />
   )
@@ -15,10 +15,10 @@ export function AnswerSkeleton() {
   return (
     <div className="space-y-4 py-2">
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-2 h-2 rounded-full bg-primary/30 animate-pulse" />
-        <SkeletonLine width="120px" height="h-3" />
+        <div className="w-2 h-2 rounded-full bg-foreground/20 animate-pulse" />
+        <SkeletonLine width="100px" height="h-3" />
       </div>
-      <div className="space-y-2.5">
+      <div className="space-y-3">
         <SkeletonLine width="100%" />
         <SkeletonLine width="95%" />
         <SkeletonLine width="88%" />
@@ -30,12 +30,12 @@ export function AnswerSkeleton() {
 
 export function ResultCardSkeleton() {
   return (
-    <div className="p-5 rounded-xl border border-foreground/[0.05] bg-foreground/[0.01] dark:bg-foreground/[0.02]">
+    <div className="p-5 rounded-2xl border border-foreground/[0.04] bg-foreground/[0.01] dark:bg-foreground/[0.02]">
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded-md animate-pulse bg-foreground/[0.06]" />
+          <div className="w-5 h-5 rounded-full animate-pulse bg-foreground/[0.06]" />
           <SkeletonLine width="100px" height="h-3" />
-          <div className="ml-auto w-3.5 h-3.5 rounded-sm animate-pulse bg-foreground/[0.04]" />
+          <div className="ml-auto w-3.5 h-3.5 rounded-full animate-pulse bg-foreground/[0.04]" />
         </div>
         <SkeletonLine width="85%" height="h-5" />
         <div className="space-y-2">

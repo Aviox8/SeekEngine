@@ -3,19 +3,19 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const badgeVariants = cva(
-  'inline-flex items-center rounded-md border px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2',
+  'inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2',
   {
     variants: {
       variant: {
-        default: 'border-primary/30 bg-primary/10 text-primary hover:bg-primary/15',
-        secondary: 'border-border bg-muted/50 text-muted-foreground hover:bg-muted/70',
-        outline: 'border-border/80 bg-transparent text-muted-foreground hover:border-foreground/30 hover:bg-accent/5',
-        success: 'border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-300 hover:bg-green-500/15',
-        warning: 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/15',
-        error: 'border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-300 hover:bg-red-500/15',
-        info: 'border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-300 hover:bg-blue-500/15',
-        purple: 'border-violet-500/30 bg-violet-500/10 text-violet-700 dark:text-violet-300 hover:bg-violet-500/15',
-        cyan: 'border-cyan-500/30 bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/15',
+        default: 'border-foreground/10 bg-foreground/[0.06] text-foreground/70 hover:bg-foreground/[0.08]',
+        secondary: 'border-foreground/[0.06] bg-foreground/[0.03] text-foreground/60 hover:bg-foreground/[0.05]',
+        outline: 'border-foreground/10 bg-transparent text-foreground/60 hover:bg-foreground/[0.04]',
+        success: 'border-emerald-500/20 bg-emerald-500/[0.08] text-emerald-600 dark:text-emerald-400',
+        warning: 'border-amber-500/20 bg-amber-500/[0.08] text-amber-600 dark:text-amber-400',
+        error: 'border-red-500/20 bg-red-500/[0.08] text-red-600 dark:text-red-400',
+        info: 'border-blue-500/20 bg-blue-500/[0.08] text-blue-600 dark:text-blue-400',
+        purple: 'border-violet-500/20 bg-violet-500/[0.08] text-violet-600 dark:text-violet-400',
+        cyan: 'border-cyan-500/20 bg-cyan-500/[0.08] text-cyan-600 dark:text-cyan-400',
       },
     },
     defaultVariants: {

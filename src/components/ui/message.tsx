@@ -24,10 +24,10 @@ const Message = React.forwardRef<HTMLDivElement, MessageProps>(
       >
         <motion.div 
           className={cn(
-            "flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-lg border shadow-sm",
+            "flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full border",
             role === 'user' 
-              ? "bg-background border-primary/20 text-foreground" 
-              : "bg-primary/10 border-primary/30 text-primary"
+              ? "bg-foreground/[0.04] border-foreground/[0.08] text-foreground" 
+              : "bg-foreground/[0.06] border-foreground/[0.08] text-foreground/70"
           )}
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -46,7 +46,7 @@ const Message = React.forwardRef<HTMLDivElement, MessageProps>(
           transition={{ duration: 0.3, delay: 0.1 }}
         >
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/70">
+            <span className="text-[11px] font-medium text-foreground/40">
               {role === 'user' ? 'You' : 'SeekEngine'}
             </span>
             {role === 'assistant' && (
@@ -56,11 +56,11 @@ const Message = React.forwardRef<HTMLDivElement, MessageProps>(
                 animate={{ opacity: 1 }}
               >
                 <motion.div 
-                  className="h-1.5 w-1.5 rounded-full bg-primary/60"
+                  className="h-1.5 w-1.5 rounded-full bg-foreground/30"
                   animate={{ scale: [1, 1.2, 1] }}
                   transition={{ repeat: Infinity, duration: 1.5 }}
                 />
-                <span className="text-[10px] font-medium text-primary/70 uppercase tracking-tight">AI</span>
+                <span className="text-[10px] font-medium text-foreground/40">AI</span>
               </motion.div>
             )}
             {isStreaming && (
@@ -70,11 +70,11 @@ const Message = React.forwardRef<HTMLDivElement, MessageProps>(
                 className="flex items-center gap-1 ml-1"
               >
                 <motion.span 
-                  className="h-1 w-1 rounded-full bg-primary/80"
+                  className="h-1 w-1 rounded-full bg-foreground/40"
                   animate={{ scale: [1, 1.5, 1] }}
                   transition={{ repeat: Infinity, duration: 1 }}
                 />
-                <span className="text-[10px] text-primary/60 font-medium">Thinking</span>
+                <span className="text-[10px] text-foreground/30 font-medium">Thinking</span>
               </motion.div>
             )}
           </div>

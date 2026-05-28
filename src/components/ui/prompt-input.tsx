@@ -39,12 +39,12 @@ const PromptInput = React.forwardRef<HTMLTextAreaElement, PromptInputProps>(
         className={cn(
           "relative rounded-2xl border transition-all duration-300",
           isFocused 
-            ? "border-primary/40 ring-4 ring-primary/10 bg-background shadow-lg" 
-            : "border-foreground/8 bg-foreground/[0.02] shadow-sm hover:border-foreground/12",
+            ? "border-foreground/10 bg-foreground/[0.02] shadow-[0_2px_12px_rgba(0,0,0,0.04)]" 
+            : "border-foreground/[0.06] bg-foreground/[0.01] hover:border-foreground/[0.08]",
           className
         )}
-        animate={{ boxShadow: isFocused ? "0 0 20px rgba(59, 130, 246, 0.1)" : "0 1px 3px rgba(0, 0, 0, 0.1)" }}
-        transition={{ duration: 0.2 }}
+        animate={{ boxShadow: isFocused ? "0 2px 16px rgba(0,0,0,0.04)" : "0 1px 3px rgba(0,0,0,0.02)" }}
+        transition={{ duration: 0.3 }}
       >
         <div className="flex items-start gap-3 p-4">
           <motion.div 
@@ -82,7 +82,7 @@ const PromptInput = React.forwardRef<HTMLTextAreaElement, PromptInputProps>(
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => onSearch?.(value.toString())}
-                  className="p-1.5 rounded-lg bg-primary text-primary-foreground hover:shadow-lg transition-all"
+                  className="p-1.5 rounded-full bg-foreground text-background hover:opacity-85 transition-all"
                 >
                   <CornerDownRight className="w-3.5 h-3.5" />
                 </motion.button>

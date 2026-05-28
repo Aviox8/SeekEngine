@@ -4,25 +4,25 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.97] active:duration-100',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-[13px] font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-40 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.97] active:duration-100',
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground shadow-md hover:shadow-lg hover:brightness-110 dark:hover:brightness-125 active:shadow-sm',
-        secondary: 'bg-secondary text-secondary-foreground shadow-sm hover:shadow-md hover:bg-secondary/80 active:shadow-none',
-        destructive: 'bg-destructive text-destructive-foreground shadow-md hover:shadow-lg hover:brightness-110 active:shadow-sm',
-        outline: 'border-2 border-border bg-transparent text-foreground hover:bg-accent/5 hover:border-accent/50 active:bg-accent/10',
-        ghost: 'text-foreground hover:bg-accent/10 hover:text-foreground/80 active:bg-accent/20',
-        glow: 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50 hover:brightness-110 dark:from-violet-500 dark:to-indigo-500',
-        success: 'bg-green-600 text-white shadow-md hover:shadow-lg hover:brightness-110 active:shadow-sm',
+        default: 'bg-foreground text-background shadow-sm hover:shadow-md hover:brightness-110 active:shadow-sm',
+        secondary: 'bg-foreground/[0.06] text-foreground hover:bg-foreground/[0.1] active:bg-foreground/[0.08]',
+        destructive: 'bg-red-500 text-white shadow-sm hover:shadow-md hover:brightness-110 active:shadow-sm',
+        outline: 'border border-foreground/10 bg-transparent text-foreground hover:bg-foreground/[0.04] hover:border-foreground/15 active:bg-foreground/[0.06]',
+        ghost: 'text-foreground hover:bg-foreground/[0.06] active:bg-foreground/[0.08]',
+        glow: 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-sm hover:shadow-md hover:brightness-110 dark:from-violet-500 dark:to-indigo-500',
+        success: 'bg-emerald-500 text-white shadow-sm hover:shadow-md hover:brightness-110 active:shadow-sm',
       } as const,
       size: {
-        default: 'h-10 px-4 py-2',
-        sm: 'h-8 rounded-md px-3 text-xs font-medium',
-        lg: 'h-12 rounded-lg px-6 text-base',
-        xl: 'h-14 rounded-xl px-8 text-lg font-bold',
-        icon: 'h-10 w-10 rounded-lg',
-        icon_sm: 'h-8 w-8 rounded-md',
+        default: 'h-10 px-5 py-2',
+        sm: 'h-8 rounded-full px-4 text-xs',
+        lg: 'h-12 rounded-full px-6 text-sm',
+        xl: 'h-14 rounded-full px-8 text-base',
+        icon: 'h-10 w-10 rounded-full',
+        icon_sm: 'h-8 w-8 rounded-full',
       } as const,
     },
     defaultVariants: {

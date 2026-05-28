@@ -101,7 +101,7 @@ export function Sources({ sources, isLoading, className, ...props }: SourcesProp
                 }}
                 whileHover={{ y: -4, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="group/source snap-start flex w-36 flex-shrink-0 rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] p-2.5 shadow-sm transition-all hover:border-foreground/[0.12] hover:bg-foreground/[0.05] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-48 sm:rounded-xl sm:p-3 sm:snap-center"
+                className="group/source snap-start flex w-36 flex-shrink-0 rounded-2xl border border-foreground/[0.04] bg-foreground/[0.02] p-2.5 transition-all hover:border-foreground/[0.08] hover:bg-foreground/[0.04] hover:shadow-[0_2px_12px_rgba(0,0,0,0.04)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-48 sm:p-3 sm:snap-center"
                 aria-label={`${source.title} - ${displayUrl}`}
               >
                 <div className="flex items-center gap-2 mb-2">
