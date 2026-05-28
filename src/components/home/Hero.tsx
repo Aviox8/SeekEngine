@@ -1,8 +1,8 @@
 'use client'
 
 /**
- * Hero Component — Apple-style clean, minimal hero
- * Inspired by apple.com: bold typography, generous whitespace, subtle animations
+ * Hero Component — Apple Intelligence-style hero
+ * Inspired by apple.com/apple-intelligence: aurora glow, clean typography
  */
 
 import { motion } from 'framer-motion'
@@ -12,6 +12,28 @@ export default function Hero() {
   return (
     <section className="w-full flex flex-col items-center justify-center relative overflow-visible pointer-events-none py-8 sm:py-12">
       
+      {/* Apple Intelligence aurora glow behind logo */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] pointer-events-none"
+      >
+        {/* Rotating aurora gradient */}
+        <div className="absolute inset-0 rounded-full opacity-[0.08] dark:opacity-[0.12] animate-[ai-rotate_8s_linear_infinite]"
+          style={{
+            background: 'conic-gradient(from 0deg, #f59e0b, #e11d48, #7c3aed, #0284c7, #059669, #f59e0b)',
+            filter: 'blur(60px)',
+          }}
+        />
+        {/* Subtle radial glow */}
+        <div className="absolute inset-0 rounded-full opacity-[0.04] dark:opacity-[0.06]"
+          style={{
+            background: 'radial-gradient(circle, rgba(124, 58, 237, 0.3) 0%, transparent 70%)',
+          }}
+        />
+      </motion.div>
+
       {/* HERO CONTENT */}
       <motion.div
         className="relative z-10 text-center px-4 pointer-events-auto flex flex-col items-center"
@@ -21,14 +43,16 @@ export default function Hero() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-          className="mb-6 sm:mb-8"
+          className="mb-6 sm:mb-8 relative"
         >
+          {/* Subtle glow behind logo */}
+          <div className="absolute inset-0 -m-4 rounded-full bg-gradient-to-br from-violet-500/10 via-transparent to-blue-500/10 blur-xl" />
           <Image
             src="/logo.png"
             alt="SeekEngine"
             width={56}
             height={56}
-            className="w-14 h-14 sm:w-16 sm:h-16"
+            className="w-14 h-14 sm:w-16 sm:h-16 relative z-10"
             priority
           />
         </motion.div>
@@ -43,16 +67,19 @@ export default function Hero() {
           Seek<span className="font-display-italic text-foreground/30">Engine</span>
         </motion.h1>
 
-        {/* Subtle divider line */}
+        {/* Subtle divider line with gradient */}
         <motion.div
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ delay: 0.4, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-          className="w-12 h-px bg-foreground/10 mt-6 origin-center sm:w-16"
+          className="w-16 h-px mt-6 origin-center sm:w-20"
+          style={{
+            background: 'linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.3), transparent)',
+          }}
         />
       </motion.div>
 
-      {/* TAGLINE — Clean, minimal */}
+      {/* TAGLINE — Clean, minimal with AI emphasis */}
       <motion.div
         className="mt-6 md:mt-8 text-center space-y-2 z-20 relative max-w-md px-6 pointer-events-auto"
       >

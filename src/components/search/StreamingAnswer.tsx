@@ -402,52 +402,57 @@ function ReasoningPanel({
       ? script.leads.streaming
       : script.leads.done
 
-  // Gradient border color based on state
-  const borderColor = state === 'thinking' 
-    ? 'from-primary/20 via-primary/10 to-transparent'
-    : state === 'streaming'
-      ? 'from-primary/30 via-primary/15 to-transparent'
-      : 'from-emerald-500/20 via-emerald-500/10 to-transparent'
-
   return (
     <motion.div 
-      className="mb-3 rounded-lg sm:mb-4 sm:rounded-xl sm:px-4 sm:py-3.5 relative overflow-hidden"
+      className="mb-3 rounded-2xl sm:mb-4 sm:px-4 sm:py-3.5 relative overflow-hidden ai-glass"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      {/* Animated gradient border */}
-      <div className={`absolute inset-0 rounded-lg sm:rounded-xl bg-gradient-to-r ${borderColor} opacity-50`} />
-      <div className="absolute inset-[1px] rounded-lg sm:rounded-xl bg-background/90 backdrop-blur-sm" />
-      
       <div className="relative px-3 py-2.5">
         <div className="flex items-start gap-2.5">
-          <div className="mt-[1px] flex h-4 w-4 items-center justify-center rounded-full border border-foreground/10">
+          {/* AI Status indicator — Apple Intelligence style */}
+          <div className="mt-[1px] flex h-5 w-5 items-center justify-center rounded-full relative">
+            {/* Animated aurora border */}
+            <div className={`absolute inset-0 rounded-full transition-opacity duration-500 ${
+              state === 'done' ? 'opacity-0' : 'opacity-100'
+            }`}
+              style={{
+                background: 'conic-gradient(from 0deg, #f59e0b, #e11d48, #7c3aed, #0284c7, #059669, #f59e0b)',
+                animation: 'ai-rotate 2s linear infinite',
+                padding: '1px',
+                WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                WebkitMaskComposite: 'xor',
+                maskComposite: 'exclude',
+              }}
+            />
             {state === 'thinking' || state === 'streaming' ? (
-              <div className="flex items-center gap-0.5">
-                <span className="w-1 h-1 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-1 h-1 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-1 h-1 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
+              <div className="flex items-center gap-0.5 relative z-10">
+                <span className="w-1 h-1 rounded-full bg-foreground/60 animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-1 h-1 rounded-full bg-foreground/60 animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-1 h-1 rounded-full bg-foreground/60 animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
             ) : (
-              <svg className="w-2.5 h-2.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
+              <div className="relative z-10">
+                <svg className="w-2.5 h-2.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
             )}
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/80">
+              <p className="text-[11px] font-medium text-foreground/50">
                 {heading}
               </p>
               {/* Step counter */}
               {state === 'thinking' && (
-                <span className="text-[9px] font-medium text-muted-foreground/50 tabular-nums">
+                <span className="text-[10px] font-medium text-foreground/30 tabular-nums">
                   {activeStep + 1}/{totalSteps}
                 </span>
               )}
               {state === 'thinking' && (
-                <span className="inline-flex rounded-full border border-primary/20 bg-primary/[0.05] px-2 py-0.5 text-[10px] font-medium text-primary/70">
+                <span className="inline-flex rounded-full bg-foreground/[0.04] px-2.5 py-0.5 text-[10px] font-medium text-foreground/50">
                   <ShimmeringText text={script.statusText} duration={1.8} spread={1.25} />
                 </span>
               )}
@@ -457,7 +462,7 @@ function ReasoningPanel({
               <AnimatePresence mode="wait" initial={false}>
                 <motion.p
                   key={`${state}:${activeStep}:${thoughtText}`}
-                  className="text-[11px] leading-relaxed text-foreground/82 sm:text-[12px]"
+                  className="text-[12px] leading-relaxed text-foreground/70 sm:text-[13px]"
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
@@ -469,13 +474,13 @@ function ReasoningPanel({
             </div>
 
             {supportText && (
-              <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground/75">
+              <p className="mt-0.5 text-[11px] leading-relaxed text-foreground/40">
                 {supportText}
               </p>
             )}
 
             {state === 'done' && content && (
-              <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground/70">
+              <p className="mt-1 text-[11px] leading-relaxed text-foreground/35">
                 {content}
               </p>
             )}

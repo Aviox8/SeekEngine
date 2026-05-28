@@ -200,7 +200,7 @@ export default function Navbar() {
     return () => { document.body.style.overflow = '' }
   }, [])
 
-  /* Nav pill styles — Apple-style refined glass with smooth scroll transitions */
+  /* Nav pill styles — Apple Intelligence refined glass with subtle AI glow on scroll */
   const pillClass = scrolled
     ? 'bg-background/80 backdrop-blur-xl border-foreground/[0.08] shadow-[0_2px_20px_rgba(0,0,0,0.06)]'
     : 'bg-background/60 backdrop-blur-lg border-foreground/[0.05]'
@@ -216,7 +216,24 @@ export default function Navbar() {
             initial={{ y: -100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-            className={`pointer-events-auto flex w-full max-w-[min(100%,42rem)] items-center justify-between gap-2 rounded-full border px-2 py-1.5 transition-all duration-700 ease-out sm:w-auto sm:max-w-none sm:gap-1 sm:px-2.5 sm:py-1.5 ${pillClass}`}
+            className={`pointer-events-auto flex w-full max-w-[min(100%,42rem)] items-center justify-between gap-2 rounded-full border px-2 py-1.5 transition-all duration-700 ease-out sm:w-auto sm:max-w-none sm:gap-1 sm:px-2.5 sm:py-1.5 relative ${pillClass}`}
+          >
+            {/* Subtle AI gradient glow when scrolled — Apple Intelligence style */}
+            {scrolled && (
+              <div 
+                className="absolute -inset-[1px] rounded-full opacity-[0.15] pointer-events-none"
+                style={{
+                  background: 'conic-gradient(from 0deg, #f59e0b, #e11d48, #7c3aed, #0284c7, #059669, #f59e0b)',
+                  animation: 'ai-rotate 8s linear infinite',
+                  filter: 'blur(8px)',
+                  mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                  WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                  WebkitMaskComposite: 'xor',
+                  maskComposite: 'exclude',
+                  padding: '1px',
+                }}
+              />
+            )}
             style={{
               boxShadow: scrolled 
                 ? `0 4px 24px -4px rgba(0,0,0,${shadowIntensity.get()})` 

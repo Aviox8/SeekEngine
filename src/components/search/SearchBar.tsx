@@ -141,11 +141,38 @@ export default memo(function SearchBar({
 
   return (
     <div className="relative w-full z-[100]" ref={suggestionsRef}>
-        {/* Main search container — Apple-style clean */}
-        <div className={`relative z-50 rounded-full border transition-all duration-300 px-5 py-2 ${
+      {/* Main search container — Apple Intelligence style with gradient border */}
+      <div className={`relative z-50 rounded-full transition-all duration-500 ${
+        isFocused 
+          ? 'shadow-[0_2px_20px_rgba(124,58,237,0.08)]' 
+          : ''
+      }`}>
+        {/* AI gradient border — visible on focus */}
+        <div className={`absolute -inset-[1px] rounded-full transition-opacity duration-500 ${
+          isFocused ? 'opacity-100' : 'opacity-0'
+        }`}
+          style={{
+            background: 'conic-gradient(from 0deg, #f59e0b, #e11d48, #7c3aed, #0284c7, #059669, #f59e0b)',
+            animation: 'ai-rotate 4s linear infinite',
+          }}
+        />
+        {/* Border mask */}
+        <div className={`absolute -inset-[1px] rounded-full transition-opacity duration-500 ${
+          isFocused ? 'opacity-100' : 'opacity-0'
+        }`}
+          style={{
+            background: 'linear-gradient(var(--background), var(--background))',
+            padding: '1px',
+            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+            WebkitMaskComposite: 'xor',
+            maskComposite: 'exclude',
+          }}
+        />
+        {/* Inner container */}
+        <div className={`relative rounded-full border transition-all duration-300 px-5 py-2 ${
           isFocused 
-            ? 'border-foreground/10 bg-foreground/[0.02] shadow-[0_2px_12px_rgba(0,0,0,0.04)]' 
-            : 'border-foreground/[0.06] hover:border-foreground/[0.10] bg-foreground/[0.01]'
+            ? 'border-transparent bg-background/95 backdrop-blur-xl' 
+            : 'border-foreground/[0.06] bg-foreground/[0.01] hover:border-foreground/[0.10]'
         }`}>
 
         {/* Input wrapper */}
@@ -299,7 +326,8 @@ export default memo(function SearchBar({
                     >
                       ↵
                     </motion.kbd>
-                 </div>
+        </div>
+      </div>
                ))}
                
                <div className="px-4 py-2 border-t border-foreground/5 flex justify-between items-center bg-foreground/[0.01]">
