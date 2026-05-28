@@ -94,6 +94,19 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const mobileMenuId = useId()
 
+  // Close mobile menu on Escape key
+  const handleEscapeKey = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape' && mobileOpen) {
+      e.preventDefault()
+      setMobileOpen(false)
+    }
+  }, [mobileOpen])
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleEscapeKey)
+    return () => document.removeEventListener('keydown', handleEscapeKey)
+  }, [handleEscapeKey])
+
   useMotionValueEvent(scrollY, 'change', (latest) => {
     const previous = scrollY.getPrevious() ?? 0
     const diff = latest - previous
