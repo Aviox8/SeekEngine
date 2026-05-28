@@ -7,13 +7,13 @@ import { CornerDownRight, X, Loader2, Search } from "lucide-react"
 import LivingIcon from "../shared/LivingIcon"
 
 interface PromptInputProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  onSumbit?: (value: string) => void
+  onSubmit?: (value: string) => void
   isLoading?: boolean
   suggestions?: string[]
 }
 
 const PromptInput = React.forwardRef<HTMLTextAreaElement, PromptInputProps>(
-  ({ className, value, onChange, onSumbit, isLoading, suggestions, ...props }, ref) => {
+  ({ className, value, onChange, onSubmit, isLoading, suggestions, ...props }, ref) => {
     const textareaRef = React.useRef<HTMLTextAreaElement>(null)
     const [isFocused, setIsFocused] = React.useState(false)
 
@@ -30,7 +30,7 @@ const PromptInput = React.forwardRef<HTMLTextAreaElement, PromptInputProps>(
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault()
-        if (value && onSumbit) onSumbit(value.toString())
+        if (value && onSubmit) onSubmit(value.toString())
       }
     }
 
@@ -81,7 +81,7 @@ const PromptInput = React.forwardRef<HTMLTextAreaElement, PromptInputProps>(
                   exit={{ opacity: 0, scale: 0.8 }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => onSumbit?.(value.toString())}
+                  onClick={() => onSubmit?.(value.toString())}
                   className="p-1.5 rounded-lg bg-primary text-primary-foreground hover:shadow-lg transition-all"
                 >
                   <CornerDownRight className="w-3.5 h-3.5" />
@@ -108,7 +108,7 @@ const PromptInput = React.forwardRef<HTMLTextAreaElement, PromptInputProps>(
              {suggestions?.slice(0, 3).map((s, idx) => (
                 <motion.button 
                   key={idx}
-                  onClick={() => onSumbit?.(s)}
+                  onClick={() => onSubmit?.(s)}
                   whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.04)' }}
                   whileTap={{ scale: 0.95 }}
                   className="px-2 py-1 rounded-md transition-colors text-[10px] font-semibold text-muted-foreground/60 hover:text-foreground/70 truncate max-w-[120px]"
