@@ -198,14 +198,14 @@ export default memo(function SearchBar({
               <motion.div
                 initial={{ left: '-100%', opacity: 0 }}
                 animate={{ left: '120%', opacity: [0, 1, 1, 0] }}
-                transition={{ duration: 0.65, ease: [0.25, 0.46, 0.45, 0.94] }}
+                transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
                 style={{
                   position: 'absolute',
-                  top: '-20%',
-                  width: '55%',
-                  height: '140%',
-                  background: 'linear-gradient(105deg, transparent, rgba(0,198,251,0.2) 20%, rgba(123,47,247,0.3) 45%, rgba(255,45,120,0.25) 65%, rgba(255,149,0,0.15) 85%, transparent)',
-                  filter: 'blur(3px)',
+                  top: '-30%',
+                  width: '60%',
+                  height: '160%',
+                  background: 'linear-gradient(105deg, transparent, rgba(0,198,251,0.35) 20%, rgba(123,47,247,0.45) 45%, rgba(255,45,120,0.4) 65%, rgba(255,149,0,0.25) 85%, transparent)',
+                  filter: 'blur(4px)',
                   transform: 'skewX(-12deg)',
                 }}
               />
@@ -214,7 +214,11 @@ export default memo(function SearchBar({
         </AnimatePresence>
 
         {/* 4. Main search bar */}
-        <div className="relative z-[1] rounded-full px-5 py-2.5 border border-foreground/[0.06] hover:border-foreground/[0.10]">
+        <div className={`relative z-[1] rounded-full px-5 py-2.5 border transition-all duration-300 ${
+          isFocused 
+            ? 'border-foreground/[0.12] bg-white/5 dark:bg-black/5 backdrop-blur-sm' 
+            : 'border-foreground/[0.06] hover:border-foreground/[0.10] hover:bg-foreground/[0.02]'
+        }`}>
 
           {/* Input wrapper */}
           <div className="relative flex items-baseline gap-1.5">
@@ -316,7 +320,7 @@ export default memo(function SearchBar({
           </div>
         </div>
 
-        {/* 5. Siri-style animated bars (right side, inside bar) */}
+        {/* 5. Siri-style animated bars (left side, outside input area) */}
         <AnimatePresence>
           {isTyping && (
             <motion.div
@@ -324,7 +328,7 @@ export default memo(function SearchBar({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ duration: 0.2 }}
-              className="absolute right-5 top-1/2 -translate-y-1/2 z-[2] flex items-center gap-[3px] pointer-events-none"
+              className="absolute -left-12 top-1/2 -translate-y-1/2 z-[2] flex items-center gap-[3px] pointer-events-none"
             >
               {[
                 { h: 8,  color: '#00c6fb', delay: '0s' },
