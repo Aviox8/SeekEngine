@@ -214,10 +214,10 @@ export default memo(function SearchBar({
         </AnimatePresence>
 
         {/* 4. Main search bar */}
-        <div className={`relative z-[1] rounded-full border transition-all duration-300 px-5 py-2 ${
-          isFocused
-            ? 'border-transparent bg-background/95 backdrop-blur-xl'
-            : 'border-foreground/[0.06] bg-foreground/[0.01] hover:border-foreground/[0.10]'
+        <div className={`relative z-[1] rounded-full transition-all duration-500 px-5 py-2.5 ${
+          isFocused 
+            ? 'bg-background/95 backdrop-blur-xl border border-transparent' 
+            : 'bg-foreground/[0.02] border border-foreground/[0.06] hover:border-foreground/[0.10] hover:bg-foreground/[0.03]'
         }`}>
 
           {/* Input wrapper */}
