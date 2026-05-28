@@ -214,11 +214,7 @@ export default memo(function SearchBar({
         </AnimatePresence>
 
         {/* 4. Main search bar */}
-        <div className={`relative z-[1] rounded-full transition-all duration-500 px-5 py-2.5 ${
-          isFocused 
-            ? 'bg-background/95 backdrop-blur-xl border border-transparent' 
-            : 'bg-foreground/[0.02] border border-foreground/[0.06] hover:border-foreground/[0.10] hover:bg-foreground/[0.03]'
-        }`}>
+        <div className="relative z-[1] rounded-full px-5 py-2.5 border border-foreground/[0.06] hover:border-foreground/[0.10]">
 
           {/* Input wrapper */}
           <div className="relative flex items-baseline gap-1.5">
