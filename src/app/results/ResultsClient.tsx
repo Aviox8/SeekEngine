@@ -405,8 +405,9 @@ export default function ResultsClient() {
                   <p className="text-xs text-destructive font-medium mb-1 sm:text-sm">{resultsError}</p>
                   <p className="text-[10px] text-muted-foreground/60 mb-3 sm:text-xs sm:mb-4">Try a different query or check your connection.</p>
                   <button
+                    type="button"
                     onClick={() => setRetryToken(t => t + 1)}
-                    className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors sm:text-xs"
+                    className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-xs"
                   >
                     Retry
                   </button>
