@@ -368,6 +368,7 @@ export default function ResultsClient() {
             <div className="flex gap-1.5 mb-4 overflow-x-auto scrollbar-none pb-1 -mx-1 px-1 sm:flex-wrap sm:mb-5 sm:overflow-x-visible sm:mx-0 sm:px-0 sm:pb-0">
               {TIME_OPTIONS.map(opt => (
                 <button
+                  type="button"
                   key={opt.value}
                   onClick={() => {
                     setTimeFilter(opt.value)
@@ -380,7 +381,7 @@ export default function ResultsClient() {
                     }
                     router.push(`/results?${params.toString()}`, { scroll: false })
                   }}
-                  className={`shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-200 border whitespace-nowrap ${
+                  className={`shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-200 border whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 ${
                     timeFilter === opt.value
                       ? 'bg-foreground text-background border-foreground'
                       : 'border-foreground/[0.06] text-muted-foreground hover:border-foreground/15 hover:text-foreground'

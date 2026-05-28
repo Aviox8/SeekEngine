@@ -728,6 +728,7 @@ export function StreamingAnswer({
                 />
               )}
               <button
+                type="button"
                 onClick={() => {
                   completed.current = false
                   lastStartedRequest.current = null
@@ -735,8 +736,8 @@ export function StreamingAnswer({
                   onRegenerate?.()
                   startCurrentStream()
                 }}
-                className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide transition-all text-muted-foreground/70 hover:text-primary active:scale-95 group/regen sm:gap-2.5 sm:text-xs"
-                title="Regenerate answer"
+                className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide transition-all text-muted-foreground/70 hover:text-primary active:scale-95 group/regen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:gap-2.5 sm:text-xs"
+                aria-label="Regenerate answer"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover/regen:rotate-180 transition-transform duration-700">
                   <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
@@ -760,13 +761,14 @@ export function StreamingAnswer({
               <span className="text-xs font-medium text-destructive flex-1 sm:text-sm">{error || 'Failed to generate answer'}</span>
             </div>
             <button 
+              type="button"
               onClick={() => {
                 completed.current = false
                 lastStartedRequest.current = null
                 setRunCycle((current) => current + 1)
                 startCurrentStream()
               }}
-              className="w-full px-3 py-2 text-[10px] font-semibold uppercase tracking-wide rounded-md transition-all active:scale-95 bg-destructive/10 border border-destructive/20 text-destructive hover:bg-destructive/15 flex items-center justify-center gap-1.5 sm:text-xs sm:gap-2 sm:rounded-lg"
+              className="w-full px-3 py-2 text-[10px] font-semibold uppercase tracking-wide rounded-md transition-all active:scale-95 bg-destructive/10 border border-destructive/20 text-destructive hover:bg-destructive/15 flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-xs sm:gap-2 sm:rounded-lg"
             >
               <RefreshCw className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               Try Again
