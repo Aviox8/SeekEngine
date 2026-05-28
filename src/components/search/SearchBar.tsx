@@ -141,80 +141,14 @@ export default memo(function SearchBar({
 
   return (
     <div className="relative w-full z-[100]" ref={suggestionsRef}>
-      {/* ── Apple Intelligence wrapper ── */}
-      <div className="relative group">
+      {/* ── Search bar ── */}
+      <div className="relative">
 
-        {/* 1. Blurred glow — soft halo behind the border */}
-        <div
-          className={`absolute -inset-[2px] rounded-full pointer-events-none transition-all duration-700 ${
-            isTyping 
-              ? 'opacity-70' 
-              : isFocused 
-                ? 'opacity-25' 
-                : 'opacity-0'
-          }`}
-          style={{
-            zIndex: 0,
-            background: 'conic-gradient(from var(--search-rotation) at 50% 50% in oklab, oklch(0.63 0.2 251.22) 0%, oklch(0.67 0.21 25.81) 15%, oklch(0.9 0.19 93.93) 30%, oklch(0.79 0.25 150.49) 45%, oklch(0.63 0.2 251.22) 60%, oklch(0.72 0.21 150.89) 80%, oklch(0.63 0.2 251.22) 100%)',
-            filter: isTyping ? 'blur(18px)' : 'blur(12px)',
-            animation: (isTyping || isFocused) ? 'search-border-rotate 4s linear infinite' : 'none',
-          }}
-        />
-
-        {/* 2. Gradient border ring — CSS mask cuts out center, only 2px border shows gradient */}
-        <div
-          className={`absolute inset-0 rounded-full pointer-events-none transition-all duration-700 ${
-            isTyping 
-              ? 'opacity-100' 
-              : isFocused 
-                ? 'opacity-40' 
-                : 'opacity-0'
-          }`}
-          style={{
-            zIndex: 1,
-            padding: '2px',
-            background: 'conic-gradient(from var(--search-rotation) at 50% 50% in oklab, oklch(0.63 0.2 251.22) 0%, oklch(0.67 0.21 25.81) 15%, oklch(0.9 0.19 93.93) 30%, oklch(0.79 0.25 150.49) 45%, oklch(0.63 0.2 251.22) 60%, oklch(0.72 0.21 150.89) 80%, oklch(0.63 0.2 251.22) 100%)',
-            animation: (isTyping || isFocused) ? 'search-border-rotate 4s linear infinite' : 'none',
-            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-            WebkitMaskComposite: 'xor',
-            maskComposite: 'exclude',
-          }}
-        />
-
-        {/* 3. One-shot brush sweep on first keystroke */}
-        <AnimatePresence>
-          {isTyping && (
-            <motion.div
-              key="brush-sweep"
-              className="absolute inset-0 rounded-full pointer-events-none overflow-hidden"
-              style={{ zIndex: 10 }}
-              initial={{ opacity: 1 }}
-              animate={{ opacity: 0 }}
-              transition={{ duration: 0.01, delay: 0.7 }}
-            >
-              <motion.div
-                initial={{ left: '-100%', opacity: 0 }}
-                animate={{ left: '120%', opacity: [0, 1, 1, 0] }}
-                transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
-                style={{
-                  position: 'absolute',
-                  top: '-30%',
-                  width: '60%',
-                  height: '160%',
-                  background: 'linear-gradient(105deg, transparent, oklch(0.63 0.2 251.22 / 0.3) 20%, oklch(0.67 0.21 25.81 / 0.35) 45%, oklch(0.9 0.19 93.93 / 0.3) 65%, oklch(0.79 0.25 150.49 / 0.2) 85%, transparent)',
-                  filter: 'blur(3px)',
-                  transform: 'skewX(-12deg)',
-                }}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* 4. Main search bar — fully transparent, sits on top */}
-        <div className={`relative z-[2] rounded-full px-5 py-2.5 transition-all duration-500 ${
-          isFocused && !isTyping 
-            ? 'bg-foreground/[0.02]' 
-            : ''
+        {/* Main search bar */}
+        <div className={`relative z-[1] rounded-full px-5 py-2.5 border transition-all duration-300 ${
+          isFocused 
+            ? 'border-foreground/[0.12]' 
+            : 'border-foreground/[0.06] hover:border-foreground/[0.10]'
         }`}>
 
           {/* Input wrapper */}
