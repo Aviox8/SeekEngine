@@ -10,7 +10,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
-import { useState, useId } from 'react'
+import { useState, useId, useEffect, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'framer-motion'
 
