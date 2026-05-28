@@ -60,7 +60,7 @@ export default function PrivacyContent() {
       {/* Background */}
       <div className="fixed inset-0 pointer-events-none bg-grid-black/[0.01] dark:bg-grid-white/[0.01]" />
 
-      <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6">
+      <div className="relative z-10 mx-auto max-w-4xl px-5 sm:px-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

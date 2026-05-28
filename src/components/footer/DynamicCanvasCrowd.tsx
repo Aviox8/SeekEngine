@@ -65,7 +65,7 @@ export default function DynamicCanvasCrowd() {
                   href={link.href}
                   target={link.external ? '_blank' : undefined}
                   rel={link.external ? 'noopener noreferrer' : undefined}
-                  className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/25 transition-all duration-300 hover:text-foreground/60 hover:tracking-[0.16em] sm:tracking-[0.15em] sm:hover:tracking-[0.2em]"
+                  className="text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/35 transition-all duration-300 hover:text-foreground/60 hover:tracking-[0.16em] sm:tracking-[0.15em] sm:hover:tracking-[0.2em]"
                 >
                   {link.label}
                 </a>
@@ -74,10 +74,10 @@ export default function DynamicCanvasCrowd() {
 
             {/* Copyright + tagline */}
             <div className="flex flex-col items-center gap-2 pt-2">
-              <p className="text-center text-[9px] uppercase tracking-[0.22em] text-muted-foreground/15 sm:tracking-[0.3em]">
+              <p className="text-center text-[10px] sm:text-[11px] uppercase tracking-[0.22em] text-muted-foreground/25 sm:tracking-[0.3em]">
                 The future of discovery
               </p>
-              <p className="text-center text-[9px] uppercase tracking-[0.15em] text-muted-foreground/20 sm:tracking-[0.2em]">
+              <p className="text-center text-[10px] sm:text-[11px] uppercase tracking-[0.15em] text-muted-foreground/30 sm:tracking-[0.2em]">
                 &copy; {new Date().getFullYear()} SeekEngine &middot; All rights reserved
               </p>
             </div>
