@@ -141,39 +141,39 @@ export default memo(function SearchBar({
 
   return (
     <div className="relative w-full z-[100]" ref={suggestionsRef}>
-      {/* Main search container — Apple Intelligence style with gradient border */}
-      <div className={`relative z-50 rounded-full transition-all duration-500 ${
+      {/* Main search container — Apple Intelligence spotlight */}
+      <div className={`relative z-50 rounded-full transition-all duration-700 ease-out ${
         isFocused 
-          ? 'shadow-[0_2px_20px_rgba(124,58,237,0.08)]' 
-          : ''
+          ? 'shadow-[0_0_40px_-8px_rgba(124,58,237,0.25),0_0_80px_-12px_rgba(124,58,237,0.15)]' 
+          : 'shadow-none'
       }`}>
-        {/* AI gradient border — rotating conic gradient with overflow hidden */}
-        <div className={`absolute -inset-[1px] rounded-full overflow-hidden transition-opacity duration-500 ${
-          isFocused ? 'opacity-100' : 'opacity-0'
+        {/* Apple Intelligence spotlight border — rotating aurora gradient */}
+        <div className={`absolute -inset-[2px] rounded-full overflow-hidden transition-all duration-700 ease-out ${
+          isFocused ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
         }`}>
-          {/* Rotating gradient — oversized to cover rotation */}
+          {/* Rotating gradient layer */}
           <div 
-            className="absolute"
+            className="absolute inset-0"
             style={{
-              inset: '-100%',
-              background: 'conic-gradient(from 0deg, #f59e0b, #e11d48, #7c3aed, #0284c7, #059669, #f59e0b)',
-              animation: 'ai-rotate 4s linear infinite',
+              background: 'conic-gradient(from 0deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #54a0ff, #5f27cd, #ff6b6b)',
+              animation: 'ai-rotate 3s linear infinite',
             }}
           />
-          {/* Inner cutout — reveals only the border ring */}
+          {/* Inner cutout — creates the border ring effect */}
           <div 
             className="absolute rounded-full"
             style={{
-              inset: '1.5px',
+              inset: '2px',
               background: 'var(--background)',
             }}
           />
         </div>
-        {/* Inner container */}
-        <div className={`relative rounded-full border transition-all duration-300 px-5 py-2 ${
+        
+        {/* Inner container — glass surface */}
+        <div className={`relative rounded-full transition-all duration-500 px-5 py-2.5 ${
           isFocused 
-            ? 'border-transparent bg-background/95 backdrop-blur-xl' 
-            : 'border-foreground/[0.06] bg-foreground/[0.01] hover:border-foreground/[0.10]'
+            ? 'bg-background/95 backdrop-blur-xl border border-transparent' 
+            : 'bg-foreground/[0.02] border border-foreground/[0.06] hover:border-foreground/[0.10] hover:bg-foreground/[0.03]'
         }`}>
 
         {/* Input wrapper */}
