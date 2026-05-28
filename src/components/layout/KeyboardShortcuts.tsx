@@ -24,21 +24,62 @@ const SHORTCUT_GROUPS = [
 
 export default function KeyboardShortcuts() {
   const [open, setOpen] = useState(false)
+  const modalRef = useRef<HTMLDivElement>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
+
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === '?' && !e.ctrlKey && !e.metaKey && !document.activeElement?.matches('input, textarea')) {
+      e.preventDefault()
+      setOpen(prev => !prev)
+    }
+    if (e.key === 'Escape' && open) {
+      e.preventDefault()
+      setOpen(false)
+    }
+  }, [open])
 
   useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (document.activeElement?.matches('input, textarea')) return
-      if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
-        e.preventDefault()
-        setOpen(prev => !prev)
-      }
-      if (e.key === 'Escape' && open) {
-        setOpen(false)
-      }
-    }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [handleKeyDown])
+
+  // Focus trap when modal is open
+  useEffect(() => {
+    if (open) {
+      previousFocusRef.current = document.activeElement as HTMLElement
+      // Focus the modal after animation
+      const timer = setTimeout(() => {
+        modalRef.current?.focus()
+      }, 100)
+      return () => clearTimeout(timer)
+    } else if (previousFocusRef.current) {
+      previousFocusRef.current.focus()
+      previousFocusRef.current = null
+    }
   }, [open])
+
+  // Trap focus inside modal
+  const handleModalKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key !== 'Tab' || !modalRef.current) return
+    
+    const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+    const firstElement = focusableElements[0]
+    const lastElement = focusableElements[focusableElements.length - 1]
+
+    if (e.shiftKey) {
+      if (document.activeElement === firstElement) {
+        e.preventDefault()
+        lastElement?.focus()
+      }
+    } else {
+      if (document.activeElement === lastElement) {
+        e.preventDefault()
+        firstElement?.focus()
+      }
+    }
+  }, [])
 
   return (
     <AnimatePresence>
