@@ -146,8 +146,12 @@ export default memo(function SearchBar({
 
         {/* 1. Rotating gradient border ring */}
         <div
-          className={`absolute -inset-[2px] rounded-full pointer-events-none transition-opacity duration-700 overflow-hidden ${
-            isTyping ? 'opacity-100' : 'opacity-0'
+          className={`absolute -inset-[2px] rounded-full pointer-events-none transition-all duration-700 overflow-hidden ${
+            isTyping 
+              ? 'opacity-100 scale-100' 
+              : isFocused 
+                ? 'opacity-40 scale-[0.998]' 
+                : 'opacity-0 scale-95'
           }`}
           style={{ zIndex: 0 }}
         >
@@ -156,21 +160,25 @@ export default memo(function SearchBar({
               position: 'absolute',
               inset: '-50%',
               background: 'conic-gradient(from var(--search-rotation) at 50% 50% in oklab, oklch(0.63 0.2 251.22) 0%, oklch(0.67 0.21 25.81) 15%, oklch(0.9 0.19 93.93) 30%, oklch(0.79 0.25 150.49) 45%, oklch(0.63 0.2 251.22) 60%, oklch(0.72 0.21 150.89) 80%, oklch(0.63 0.2 251.22) 100%)',
-              animation: isTyping ? 'search-border-rotate 4s linear infinite' : 'none',
+              animation: (isTyping || isFocused) ? 'search-border-rotate 4s linear infinite' : 'none',
             }}
           />
         </div>
 
         {/* 2. Blurred glow behind border */}
         <div
-          className={`absolute -inset-[2px] rounded-full pointer-events-none transition-opacity duration-700 ${
-            isTyping ? 'opacity-60' : 'opacity-0'
+          className={`absolute -inset-[2px] rounded-full pointer-events-none transition-all duration-700 ${
+            isTyping 
+              ? 'opacity-70' 
+              : isFocused 
+                ? 'opacity-25' 
+                : 'opacity-0'
           }`}
           style={{
             zIndex: -1,
             background: 'conic-gradient(from var(--search-rotation) at 50% 50% in oklab, oklch(0.63 0.2 251.22) 0%, oklch(0.67 0.21 25.81) 15%, oklch(0.9 0.19 93.93) 30%, oklch(0.79 0.25 150.49) 45%, oklch(0.63 0.2 251.22) 60%, oklch(0.72 0.21 150.89) 80%, oklch(0.63 0.2 251.22) 100%)',
-            filter: 'blur(16px)',
-            animation: isTyping ? 'search-border-rotate 4s linear infinite' : 'none',
+            filter: isTyping ? 'blur(18px)' : 'blur(12px)',
+            animation: (isTyping || isFocused) ? 'search-border-rotate 4s linear infinite' : 'none',
           }}
         />
 
@@ -194,7 +202,7 @@ export default memo(function SearchBar({
                   top: '-30%',
                   width: '60%',
                   height: '160%',
-                  background: 'linear-gradient(105deg, transparent, oklch(0.63 0.2 251.22 / 0.25) 20%, oklch(0.67 0.21 25.81 / 0.3) 45%, oklch(0.9 0.19 93.93 / 0.25) 65%, oklch(0.79 0.25 150.49 / 0.15) 85%, transparent)',
+                  background: 'linear-gradient(105deg, transparent, oklch(0.63 0.2 251.22 / 0.3) 20%, oklch(0.67 0.21 25.81 / 0.35) 45%, oklch(0.9 0.19 93.93 / 0.3) 65%, oklch(0.79 0.25 150.49 / 0.2) 85%, transparent)',
                   filter: 'blur(3px)',
                   transform: 'skewX(-12deg)',
                 }}
@@ -205,8 +213,12 @@ export default memo(function SearchBar({
 
         {/* 4. Inner mask — cuts out the center, leaving only the border visible */}
         <div
-          className={`absolute inset-0 rounded-full pointer-events-none transition-opacity duration-700 ${
-            isTyping ? 'opacity-100' : 'opacity-0'
+          className={`absolute inset-0 rounded-full pointer-events-none transition-all duration-700 ${
+            isTyping 
+              ? 'opacity-100' 
+              : isFocused 
+                ? 'opacity-40' 
+                : 'opacity-0'
           }`}
           style={{
             zIndex: 1,
@@ -218,8 +230,12 @@ export default memo(function SearchBar({
           }}
         />
 
-        {/* 5. Main search bar — fully transparent */}
-        <div className="relative z-[2] rounded-full px-5 py-2.5">
+        {/* 5. Main search bar — subtle glass on focus */}
+        <div className={`relative z-[2] rounded-full px-5 py-2.5 transition-all duration-500 ${
+          isFocused && !isTyping 
+            ? 'bg-foreground/[0.02]' 
+            : ''
+        }`}>
 
           {/* Input wrapper */}
           <div className="relative flex items-baseline gap-1.5">
@@ -345,34 +361,39 @@ export default memo(function SearchBar({
             initial={{ opacity: 0, y: -8, scale: 0.98 }}
             animate={{ opacity: 1, y: 8, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="absolute top-full left-0 right-0 z-40 overflow-hidden"
           >
-            <div 
-              role="listbox"
-              className="rounded-2xl overflow-hidden border border-foreground/[0.08] shadow-lg shadow-black/5 dark:shadow-black/20"
-              style={dropdownStyle}
-            >
-               {suggestions.slice(0, 10).map((suggestion, index) => (
-                 <motion.div
-                   key={`${suggestion}-${index}`}
-                   role="option"
-                   aria-selected={index === selectedIndex}
-                   initial={{ opacity: 0, x: -4 }}
-                   animate={{ opacity: 1, x: 0 }}
-                   transition={{ delay: index * 0.03, duration: 0.2 }}
-                   onClick={() => {
-                     updateQuery(suggestion)
-                     handleSearch(suggestion)
-                     setShowSuggestions(false)
-                   }}
-                   onMouseEnter={() => setSelectedIndex(index)}
-                   className={`px-4 py-3 cursor-pointer flex items-center gap-3 text-[14px] font-medium transition-all duration-150 ${
-                     index === selectedIndex 
-                       ? 'bg-primary/[0.06]' 
-                       : 'hover:bg-foreground/[0.03]'
-                   }`}
-                 >
+            {/* Subtle gradient border on dropdown */}
+            <div className="relative rounded-2xl p-[1px] overflow-hidden" style={{
+              background: 'conic-gradient(from var(--search-rotation) at 50% 50% in oklab, oklch(0.63 0.2 251.22 / 0.15) 0%, oklch(0.67 0.21 25.81 / 0.15) 25%, oklch(0.9 0.19 93.93 / 0.15) 50%, oklch(0.79 0.25 150.49 / 0.15) 75%, oklch(0.63 0.2 251.22 / 0.15) 100%)',
+              animation: 'search-border-rotate 6s linear infinite',
+            }}>
+              <div 
+                role="listbox"
+                className="rounded-2xl overflow-hidden"
+                style={dropdownStyle}
+              >
+                {suggestions.slice(0, 10).map((suggestion, index) => (
+                  <motion.div
+                    key={`${suggestion}-${index}`}
+                    role="option"
+                    aria-selected={index === selectedIndex}
+                    initial={{ opacity: 0, x: -4 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.03, duration: 0.2 }}
+                    onClick={() => {
+                      updateQuery(suggestion)
+                      handleSearch(suggestion)
+                      setShowSuggestions(false)
+                    }}
+                    onMouseEnter={() => setSelectedIndex(index)}
+                    className={`px-4 py-3 cursor-pointer flex items-center gap-3 text-[14px] font-medium transition-all duration-150 ${
+                      index === selectedIndex 
+                        ? 'bg-primary/[0.06]' 
+                        : 'hover:bg-foreground/[0.03]'
+                    }`}
+                  >
                     <Search className={`w-4 h-4 shrink-0 transition-colors duration-150 ${index === selectedIndex ? 'text-primary/60' : 'text-muted-foreground/30'}`} />
                     
                     <span className="text-foreground/80 truncate flex-1">
@@ -393,15 +414,16 @@ export default memo(function SearchBar({
                     >
                       ↵
                     </motion.kbd>
-                 </motion.div>
-               ))}
-               
-               <div className="px-4 py-2 border-t border-foreground/[0.05] flex justify-between items-center">
+                  </motion.div>
+                ))}
+                
+                <div className="px-4 py-2 border-t border-foreground/[0.05] flex justify-between items-center">
                   <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/30">{suggestions.length > 10 ? `${suggestions.length} results` : 'suggestions'}</span>
                   <div className="flex items-center gap-1.5">
                     <kbd className="px-1.5 py-0.5 text-[10px] rounded border border-foreground/10 text-muted-foreground/30 bg-foreground/[0.02]">↵</kbd>
                   </div>
-               </div>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
@@ -414,47 +436,53 @@ export default memo(function SearchBar({
             initial={{ opacity: 0, y: -8, scale: 0.98 }}
             animate={{ opacity: 1, y: 8, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="absolute top-full left-0 right-0 z-40 overflow-hidden"
           >
-            <div 
-              className="rounded-2xl overflow-hidden border border-foreground/[0.08] shadow-lg shadow-black/5 dark:shadow-black/20"
-              style={dropdownStyle}
-            >
-              <div className="px-4 py-2.5 border-b border-foreground/[0.05] flex items-center gap-2">
-                <Clock className="w-3.5 h-3.5 text-muted-foreground/30" />
-                <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/30">recent</span>
-              </div>
-              {history.slice(0, 8).map((entry, index) => (
-                <motion.div
-                  key={entry.timestamp}
-                  initial={{ opacity: 0, x: -4 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.03, duration: 0.2 }}
-                  className="px-4 py-3 cursor-pointer flex items-center gap-3 text-[14px] font-medium transition-all group hover:bg-foreground/[0.03]"
-                  onClick={() => {
-                    updateQuery(entry.query)
-                    handleSearch(entry.query)
-                    setShowSuggestions(false)
-                  }}
-                >
-                  <Clock className="w-3.5 h-3.5 shrink-0 text-muted-foreground/20 group-hover:text-muted-foreground/40 transition-colors duration-150" />
-                  <span className="flex-1 truncate text-foreground/60 group-hover:text-foreground/80 transition-colors duration-150">{entry.query}</span>
-                  <motion.button
-                    type="button"
-                    initial={{ opacity: 0 }}
-                    whileHover={{ opacity: 1 }}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      removeEntry(entry.query)
+            {/* Subtle gradient border on dropdown */}
+            <div className="relative rounded-2xl p-[1px] overflow-hidden" style={{
+              background: 'conic-gradient(from var(--search-rotation) at 50% 50% in oklab, oklch(0.63 0.2 251.22 / 0.1) 0%, oklch(0.67 0.21 25.81 / 0.1) 25%, oklch(0.9 0.19 93.93 / 0.1) 50%, oklch(0.79 0.25 150.49 / 0.1) 75%, oklch(0.63 0.2 251.22 / 0.1) 100%)',
+              animation: 'search-border-rotate 8s linear infinite',
+            }}>
+              <div 
+                className="rounded-2xl overflow-hidden"
+                style={dropdownStyle}
+              >
+                <div className="px-4 py-2.5 border-b border-foreground/[0.05] flex items-center gap-2">
+                  <Clock className="w-3.5 h-3.5 text-muted-foreground/30" />
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/30">recent</span>
+                </div>
+                {history.slice(0, 8).map((entry, index) => (
+                  <motion.div
+                    key={entry.timestamp}
+                    initial={{ opacity: 0, x: -4 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.03, duration: 0.2 }}
+                    className="px-4 py-3 cursor-pointer flex items-center gap-3 text-[14px] font-medium transition-all group hover:bg-foreground/[0.03]"
+                    onClick={() => {
+                      updateQuery(entry.query)
+                      handleSearch(entry.query)
+                      setShowSuggestions(false)
                     }}
-                    aria-label={`Remove ${entry.query} from history`}
-                    className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-1 rounded-md transition-all duration-150 text-muted-foreground/25 hover:text-destructive hover:bg-destructive/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:text-destructive"
                   >
-                    <X className="w-3 h-3" />
-                  </motion.button>
-                </motion.div>
-              ))}
+                    <Clock className="w-3.5 h-3.5 shrink-0 text-muted-foreground/20 group-hover:text-muted-foreground/40 transition-colors duration-150" />
+                    <span className="flex-1 truncate text-foreground/60 group-hover:text-foreground/80 transition-colors duration-150">{entry.query}</span>
+                    <motion.button
+                      type="button"
+                      initial={{ opacity: 0 }}
+                      whileHover={{ opacity: 1 }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        removeEntry(entry.query)
+                      }}
+                      aria-label={`Remove ${entry.query} from history`}
+                      className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-1 rounded-md transition-all duration-150 text-muted-foreground/25 hover:text-destructive hover:bg-destructive/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:text-destructive"
+                    >
+                      <X className="w-3 h-3" />
+                    </motion.button>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </motion.div>
         )}
