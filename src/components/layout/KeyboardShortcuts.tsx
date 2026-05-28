@@ -102,7 +102,12 @@ export default function KeyboardShortcuts() {
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="fixed inset-0 z-[201] flex items-center justify-center px-4 pointer-events-none"
           >
-            <div className="pointer-events-auto w-full max-w-sm rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden">
+            <div 
+              ref={modalRef}
+              tabIndex={-1}
+              onKeyDown={handleModalKeyDown}
+              className="pointer-events-auto w-full max-w-sm rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden outline-none"
+            >
               {/* Header */}
               <div className="flex items-center justify-between px-6 pt-5 pb-4">
                 <div className="flex items-center gap-2">
@@ -116,6 +121,7 @@ export default function KeyboardShortcuts() {
                 </div>
                 <button
                   onClick={() => setOpen(false)}
+                  aria-label="Close keyboard shortcuts"
                   className="p-1 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
