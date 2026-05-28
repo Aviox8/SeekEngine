@@ -52,22 +52,24 @@ export function TypingAnimation({
   React.useEffect(() => {
     if (!started) return
 
+    let typingEffect: ReturnType<typeof setInterval> | null = null
+
     const timeout = setTimeout(() => {
       let i = 0
-      // PERF: Use efficient string slicing for smoother typing animation
-      const typingEffect = setInterval(() => {
+      typingEffect = setInterval(() => {
         if (i < children.length) {
           setDisplayedText(children.slice(0, i + 1))
           i++
         } else {
-          clearInterval(typingEffect)
+          if (typingEffect) clearInterval(typingEffect)
         }
       }, duration)
-
-      return () => clearInterval(typingEffect)
     }, delay)
 
-    return () => clearTimeout(timeout)
+    return () => {
+      clearTimeout(timeout)
+      if (typingEffect) clearInterval(typingEffect)
+    }
   }, [children, duration, delay, started])
 
   return (
