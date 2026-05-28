@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useMemo } from 'react'
+import { useMemo, useId } from 'react'
 
 type AgentState = null | 'thinking' | 'listening' | 'talking'
 
