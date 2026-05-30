@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Globe } from 'lucide-react';
 import { useState } from 'react';
+import Image from 'next/image';
 
 export interface Source {
   title: string;
@@ -107,12 +108,14 @@ export function Sources({ sources, isLoading, className, ...props }: SourcesProp
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-4 h-4 rounded shadow-sm bg-card flex items-center justify-center overflow-hidden shrink-0">
                     {source.favicon && !faviconFailed ? (
-                      <img 
+                      <Image 
                         src={source.favicon} 
                         alt="" 
+                        width={16}
+                        height={16}
                         className="w-full h-full object-contain"
+                        unoptimized
                         onError={() => handleFaviconError(source.url)}
-                        loading="lazy"
                       />
                     ) : (
                       <Globe className="w-2.5 h-2.5 text-muted-foreground" aria-hidden="true" />

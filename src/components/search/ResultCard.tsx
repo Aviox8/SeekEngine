@@ -10,6 +10,7 @@
 import { SearchResult } from '../../lib/google-search'
 import { motion } from 'framer-motion'
 import { memo, useMemo } from 'react'
+import Image from 'next/image'
 
 const Favicon = memo(function Favicon({ url, fallback }: { url: string; fallback: string }) {
   const faviconUrl = useMemo(() => `https://www.google.com/s2/favicons?domain=${url}&sz=32`, [url])
@@ -21,17 +22,16 @@ const Favicon = memo(function Favicon({ url, fallback }: { url: string; fallback
       >
         {fallback}
       </div>
-      <img
+      <Image
         src={faviconUrl}
         alt=""
         width={20}
         height={20}
         className="absolute inset-0 w-full h-full rounded sm:rounded-md"
+        unoptimized
         onError={(e) => {
           e.currentTarget.style.display = 'none'
         }}
-        loading="lazy"
-        decoding="async"
       />
     </div>
   )
