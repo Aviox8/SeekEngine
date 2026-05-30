@@ -34,6 +34,7 @@ describe('sanitizeSearchQuery', () => {
   })
 
   it('throws on non-string input', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(() => sanitizeSearchQuery(123 as any)).toThrow()
   })
 
@@ -77,7 +78,9 @@ describe('sanitizeUrlParam', () => {
   })
 
   it('returns empty string for non-string input', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(sanitizeUrlParam(undefined as any)).toBe('')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(sanitizeUrlParam(null as any)).toBe('')
   })
 })
@@ -138,6 +141,7 @@ describe('sanitizeApiKey', () => {
   })
 
   it('throws on non-string', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(() => sanitizeApiKey(undefined as any)).toThrow()
   })
 })

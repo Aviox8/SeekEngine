@@ -113,7 +113,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
       y: number;
       anchorY: number;
       scaleX: number;
-      walk: gsap.core.Tween | null;
+      walk: gsap.core.Tween | gsap.core.Timeline | null;
       setRect: (rect: number[]) => void;
       render: (ctx: CanvasRenderingContext2D) => void;
     };
@@ -201,7 +201,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
 
     const initCrowd = () => {
       while (availablePeeps.length) {
-        addPeepToCrowd().walk.progress(Math.random());
+        addPeepToCrowd().walk?.progress(Math.random());
       }
     };
 
@@ -252,7 +252,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
       canvas.height = stage.height * devicePixelRatio;
 
       crowd.forEach((peep) => {
-        peep.walk.kill();
+        peep.walk?.kill();
       });
 
       crowd.length = 0;
