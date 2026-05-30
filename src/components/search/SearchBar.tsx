@@ -278,16 +278,11 @@ export default memo(function SearchBar({
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="absolute top-full left-0 right-0 z-40 overflow-hidden"
           >
-            {/* Subtle gradient border on dropdown */}
-            <div className="relative rounded-2xl p-[1px] overflow-hidden" style={{
-              background: 'conic-gradient(from var(--search-rotation) at 50% 50% in oklab, oklch(0.63 0.2 251.22 / 0.15) 0%, oklch(0.67 0.21 25.81 / 0.15) 25%, oklch(0.9 0.19 93.93 / 0.15) 50%, oklch(0.79 0.25 150.49 / 0.15) 75%, oklch(0.63 0.2 251.22 / 0.15) 100%)',
-              animation: 'search-border-rotate 6s linear infinite',
-            }}>
-              <div 
-                role="listbox"
-                className="rounded-2xl overflow-hidden"
-                style={dropdownStyle}
-              >
+            <div 
+              role="listbox"
+              className="rounded-2xl overflow-hidden border border-foreground/[0.06]"
+              style={dropdownStyle}
+            >
                 {suggestions.slice(0, 10).map((suggestion, index) => (
                   <motion.div
                     key={`${suggestion}-${index}`}
@@ -338,7 +333,6 @@ export default memo(function SearchBar({
                   </div>
                 </div>
               </div>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -353,15 +347,10 @@ export default memo(function SearchBar({
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="absolute top-full left-0 right-0 z-40 overflow-hidden"
           >
-            {/* Subtle gradient border on dropdown */}
-            <div className="relative rounded-2xl p-[1px] overflow-hidden" style={{
-              background: 'conic-gradient(from var(--search-rotation) at 50% 50% in oklab, oklch(0.63 0.2 251.22 / 0.1) 0%, oklch(0.67 0.21 25.81 / 0.1) 25%, oklch(0.9 0.19 93.93 / 0.1) 50%, oklch(0.79 0.25 150.49 / 0.1) 75%, oklch(0.63 0.2 251.22 / 0.1) 100%)',
-              animation: 'search-border-rotate 8s linear infinite',
-            }}>
-              <div 
-                className="rounded-2xl overflow-hidden"
-                style={dropdownStyle}
-              >
+            <div 
+              className="rounded-2xl overflow-hidden border border-foreground/[0.06]"
+              style={dropdownStyle}
+            >
                 <div className="px-4 py-2.5 border-b border-foreground/[0.05] flex items-center gap-2">
                   <Clock className="w-3.5 h-3.5 text-muted-foreground/30" />
                   <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/30">recent</span>
@@ -397,7 +386,6 @@ export default memo(function SearchBar({
                   </motion.div>
                 ))}
               </div>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>

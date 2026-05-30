@@ -308,17 +308,6 @@ html.theme-transition *, html.theme-transition *::before, html.theme-transition 
   to { --ai-angle: 360deg; }
 }
 
-/* Gemini-style search bar border */
-@property --search-rotation {
-  syntax: '<angle>';
-  inherits: false;
-  initial-value: 0deg;
-}
-
-@keyframes search-border-rotate {
-  to { --search-rotation: 360deg; }
-}
-
 @keyframes ai-brush-sweep {
   0%   { left: -100%; opacity: 0; }
   15%  { opacity: 1; }
