@@ -14,6 +14,7 @@ export default function ResultsFooter() {
   const { location, timeOfDay } = useLocation()
   // FIX: Hydration-safe year — avoid mismatch if SSR timestamp crosses midnight
   const [year, setYear] = useState<number | null>(null)
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setYear(new Date().getFullYear()) }, [])
 
   return (

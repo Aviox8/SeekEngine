@@ -16,6 +16,7 @@ export default function RiverFooter() {
 
   // Architectural Hardening: Separate setup from visibility tracking
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
 
     const canvas = canvasRef.current
@@ -123,6 +124,7 @@ export default function RiverFooter() {
             timeZoneName: 'short'
         }))
     }, 1000)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTime(new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' }))
 
     // Latency Jitter
