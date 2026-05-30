@@ -33,16 +33,16 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
     // UTILS
     const randomRange = (min: number, max: number) =>
       min + Math.random() * (max - min);
-    const randomIndex = (array: any[]) => randomRange(0, array.length) | 0;
-    const removeFromArray = (array: any[], i: number) => array.splice(i, 1)[0];
-    const removeItemFromArray = (array: any[], item: any) =>
+    const randomIndex = (array: unknown[]) => randomRange(0, array.length) | 0;
+    const removeFromArray = <T,>(array: T[], i: number) => array.splice(i, 1)[0];
+    const removeItemFromArray = <T,>(array: T[], item: T) =>
       removeFromArray(array, array.indexOf(item));
-    const removeRandomFromArray = (array: any[]) =>
+    const removeRandomFromArray = <T,>(array: T[]) =>
       removeFromArray(array, randomIndex(array));
-    const getRandomFromArray = (array: any[]) => array[randomIndex(array) | 0];
+    const getRandomFromArray = <T,>(array: T[]) => array[randomIndex(array) | 0];
 
     // TWEEN FACTORIES
-    const resetPeep = ({ stage, peep }: { stage: any; peep: any }) => {
+    const resetPeep = ({ stage, peep }: { stage: { width: number; height: number }; peep: Peep }) => {
       const direction = Math.random() > 0.5 ? 1 : -1;
       const offsetY = 100 - 250 * gsap.parseEase("power2.in")(Math.random());
       const startY = stage.height - peep.height + offsetY;
@@ -70,8 +70,8 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
       };
     };
 
-    const normalWalk = ({ peep, props }: { peep: any; props: any }) => {
-      const { startX, startY, endX } = props;
+    const normalWalk = ({ peep, props }: { peep: Peep; props: { startX: number; startY: number; endX: number } }) => {
+      const { startY, endX } = props;
       const xDuration = 10;
       const yDuration = 0.25;
 
@@ -108,12 +108,12 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
       rect: number[];
       width: number;
       height: number;
-      drawArgs: any[];
+      drawArgs: (HTMLImageElement | number)[];
       x: number;
       y: number;
       anchorY: number;
       scaleX: number;
-      walk: any;
+      walk: gsap.core.Tween | null;
       setRect: (rect: number[]) => void;
       render: (ctx: CanvasRenderingContext2D) => void;
     };
