@@ -31,7 +31,7 @@ export default function LivingIcon({
     const g = parseInt(hex.substring(2, 4), 16)
     const b = parseInt(hex.substring(4, 6), 16)
     return { r, g, b, css: `rgb(${r}, ${g}, ${b})` }
-  }, [color])
+  }, [resolvedColor])
 
   const volumeScale = Math.max(inputVolume, outputVolume)
   const isAlive = !!agentState || volumeScale > 0
