@@ -39,7 +39,7 @@ export const ShimmeringText = ({
   const ref = React.useRef(null)
   const isInView = useInView(ref, { 
     once, 
-    margin: inViewMargin as any,
+    margin: inViewMargin as string & { __brand: 'Margin' },
     amount: 0.1
   })
 
