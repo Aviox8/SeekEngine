@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 
 const STORAGE_KEY = 'seekengine-search-history'
 const MAX_HISTORY = 20
@@ -11,20 +11,16 @@ export interface SearchHistoryEntry {
 }
 
 export function useSearchHistory() {
-  const [history, setHistory] = useState<SearchHistoryEntry[]>([])
-
-  // Load from localStorage on mount
-  useEffect(() => {
+  const [history, setHistory] = useState<SearchHistoryEntry[]>(() => {
+    if (typeof window === 'undefined') return []
     try {
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) {
-        const parsed = JSON.parse(stored) as SearchHistoryEntry[]
-        setHistory(parsed)
+        return JSON.parse(stored) as SearchHistoryEntry[]
       }
-    } catch {
-      // localStorage may be unavailable
-    }
-  }, [])
+    } catch { /* localStorage may be unavailable */ }
+    return []
+  })
 
   const addEntry = useCallback((query: string) => {
     const trimmed = query.trim()
