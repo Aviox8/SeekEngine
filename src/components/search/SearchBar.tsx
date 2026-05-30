@@ -10,7 +10,6 @@ import { useEffect, useRef, useState, useCallback, memo, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSearch } from '../../hooks/useSearch'
 import { useSearchHistory } from '../../hooks/useSearchHistory'
-import { useTheme } from 'next-themes'
 import { X, Search, Loader2, Clock } from 'lucide-react'
 import LivingIcon from '../shared/LivingIcon'
 
@@ -35,9 +34,7 @@ export default memo(function SearchBar({
   const suggestionsRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const { resolvedTheme } = useTheme()
   const { history, removeEntry } = useSearchHistory()
-  const isDark = resolvedTheme === 'dark'
   
   // PERF: Memoize dropdown style objects using CSS tokens
   const dropdownStyle = useMemo(() => ({

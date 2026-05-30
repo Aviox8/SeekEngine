@@ -7,7 +7,7 @@
 
 import { cn } from '@/lib/utils'
 import { motion, useMotionTemplate, useMotionValue } from 'framer-motion'
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 interface MagicCardProps {
   children: React.ReactNode
@@ -184,7 +184,7 @@ export function Particles({
   color?: string
   className?: string
 }) {
-  const particlesRef = useRef(Array.from({ length: count }, (_, i) => ({
+  const [particles] = useState(() => Array.from({ length: count }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
     y: Math.random() * 100,

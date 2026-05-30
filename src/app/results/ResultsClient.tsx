@@ -1,7 +1,7 @@
 'use client'
 
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useEffect, useState, useRef, useMemo } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import ResultCard from '../../components/search/ResultCard'
 import SearchBar from '../../components/search/SearchBar'
 import { ResultCardSkeleton } from '../../components/search/Skeleton'

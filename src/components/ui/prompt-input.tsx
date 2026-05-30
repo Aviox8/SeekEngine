@@ -3,7 +3,7 @@
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
-import { CornerDownRight, X, Loader2, Search } from "lucide-react"
+import { CornerDownRight, Loader2, Search } from "lucide-react"
 import LivingIcon from "../shared/LivingIcon"
 
 interface PromptInputProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
