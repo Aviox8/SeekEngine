@@ -26,6 +26,7 @@ export function MagicCard({
   className,
   gradientFrom = '#7c3aed',
   gradientTo = '#2563eb',
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gradientOpacity = 0,
   borderGlow = true,
   meshGradient = false,

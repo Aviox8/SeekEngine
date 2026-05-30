@@ -10,7 +10,9 @@ export default function LivingIcon({
   className = '',
   size = 'w-16 h-16',
   agentState = null,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   inputVolume = 0,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   outputVolume = 0,
 }: {
   color?: string
@@ -32,9 +34,6 @@ export default function LivingIcon({
     const b = parseInt(hex.substring(4, 6), 16)
     return { r, g, b, css: `rgb(${r}, ${g}, ${b})` }
   }, [resolvedColor])
-
-  const volumeScale = Math.max(inputVolume, outputVolume)
-  const isAlive = !!agentState || volumeScale > 0
 
   // Organic breathing curves with natural rhythm
   const breathingVariants = {

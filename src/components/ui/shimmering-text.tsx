@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useMemo } from 'react'
-import { motion, useInView, type Margin } from 'framer-motion'
+import { motion, useInView } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 interface ShimmeringTextProps {
@@ -13,7 +13,7 @@ interface ShimmeringTextProps {
   className?: string
   startOnView?: boolean
   once?: boolean
-  inViewMargin?: Margin
+  inViewMargin?: string
   spread?: number
   disabled?: boolean
 }
@@ -39,7 +39,8 @@ export const ShimmeringText = ({
   const ref = React.useRef(null)
   const isInView = useInView(ref, { 
     once, 
-    margin: inViewMargin,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    margin: inViewMargin as any,
     amount: 0.1
   })
 

@@ -161,7 +161,7 @@ export default function RiverFooter() {
                     setLocation(`${data.city.toUpperCase()}, ${data.region_code}`)
                 }
             }
-        } catch (e) {
+        } catch {
             // If fails, we just keep "SYSTEM ONLINE" - no UI jar
         }
     }
