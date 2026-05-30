@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useMemo } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { motion, useInView, type Margin } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 interface ShimmeringTextProps {
@@ -13,7 +13,7 @@ interface ShimmeringTextProps {
   className?: string
   startOnView?: boolean
   once?: boolean
-  inViewMargin?: string
+  inViewMargin?: Margin
   spread?: number
   disabled?: boolean
 }
