@@ -195,7 +195,7 @@ export function Particles({
 
   return (
     <div className={cn('absolute inset-0 overflow-hidden pointer-events-none', className)}>
-      {particlesRef.current.map((p) => (
+      {particles.map((p) => (
         <motion.div
           key={p.id}
           className="absolute rounded-full"
