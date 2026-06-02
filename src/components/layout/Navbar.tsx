@@ -129,8 +129,6 @@ export default function Navbar() {
   const navLinks = useMemo(() => [
     { label: 'Engine',   href: '/' },
     { label: 'About',    href: '/about' },
-    { label: 'Terms',    href: '/tos' },
-    { label: 'Privacy',  href: '/privacy' },
     { label: 'Research', href: 'https://archduke.is-a.dev/research/seekengine', external: true },
     { label: 'Dev',      href: 'https://archduke.is-a.dev/about',              external: true },
   ], [])
@@ -217,7 +215,7 @@ export default function Navbar() {
             initial={{ y: -100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-            className={`pointer-events-auto flex w-full max-w-[min(100%,52rem)] items-center justify-between gap-2 rounded-full border px-2 py-1.5 transition-all duration-700 ease-out sm:w-auto sm:max-w-none sm:gap-1 sm:px-2.5 sm:py-1.5 relative ${pillClass}`}
+            className={`pointer-events-auto flex w-full max-w-[min(100%,38rem)] items-center justify-between gap-2 rounded-full border px-2 py-1.5 transition-all duration-700 ease-out sm:w-auto sm:max-w-none sm:gap-1 sm:px-2.5 sm:py-1.5 relative ${pillClass}`}
           >
             {/* Subtle AI gradient glow when scrolled — Apple Intelligence style */}
             {scrolled && (
