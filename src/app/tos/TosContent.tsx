@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import TimelineNumber from '../../components/ui/timeline-number'
 
 export default function TosContent() {
   const sections = [
@@ -80,38 +81,14 @@ export default function TosContent() {
         {/* Content Sections */}
         <div className="space-y-8 sm:space-y-10">
           {sections.map((section, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: idx * 0.05 }}
-              viewport={{ once: true, margin: '-100px' }}
-              className="group"
-            >
-              <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
-                {/* Section number indicator */}
-                <div className="relative shrink-0">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 sm:sticky sm:top-24 sm:h-10 sm:w-10">
-                    <span className="text-xs font-black text-white">
-                      {idx + 1}
-                    </span>
-                  </div>
-                  {idx < sections.length - 1 && (
-                    <div className="absolute left-4 top-10 hidden h-20 w-0.5 bg-gradient-to-b from-blue-500 to-transparent opacity-30 transition-opacity group-hover:opacity-50 sm:block" />
-                  )}
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0 pb-8">
-                  <h2 className="text-xl sm:text-2xl font-bold text-black dark:text-white mb-3">
-                    {section.title}
-                  </h2>
-                  <p className="text-base text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                    {section.content}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
+            <TimelineNumber key={section.title} index={idx} total={sections.length} tone="blue">
+              <h2 className="text-xl sm:text-2xl font-bold text-black dark:text-white mb-3">
+                {section.title}
+              </h2>
+              <p className="text-prose">
+                {section.content}
+              </p>
+            </TimelineNumber>
           ))}
         </div>
 
@@ -123,10 +100,10 @@ export default function TosContent() {
           viewport={{ once: true }}
           className="mt-16 space-y-4 border-t border-black/5 pt-10 dark:border-white/5 sm:mt-20 sm:pt-12"
         >
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="text-prose">
             These terms were last updated in January 2026. For the complete license text, see the <Link href="https://github.com/archduke1337/SeekEngine/blob/main/LICENSE" target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline font-semibold">LICENSE</Link> file on GitHub.
           </p>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="text-prose">
             For questions or clarification, see our <Link href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline font-semibold">Privacy Policy</Link> or open an issue on <Link href="https://github.com/archduke1337/SeekEngine" target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline font-semibold">GitHub</Link>.
           </p>
         </motion.div>

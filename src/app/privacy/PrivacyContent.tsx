@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import TimelineNumber from '../../components/ui/timeline-number'
 
 export default function PrivacyContent() {
   const sections = [
@@ -87,38 +88,14 @@ export default function PrivacyContent() {
         {/* Content Sections */}
         <div className="space-y-8 sm:space-y-10">
           {sections.map((section, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: idx * 0.05 }}
-              viewport={{ once: true, margin: '-100px' }}
-              className="group"
-            >
-              <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
-                {/* Section number indicator */}
-                <div className="relative shrink-0">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 sm:sticky sm:top-24 sm:h-10 sm:w-10">
-                    <span className="text-xs font-black text-white">
-                      {idx + 1}
-                    </span>
-                  </div>
-                  {idx < sections.length - 1 && (
-                    <div className="absolute left-4 top-10 hidden h-20 w-0.5 bg-gradient-to-b from-purple-500 to-transparent opacity-30 transition-opacity group-hover:opacity-50 sm:block" />
-                  )}
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0 pb-8">
-                  <h2 className="text-xl sm:text-2xl font-bold text-black dark:text-white mb-3">
-                    {section.title}
-                  </h2>
-                  <p className="text-base text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                    {section.content}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
+            <TimelineNumber key={section.title} index={idx} total={sections.length} tone="purple">
+              <h2 className="text-xl sm:text-2xl font-bold text-black dark:text-white mb-3">
+                {section.title}
+              </h2>
+              <p className="text-prose">
+                {section.content}
+              </p>
+            </TimelineNumber>
           ))}
         </div>
 
@@ -134,11 +111,11 @@ export default function PrivacyContent() {
             <p className="text-sm font-semibold text-purple-900 dark:text-purple-100">
               The OpenSource Advantage
             </p>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="text-prose">
               With SeekEngine, you&apos;re not trusting a company&apos;s privacy promises-you can audit the code yourself. Run it on your own hardware. Modify it. That&apos;s the entire point of open source. Your data, your rules.
             </p>
           </div>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="text-prose">
             For questions: see our <Link href="/tos" className="text-purple-600 dark:text-purple-400 hover:underline font-semibold">Terms of Service</Link>, check the <Link href="https://github.com/archduke1337/SeekEngine" target="_blank" className="text-purple-600 dark:text-purple-400 hover:underline font-semibold">GitHub repository</Link>, or open an issue with questions. Last updated: January 2026.
           </p>
         </motion.div>
