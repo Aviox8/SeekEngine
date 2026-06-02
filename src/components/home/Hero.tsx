@@ -79,7 +79,7 @@ export default function Hero() {
         />
       </motion.div>
 
-      {/* TAGLINE — Clean, minimal with AI emphasis */}
+      {/* TAGLINE — Aligned with the about page's "auditable, not magical" thesis */}
       <motion.div
         className="mt-6 md:mt-8 text-center space-y-2 z-20 relative max-w-md px-6 pointer-events-auto"
       >
@@ -87,9 +87,9 @@ export default function Hero() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35, duration: 0.7 }}
-          className="text-[14px] sm:text-[16px] text-foreground/50 tracking-[-0.01em] leading-relaxed font-light"
+          className="text-[14px] sm:text-[16px] text-foreground/55 tracking-[-0.01em] leading-relaxed font-light"
         >
-          The future of discovery is not a list of links.
+          Search, then read what the model actually read.
         </motion.p>
         <motion.p
           initial={{ opacity: 0, y: 8 }}
@@ -97,10 +97,10 @@ export default function Hero() {
           transition={{ delay: 0.5, duration: 0.7 }}
           className="text-[14px] sm:text-[16px] tracking-[-0.01em] leading-relaxed font-light"
         >
-          It is a{' '}
-          <span className="font-display-italic text-foreground">sensed synthesis</span>
+          An{' '}
+          <span className="font-display-italic text-foreground">auditable</span>
           {' '}
-          <span className="text-foreground/50">of human intent.</span>
+          <span className="text-foreground/55">answer with sources you can verify.</span>
         </motion.p>
       </motion.div>
     </section>

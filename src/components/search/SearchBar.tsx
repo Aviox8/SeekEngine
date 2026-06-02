@@ -280,6 +280,10 @@ export default memo(function SearchBar({
               className="rounded-2xl overflow-hidden border border-foreground/[0.06]"
               style={dropdownStyle}
             >
+                <div className="px-4 py-2.5 border-b border-foreground/[0.05] flex items-center gap-2">
+                  <Search className="w-3.5 h-3.5 text-muted-foreground/30" />
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/30">suggestions</span>
+                </div>
                 {suggestions.slice(0, 10).map((suggestion, index) => (
                   <motion.div
                     key={`${suggestion}-${index}`}
