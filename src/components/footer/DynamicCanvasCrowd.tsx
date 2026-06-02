@@ -3,10 +3,30 @@
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
 
 const CrowdCanvas = dynamic(() => import('./CanvasCrowd'), { ssr: false })
 
 export default function DynamicCanvasCrowd() {
+  // prefers-reduced-motion: skip the GSAP canvas and use a static sprite
+  const [reduceMotion, setReduceMotion] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setReduceMotion(mq.matches)
+    const onChange = (e: MediaQueryListEvent) => setReduceMotion(e.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+
+  // Hydration-safe year — avoid mismatch if SSR timestamp crosses midnight
+  const [year, setYear] = useState<number | null>(null)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setYear(new Date().getFullYear())
+  }, [])
+
   return (
     <footer className="relative w-full overflow-hidden">
       {/* Gradient fade at top */}
@@ -17,9 +37,21 @@ export default function DynamicCanvasCrowd() {
         }}
       />
 
-      {/* Canvas crowd animation */}
+      {/* Canvas crowd animation (skipped for prefers-reduced-motion) */}
       <div className="relative h-[36vh] sm:h-[45vh]">
-        <CrowdCanvas src="/images/peeps/all-peeps.png" rows={15} cols={7} />
+        {reduceMotion === false && (
+          <CrowdCanvas src="/images/peeps/all-peeps.png" rows={15} cols={7} />
+        )}
+        {reduceMotion === true && (
+          <Image
+            src="/images/peeps/all-peeps.png"
+            alt=""
+            width={1920}
+            height={1080}
+            className="absolute inset-0 w-full h-full object-cover opacity-30"
+            aria-hidden="true"
+          />
+        )}
       </div>
 
       {/* Footer content overlay */}
@@ -78,7 +110,7 @@ export default function DynamicCanvasCrowd() {
                 The future of discovery
               </p>
               <p className="text-center text-[10px] sm:text-[11px] uppercase tracking-[0.15em] text-muted-foreground/30 sm:tracking-[0.2em]">
-                &copy; {new Date().getFullYear()} SeekEngine &middot; All rights reserved
+                &copy; {year ?? ''} SeekEngine &middot; All rights reserved
               </p>
             </div>
           </div>

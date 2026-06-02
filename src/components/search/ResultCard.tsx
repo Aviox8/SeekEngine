@@ -11,10 +11,12 @@ import { SearchResult } from '../../lib/google-search'
 import { motion } from 'framer-motion'
 import { memo, useMemo } from 'react'
 import Image from 'next/image'
+import { useReducedData } from '../../hooks/useReducedData'
 
 const Favicon = memo(function Favicon({ url, fallback }: { url: string; fallback: string }) {
+  const reduceData = useReducedData()
   const faviconUrl = useMemo(() => `https://www.google.com/s2/favicons?domain=${url}&sz=32`, [url])
-  
+
   return (
     <div className="relative w-4 h-4 shrink-0 sm:w-5 sm:h-5">
       <div
@@ -22,17 +24,19 @@ const Favicon = memo(function Favicon({ url, fallback }: { url: string; fallback
       >
         {fallback}
       </div>
-      <Image
-        src={faviconUrl}
-        alt=""
-        width={20}
-        height={20}
-        className="absolute inset-0 w-full h-full rounded sm:rounded-md"
-        unoptimized
-        onError={(e) => {
-          e.currentTarget.style.display = 'none'
-        }}
-      />
+      {!reduceData && (
+        <Image
+          src={faviconUrl}
+          alt=""
+          width={20}
+          height={20}
+          className="absolute inset-0 w-full h-full rounded sm:rounded-md"
+          unoptimized
+          onError={(e) => {
+            e.currentTarget.style.display = 'none'
+          }}
+        />
+      )}
     </div>
   )
 })

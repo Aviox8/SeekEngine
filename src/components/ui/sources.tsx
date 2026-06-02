@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Globe } from 'lucide-react';
 import { useState } from 'react';
 import Image from 'next/image';
+import { useReducedData } from '../../hooks/useReducedData';
 
 export interface Source {
   title: string;
@@ -40,6 +41,7 @@ function getSafeDisplayUrl(url: string, displayUrl?: string): string {
 export function Sources({ sources, isLoading, className, ...props }: SourcesProps) {
   const [faviconErrors, setFaviconErrors] = useState<Set<string>>(new Set());
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+  const reduceData = useReducedData();
 
   const handleFaviconError = (url: string) => {
     setFaviconErrors(prev => new Set([...prev, url]));
@@ -107,10 +109,10 @@ export function Sources({ sources, isLoading, className, ...props }: SourcesProp
               >
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-4 h-4 rounded shadow-sm bg-card flex items-center justify-center overflow-hidden shrink-0">
-                    {source.favicon && !faviconFailed ? (
-                      <Image 
-                        src={source.favicon} 
-                        alt="" 
+                    {source.favicon && !faviconFailed && !reduceData ? (
+                      <Image
+                        src={source.favicon}
+                        alt=""
                         width={16}
                         height={16}
                         className="w-full h-full object-contain"

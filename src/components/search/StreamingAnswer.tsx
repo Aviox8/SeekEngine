@@ -14,7 +14,7 @@
 import { useEffect, useRef, useState, CSSProperties, useMemo, memo } from 'react'
 import { useStreamingAnswer, StreamState } from '../../hooks/useStreamingAnswer'
 import type { StreamContextItem } from '../../hooks/useStreamingAnswer'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { AlertCircle, RefreshCw } from 'lucide-react'
 import { Response } from '../ui/response'
 import { Sources } from '../ui/sources'
@@ -238,7 +238,7 @@ export function StreamingAnswer({
   const lastStartedRequest = useRef<string | null>(null)
   const completed = useRef(false)
   const shouldAutoScroll = useRef(true)
-  const [runCycle, setRunCycle] = useState(0)
+  const [, setRunCycle] = useState(0)
   const requestKey = `${query}::${timeRange ?? ''}`
 
   // PERF FIX: Serialize context to create a stable dependency key
@@ -416,6 +416,8 @@ export function StreamingAnswer({
       ref={containerRef}
       className={`relative overflow-x-hidden ${className}`}
       style={style}
+      aria-live="polite"
+      aria-busy={state === 'thinking' || state === 'streaming'}
     >
       <div className="relative">
         {renderContent()}

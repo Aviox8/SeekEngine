@@ -25,13 +25,27 @@ export default function NotFound() {
           </div>
         </div>
       </div>
-      
-      <Link 
-        href="/" 
-        className="mt-2 px-6 py-2.5 rounded-full bg-foreground text-background text-sm font-medium hover:opacity-85 transition-opacity active:scale-95"
-      >
-        Return to Engine
-      </Link>
+
+      <div className="flex items-center gap-3 mt-2">
+        <Link
+          href="/"
+          className="px-6 py-2.5 rounded-full bg-foreground text-background text-sm font-medium hover:opacity-85 transition-opacity active:scale-95"
+        >
+          Return to Engine
+        </Link>
+        <button
+          type="button"
+          onClick={() => {
+            if (typeof window !== 'undefined' && window.history.length > 1) {
+              window.history.back()
+            }
+          }}
+          className="px-6 py-2.5 rounded-full border border-foreground/10 text-foreground/70 text-sm font-medium hover:border-foreground/20 hover:text-foreground transition-colors active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
+          aria-label="Go back to the previous page"
+        >
+          Go Back
+        </button>
+      </div>
     </div>
   )
 }

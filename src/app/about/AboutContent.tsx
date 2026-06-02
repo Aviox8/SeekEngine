@@ -89,7 +89,7 @@ export default function AboutContent() {
           <h1 className="font-display text-[clamp(2.25rem,5.5vw,3.5rem)] leading-[0.95] tracking-tight text-foreground mb-5">
             About SeekEngine
           </h1>
-          <div className="space-y-4 text-[15px] sm:text-base text-foreground/55 leading-relaxed font-light">
+          <div className="space-y-4 text-prose">
             <p>
               SeekEngine is a small, independent research project that rethinks how a search engine talks to a language model. Instead of letting a large language model answer questions from memory alone, the system first retrieves fresh, verifiable context from the public web, runs it through a strict verification gate, and only then asks the model to synthesize an answer grounded in what was actually found.
             </p>
@@ -110,7 +110,7 @@ export default function AboutContent() {
           <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground mb-5">
             The Problem
           </h2>
-          <div className="space-y-4 text-[15px] sm:text-base text-foreground/55 leading-relaxed font-light">
+          <div className="space-y-4 text-prose">
             <p>
               Large language models are, at their core, sealed text generators. They have no native access to the live web, no built-in concept of a source, and no reliable way to tell the difference between a fact it has seen in training and a fact it is inventing on the fly. When they fail, the failure is silent and confident. The industry calls this hallucination.
             </p>
@@ -131,7 +131,7 @@ export default function AboutContent() {
           <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground mb-3">
             The Research Journey
           </h2>
-          <p className="text-[15px] sm:text-base text-foreground/45 leading-relaxed font-light mb-10 max-w-2xl">
+          <p className="text-prose-tight mb-10 max-w-2xl">
             SeekEngine was built as a sequence of deliberate experiments. Each phase surfaced a real failure mode in the previous one, and the architecture grew around those failures. The log below is the actual order in which the system was reasoned into existence.
           </p>
 
@@ -161,7 +161,7 @@ export default function AboutContent() {
                     <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 tracking-tight">
                       {phase.title}
                     </h3>
-                    <p className="text-[14px] sm:text-[15px] text-foreground/50 leading-relaxed font-light">
+                    <p className="text-prose-tight">
                       {phase.desc}
                     </p>
                   </div>
@@ -182,7 +182,7 @@ export default function AboutContent() {
           <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground mb-5">
             How It Is Built
           </h2>
-          <div className="space-y-4 text-[15px] sm:text-base text-foreground/55 leading-relaxed font-light">
+          <div className="space-y-4 text-prose">
             <p>
               SeekEngine runs as a Next.js application with a server-side orchestration layer that coordinates the retrieval and inference sides. The retrieval side uses Google Custom Search as a stable, well-documented grounding source. The inference side runs through OpenRouter, which keeps the system model-agnostic and portable across providers.
             </p>
@@ -200,7 +200,7 @@ export default function AboutContent() {
           viewport={{ once: true, margin: '-80px' }}
           className="mb-12"
         >
-          <div className="space-y-4 text-[15px] sm:text-base text-foreground/55 leading-relaxed font-light">
+          <div className="space-y-4 text-prose">
             <p>
               SeekEngine is not a product. It is a research artifact. The goal is to make the cost of grounding visible, to make hallucination inspectable, and to keep the door open for anyone who wants to run, fork, or stress-test the ideas.
             </p>
