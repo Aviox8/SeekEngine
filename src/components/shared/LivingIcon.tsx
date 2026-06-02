@@ -72,6 +72,34 @@ export default function LivingIcon({
   const breathState = agentState || 'idle'
   const duration = getDuration()
 
+  // Reduced-motion fast-path — single static gradient orb, no infinite loops.
+  if (!allowAnimation) {
+    const fallbackFill = typeof rgbColor === 'object'
+      ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.9)`
+      : resolvedColor
+    const fallbackFillDim = typeof rgbColor === 'object'
+      ? `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.35)`
+      : resolvedColor
+    return (
+      <div className={`relative flex items-center justify-center ${size} ${className}`} aria-hidden="true">
+        <svg
+          className="absolute inset-0 w-full h-full"
+          viewBox="0 0 100 100"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ filter: 'drop-shadow(0 8px 20px rgba(0, 0, 0, 0.18))' }}
+        >
+          <defs>
+            <radialGradient id={`${uniqueId}-staticGrad`} cx="40%" cy="40%">
+              <stop offset="0%" stopColor={fallbackFill} />
+              <stop offset="100%" stopColor={fallbackFillDim} />
+            </radialGradient>
+          </defs>
+          <circle cx="50" cy="50" r="40" fill={`url(#${uniqueId}-staticGrad)`} />
+        </svg>
+      </div>
+    )
+  }
+
   return (
     <div className={`relative flex items-center justify-center ${size} ${className}`}>
       {/* Multi-layer SVG orb with living animations */}
