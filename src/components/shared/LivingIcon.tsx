@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useMemo, useId } from 'react'
 
 type AgentState = null | 'thinking' | 'listening' | 'talking'
@@ -22,6 +22,13 @@ export default function LivingIcon({
   inputVolume?: number
   outputVolume?: number
 }) {
+  // Respect prefers-reduced-motion — render a single static gradient orb.
+  // Five infinite-loop animations are skipped in this branch.
+  const reducedMotion = useReducedMotion()
+  // useReducedMotion returns null on the server / before mount. Default to
+  // "allow animation" so SSR markup matches the first paint, then re-render
+  // on the client once the media query is known.
+  const allowAnimation = reducedMotion !== true
   // Use CSS token for default color if not specified
   const resolvedColor = color || 'var(--living-icon)'
   const uniqueId = useId()
