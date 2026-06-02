@@ -2,6 +2,7 @@
 
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import BackButton from '../components/shared/BackButton'
 
 export const metadata: Metadata = {
   title: 'Page Not Found | SeekEngine',
