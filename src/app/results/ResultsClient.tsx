@@ -486,8 +486,35 @@ export default function ResultsClient() {
                       </svg>
                     </div>
                   </div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1 sm:text-sm">No results found for {query}</p>
-                  <p className="text-[10px] text-muted-foreground/60 sm:text-xs">Try rephrasing your query, check spelling, or try broader terms.</p>
+                  <p className="text-xs font-medium text-muted-foreground mb-1 sm:text-sm">No sources matched for &ldquo;{query}&rdquo;</p>
+                  <p className="text-[10px] text-muted-foreground/60 mb-3 sm:text-xs sm:mb-4">Try a broader query, remove the time filter, or check spelling.</p>
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    {timeFilter && (
+                      <motion.button
+                        type="button"
+                        onClick={() => {
+                          setTimeFilter('')
+                          const params = new URLSearchParams(searchParams.toString())
+                          params.delete('time')
+                          router.push(`/results?${params.toString()}`, { scroll: false })
+                        }}
+                        className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide rounded-full border border-foreground/10 text-muted-foreground hover:text-foreground hover:border-foreground/20 hover:bg-foreground/[0.02] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-[11px]"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.97 }}
+                      >
+                        Any time
+                      </motion.button>
+                    )}
+                    <motion.button
+                      type="button"
+                      onClick={() => setRetryToken(t => t + 1)}
+                      className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide rounded-full border border-foreground/10 text-muted-foreground hover:text-foreground hover:border-foreground/20 hover:bg-foreground/[0.02] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-[11px]"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.97 }}
+                    >
+                      Retry
+                    </motion.button>
+                  </div>
                 </div>
               )}
             </div>
