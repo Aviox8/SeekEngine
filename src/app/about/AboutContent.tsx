@@ -36,42 +36,34 @@ const features = [
 
 const researchPhases = [
   {
-    num: '01',
     title: 'Grounding the problem',
     desc: 'Every language model ships as a sealed container — trained on a frozen snapshot of the public web, with no native connection to anything new. The first experiment was to study exactly where this shows up. The conclusion was uncomfortable: a model that answers without retrieval is not broken, it is doing exactly what it was trained to do. The fix has to be structural, not parametric.',
   },
   {
-    num: '02',
     title: 'Retrieval as bootstrap',
     desc: 'Google Custom Search is not the most elegant retrieval engine, but it is public, predictable, well documented, and ships with a generous free tier. We use it as a bootstrap node — a reliable first stop for grounding. The choice is deliberate. The point of the project is not to compete with retrieval; it is to learn how to make retrieval and reasoning work together without one swallowing the other.',
   },
   {
-    num: '03',
     title: 'Parallel orchestration',
     desc: 'Search and inference are run in parallel. While the retriever fans out queries against the web, the language model is held in a waiting state, accumulating context rather than hallucinating. When both finish, results are fused: ranked sources, deduplicated text, normalized timestamps — and only then handed to the model for synthesis. Truth is not produced by either node alone. It is produced by their coordination.',
   },
   {
-    num: '04',
     title: 'Verification as protocol',
     desc: 'Grounded answers are not just sourced answers. Before any output reaches the user, it passes through a verification gate: the cited URL must resolve, the snippet must be consistent with the page, the freshness window must be respected, and source credibility has to clear a baseline. If any check fails, the answer is rewritten or refused outright. This is the part most retrieval demos skip. We treat it as non-negotiable.',
   },
   {
-    num: '05',
     title: 'Security and the adversarial surface',
     desc: 'Two boundaries need to be defended. The external boundary: the open web is adversarial. Pages lie, SEO farms game keywords, and click-bait content can drown out genuine sources. The internal boundary: even with perfect retrieval, the model can drift, paraphrase a source incorrectly, or invent intermediate steps that were never in the evidence. SeekEngine assumes zero trust at both surfaces and verifies continuously rather than only at the end.',
   },
   {
-    num: '06',
     title: 'Observability and diagnostics',
     desc: 'You cannot debug a distributed system with intuition. SeekEngine ships with a built-in diagnostic terminal that exposes the full request lifecycle: the original query, the retrieval trace, the verification log, the model prompt, the streamed tokens, and the final synthesis. Every step is visible. Observability is not just a debugging tool here; it is the only honest way to audit whether the system is actually being honest.',
   },
   {
-    num: '07',
     title: 'Partial failures and silent errors',
     desc: 'Real systems do not fail loudly. They fail quietly. Retrieval returns no useful results. The model finishes first and waits. A network blip drops one of ten sources. A query times out and the user sees a partial answer. SeekEngine is designed around the assumption that partial failure is the default state, and the interface is built to make silent degradation visible rather than paper over it.',
   },
   {
-    num: '08',
     title: 'What the system taught us',
     desc: 'After building and operating the system end to end, the most useful finding is conceptual. Hallucination is not a model problem; it is a coordination problem. Retrieval costs time, and time is the price of grounding. Truth, in a system like this, is not binary. It is distributed across sources, freshness, verification, and the synthesis step. A research prototype is the only honest way to find this out. Specs and benchmarks hide it.',
   },
@@ -165,27 +157,25 @@ export default function AboutContent() {
             </h2>
           </div>
 
-          <div className="space-y-0">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-3">
             {features.map((feature, idx) => (
               <motion.div
-                key={feature.num}
+                key={feature.title}
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: idx * 0.06 }}
                 viewport={{ once: true, margin: '-80px' }}
-                className="group relative grid grid-cols-[auto_1fr] gap-5 border-t border-foreground/[0.07] py-7 sm:gap-7 sm:py-9 last:border-b"
+                className="group relative rounded-2xl border border-foreground/[0.07] bg-foreground/[0.01] p-5 sm:p-6 transition-colors hover:border-foreground/15 hover:bg-foreground/[0.02]"
               >
-                <span className="text-[11px] font-medium tabular-nums text-foreground/30 pt-1.5 sm:pt-1">
-                  {feature.num}
-                </span>
-                <div className="min-w-0">
-                  <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 tracking-tight">
-                    {feature.title}
-                  </h3>
-                  <p className="text-prose-tight">
-                    {feature.desc}
-                  </p>
+                <div className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/[0.04] text-foreground/65 transition-colors group-hover:bg-foreground/[0.07] group-hover:text-foreground/85">
+                  {feature.icon}
                 </div>
+                <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2 tracking-tight">
+                  {feature.title}
+                </h3>
+                <p className="text-prose-tight">
+                  {feature.desc}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -239,33 +229,23 @@ export default function AboutContent() {
 
           <div className="space-y-0">
             {researchPhases.map((phase, idx) => (
-              <motion.div
-                key={idx}
+              <motion.article
+                key={phase.title}
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: idx * 0.04 }}
                 viewport={{ once: true, margin: '-80px' }}
-                className="group"
+                className={`group relative grid grid-cols-1 gap-2 border-t border-foreground/[0.07] py-8 sm:py-10 ${
+                  idx === researchPhases.length - 1 ? 'border-b' : ''
+                }`}
               >
-                <div className="flex gap-5 sm:gap-8">
-                  <div className="relative flex flex-col items-center shrink-0">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full border border-foreground/[0.08] bg-foreground/[0.02] sm:h-9 sm:w-9 transition-colors group-hover:border-foreground/15 group-hover:bg-foreground/[0.04]">
-                      <span className="text-[11px] font-medium text-foreground/40 tabular-nums">{phase.num}</span>
-                    </div>
-                    {idx < researchPhases.length - 1 && (
-                      <div className="w-[1px] flex-1 bg-foreground/[0.06] mt-2 mb-0 group-hover:bg-foreground/[0.08] transition-colors" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0 pb-10 sm:pb-12">
-                    <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 tracking-tight">
-                      {phase.title}
-                    </h3>
-                    <p className="text-prose-tight">
-                      {phase.desc}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
+                <h3 className="text-lg sm:text-xl font-semibold text-foreground tracking-tight">
+                  {phase.title}
+                </h3>
+                <p className="text-prose-tight max-w-2xl">
+                  {phase.desc}
+                </p>
+              </motion.article>
             ))}
           </div>
         </motion.section>
