@@ -408,8 +408,8 @@ export default function ResultsClient() {
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Web Sources */}
-          <div className="w-full min-w-0 lg:w-[37%] animate-fade-in-up animate-delay-100">
+          {/* RIGHT COLUMN: Web Sources — sticky on desktop so it stays in view on long answers */}
+          <div className="w-full min-w-0 lg:w-[37%] animate-fade-in-up animate-delay-100 lg:sticky lg:top-24 lg:self-start">
             <h3 className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.15em] mb-3 text-muted-foreground/40 sm:text-sm sm:tracking-[0.2em] sm:mb-4">
               Web Sources
             </h3>
