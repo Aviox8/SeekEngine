@@ -129,6 +129,8 @@ export default function Navbar() {
   const navLinks = useMemo(() => [
     { label: 'Engine',   href: '/' },
     { label: 'About',    href: '/about' },
+    { label: 'Terms',    href: '/tos' },
+    { label: 'Privacy',  href: '/privacy' },
     { label: 'Research', href: 'https://archduke.is-a.dev/research/seekengine', external: true },
     { label: 'Dev',      href: 'https://archduke.is-a.dev/about',              external: true },
   ], [])
@@ -215,7 +217,7 @@ export default function Navbar() {
             initial={{ y: -100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-            className={`pointer-events-auto flex w-full max-w-[min(100%,42rem)] items-center justify-between gap-2 rounded-full border px-2 py-1.5 transition-all duration-700 ease-out sm:w-auto sm:max-w-none sm:gap-1 sm:px-2.5 sm:py-1.5 relative ${pillClass}`}
+            className={`pointer-events-auto flex w-full max-w-[min(100%,52rem)] items-center justify-between gap-2 rounded-full border px-2 py-1.5 transition-all duration-700 ease-out sm:w-auto sm:max-w-none sm:gap-1 sm:px-2.5 sm:py-1.5 relative ${pillClass}`}
           >
             {/* Subtle AI gradient glow when scrolled — Apple Intelligence style */}
             {scrolled && (
@@ -264,6 +266,17 @@ export default function Navbar() {
 
             {/* ── Right actions — clean and minimal ── */}
             <div className="flex items-center gap-0.5">
+              {/* Keyboard shortcuts hint — opens `?` modal */}
+              <motion.button
+                type="button"
+                onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?', bubbles: true }))}
+                className="hidden sm:flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-foreground/50 transition-all duration-300 hover:bg-foreground/[0.06] hover:text-foreground active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2"
+                aria-label="Show keyboard shortcuts"
+                whileTap={{ scale: 0.9 }}
+              >
+                <kbd className="text-[11px] font-medium text-foreground/50 px-1.5 py-0.5 rounded border border-foreground/[0.08]">?</kbd>
+              </motion.button>
+
               {/* Theme toggle — smooth rotation */}
               <motion.button
                 type="button"
