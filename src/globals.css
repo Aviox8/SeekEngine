@@ -213,6 +213,15 @@
   .text-caption { @apply text-xs font-medium uppercase tracking-wide; }
   .text-overline { @apply text-[0.6875rem] font-semibold uppercase tracking-widest; }
 
+  /* Prose — long-form content used on /about, /privacy, /tos.
+     Centralized so the "auditable, restrained voice" stays consistent. */
+  .text-prose {
+    @apply text-[15px] sm:text-base leading-relaxed font-light text-foreground/55;
+  }
+  .text-prose-tight {
+    @apply text-[14px] sm:text-[15px] leading-relaxed font-light text-foreground/50;
+  }
+
   /* Touch target minimum — only for elements without explicit sizing */
   /* Use .touch-ok class to opt out of the 44px minimum */
   button:not(.touch-ok):not([class*="min-h-"]):not([class*="h-8"]):not([class*="h-9"]):not([class*="h-10"]):not([class*="h-11"]):not([class*="h-12"]),
