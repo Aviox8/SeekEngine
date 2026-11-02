@@ -2,8 +2,6 @@
 
 An AI-enhanced search engine with a minimalist design, dark/light mode support, and production-grade architecture.
 
-> **Recent Updates**: See [IMPROVEMENTS.md](./IMPROVEMENTS.md) for all improvements made (type safety, error handling, testing, documentation).
-
 ## Quick Start
 
 ### 1. Install Dependencies
@@ -47,7 +45,7 @@ Visit `http://localhost:3000` in your browser.
 - ♿ **Accessible** (ARIA labels, keyboard navigation)
 - 🔐 **Production-grade architecture** with:
   - Model racing for faster answers
-  - Semantic caching for duplicate queries
+  - Semantic caching for duplicate queries (per instance)
   - Rate limiting per IP
   - Input sanitization
   - Structured error handling
@@ -55,8 +53,7 @@ Visit `http://localhost:3000` in your browser.
 
 ## Documentation
 
-- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Complete system design, API docs, model racing strategy
-- **[IMPROVEMENTS.md](./IMPROVEMENTS.md)** - All improvements made (type safety, error handling, testing)
+- **[SETUP.md](./SETUP.md)** - Detailed installation, API key setup, and deployment guide
 - **[.env.example](./.env.example)** - Environment setup guide
 
 ## Development
@@ -69,6 +66,7 @@ npm start          # Run production server
 npm run lint       # Check code quality
 npm test           # Run test suite
 npm test:watch     # Watch mode
+node scripts/generate-og-image.mjs   # Regenerate public/og-image.png
 ```
 
 ### Project Structure
@@ -107,10 +105,10 @@ src/
 Simultaneously request answers from multiple AI models, streaming the first successful response (no waiting for slowest model). Losing connections immediately aborted to prevent token waste.
 
 ### Semantic Caching
-Normalize queries to catch "What is AI?" vs "what IS artificial intelligence?" as the same question, returning cached answers instantly.
+Normalize queries to catch "What is AI?" vs "what IS artificial intelligence?" as the same question, returning cached answers instantly. Note: caches live in the edge instance's memory — each instance has its own, so hit rates follow instance traffic.
 
 ### Edge Runtime
-All APIs run on Vercel Edge Runtime for <100ms cold starts, globally replicated, with built-in rate limiting and automatic failover.
+All APIs run on Vercel Edge Runtime for <100ms cold starts, globally replicated, with per-IP rate limiting and automatic key failover.
 
 ## Tests
 
@@ -134,12 +132,11 @@ npm test -- models
 
 ## Contributing
 
-1. Check [ARCHITECTURE.md](./ARCHITECTURE.md#contributing-guidelines) for guidelines
-2. Follow TypeScript strict mode
-3. Add tests for new features
-4. Use standardized error handling (`Errors.*`)
-5. Use structured logging (`logger.*`)
-6. Add JSDoc comments to exports
+1. Follow TypeScript strict mode
+2. Add tests for new features
+3. Use standardized error handling (`Errors.*`)
+4. Use structured logging (`logger.*`)
+5. Add JSDoc comments to exports
 
 ## Performance
 
@@ -152,7 +149,6 @@ npm test -- models
 
 - Input sanitization on all queries
 - UTF-8 validation
-- SQL injection protection
 - Rate limiting per IP
 - No API keys in client code
 - Structured error messages (no details leaked)
@@ -180,7 +176,7 @@ MIT - See [LICENSE](./LICENSE) for details.
 - Subsequent queries cached (~50ms)
 - Model list cached (10 min TTL)
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md#debugging) for full debugging guide.
+For environment setup see [.env.example](./.env.example); for deployment see [SETUP.md](./SETUP.md).
 
 ---
 

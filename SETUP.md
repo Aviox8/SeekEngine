@@ -9,48 +9,30 @@ npm install
 ```
 
 This will install all required packages:
-- `next@14.0.0+` - React framework with App Router
-- `react@18.2.0+` - UI library
-- `typescript@5.3.0+` - Type safety
-- `tailwindcss@3.4.0+` - Styling
-- `next-themes@0.2.1` - Dark/light mode
-- `axios@1.6.0+` - HTTP requests
-- `react-markdown@9.0.0` - Markdown rendering
+- `next@16` - React framework with App Router
+- `react@19` - UI library
+- `typescript@5.9` - Type safety
+- `tailwindcss@3.4` - Styling
+- `next-themes` - Dark/light mode
+- `framer-motion`, `gsap`, `lenis` - Animation and smooth scrolling
+- `react-markdown` + `rehype-sanitize` - Markdown rendering (sanitized)
+- `zod` - Environment and response validation
+
+> Node.js >= 20 is required (see `.node-version`; 22.x recommended).
 
 ### 2. Configure Environment Variables
 
-Create a `.env.local` file in the project root:
+Copy the environment template and fill in your API keys:
 
 ```bash
-cp .env.local.example .env.local
+cp .env.example .env.local
 ```
 
-Then edit `.env.local` and add your API keys:
+**Minimum required:** `OPENROUTER_API_KEY` (get a free key at [openrouter.ai](https://openrouter.ai)).
 
-```env
-NEXT_PUBLIC_APP_NAME=SeekEngine
-GOOGLE_API_KEY=your_key_here
-GOOGLE_CX=your_cx_here
-OPENROUTER_API_KEY=your_key_here
-```
+**Optional:** `SERPAPI_KEY` (primary web results) or `GOOGLE_SEARCH_API_KEY` + `GOOGLE_SEARCH_CX` (fallback web results). Without either, search results are limited.
 
-#### Getting API Keys:
-
-**Google Custom Search API:**
-1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Create a new project (or use existing)
-3. Enable "Custom Search API"
-4. Create credentials (API Key type)
-5. Go to [Google Custom Search Engine](https://cse.google.com)
-6. Create a new search engine (configure to search the entire web)
-7. Copy your search engine ID (CX value)
-
-**OpenRouter API (Free Tier):**
-1. Visit [OpenRouter.ai](https://openrouter.ai)
-2. Sign up for free account
-3. Go to "Keys" or "API Key" section
-4. Create new API key
-5. Copy the key to your `.env.local`
+See [.env.example](./.env.example) for every supported variable, including the `OPENROUTER_API_KEYS` key pool and the `CACHE_STATS_SECRET`/`ADMIN_SECRET` used by the `/api/ai/cache/stats` monitoring endpoint.
 
 ### 3. Run Development Server
 
@@ -73,151 +55,124 @@ npm start
 seekengine/
 ├── src/
 │   ├── app/
-│   │   ├── layout.tsx              # Root layout with theme provider
+│   │   ├── layout.tsx              # Root layout, metadata, providers
 │   │   ├── page.tsx                # Homepage (centered search)
-│   │   ├── globals.css             # Global styles
-│   │   ├── results/
-│   │   │   └── page.tsx            # Results page (AI + web results)
+│   │   ├── results/                # Results page (AI + web results)
+│   │   ├── about/ | tos/ | privacy/ # Static/legal pages
 │   │   └── api/
-│   │       ├── ai/
-│   │       │   ├── suggest/
-│   │       │   │   └── route.ts    # AI suggestions endpoint
-│   │       │   └── answer/
-│   │       │       └── route.ts    # AI answer endpoint
-│   │       └── search/
-│   │           └── route.ts        # Google search results endpoint
+│   │       ├── search/route.ts     # Web search aggregation (SerpAPI → Google CSE)
+│   │       └── ai/
+│   │           ├── stream/route.ts # Streaming AI answers (SSE, main feature)
+│   │           ├── suggest/route.ts # AI search suggestions
+│   │           └── cache/stats/route.ts # Cache monitoring (admin-only)
 │   ├── components/
-│   │   ├── ThemeToggle.tsx         # Dark/light mode switcher
-│   │   ├── SearchBar.tsx           # Search input with suggestions
-│   │   ├── ResultCard.tsx          # Individual result display
-│   │   └── Skeleton.tsx            # Loading placeholders
+│   │   ├── search/                 # SearchBar, StreamingAnswer, ResultCard, Skeleton
+│   │   ├── layout/                 # Navbar, Providers, ErrorBoundary, shortcuts
+│   │   ├── ui/                     # Base UI components
+│   │   └── shared/                 # Animated shared components
 │   ├── hooks/
-│   │   └── useDebounce.ts          # Debounce hook for typing
+│   │   ├── useSearch.ts            # Search state + suggestions
+│   │   ├── useStreamingAnswer.ts   # SSE consumer
+│   │   ├── useSearchHistory.ts     # Local history persistence
+│   │   └── useDebounce.ts          # Debounce hook
 │   └── lib/
-│       ├── openrouter.ts           # OpenRouter AI integration
-│       └── google-search.ts        # Google Custom Search integration
-├── public/                         # Static assets (if needed)
-├── .env.local                      # Environment variables (not in git)
-├── .env.local.example              # Template for env vars
-├── next.config.js                  # Next.js configuration
-├── tailwind.config.js              # Tailwind CSS configuration
-├── postcss.config.js               # PostCSS configuration
-├── tsconfig.json                   # TypeScript configuration
-├── package.json                    # Dependencies
-└── README.md                        # Documentation
+│       ├── constants.ts            # Shared magic numbers (single source of truth)
+│       ├── openrouter/             # AI integration (client, streaming, models, key-pool)
+│       ├── search-context.ts       # Provider fallback + result cache
+│       ├── semantic-cache.ts       # AI answer cache
+│       ├── rate-limit.ts           # Per-IP rate limiting
+│       ├── sanitize.ts / validation.ts # Input safety
+│       └── errors.ts / logger.ts   # Error envelopes + structured logging
+├── scripts/
+│   └── generate-og-image.mjs       # Regenerates public/og-image.png
+├── __tests__/                      # Vitest suites (libs + rate limiter)
+├── .env.example                    # Environment variable template
+└── README.md                       # Overview & quick start
 ```
 
 ## Features Implemented
 
 ### ✅ Design & Theme
 - Ultra-minimalist aesthetic with generous whitespace
-- Clean, neutral color palette (grays, white/black)
-- Indigo accent color (indigo-500)
-- Full dark/light mode support
-- Persistent theme preference (localStorage via next-themes)
-- Theme toggle button in header
+- Full dark/light mode support (persisted via next-themes)
+- Smooth transitions, page transitions, and reduced-motion/data respect
 
 ### ✅ Core Search Functionality
-- **Homepage:** Centered search bar with "Search anything..." placeholder
-- **Real-time Suggestions:** AI-powered suggestions via OpenRouter as you type
-- **Results Page:**
-  - AI-generated summary/answer (2-4 paragraphs, markdown support)
-  - Traditional Google Custom Search results below
-  - Clear visual separation between AI and web results
-  - Optional follow-up questions to refine search
+- **Homepage:** centered search bar with ghost-text predictions and example chips
+- **Real-time suggestions:** AI-powered via OpenRouter with template fallback
+- **Results page:** streaming AI answer (SSE) beside traditional web results
+- **Time filters:** past hour / day / week / month / year
 
-### ✅ API Integration
-- **Server-side only** for security (API keys never exposed to browser)
-- **OpenRouter Integration:**
-  - `/api/ai/suggest?q=...` returns array of 5-7 suggestions
-  - `/api/ai/answer?q=...` returns AI summary text
-  - Uses free-tier models (mistral-7b-instruct:free)
-- **Google Custom Search Integration:**
-  - `/api/search?q=...` returns traditional web results
-  - Includes title, snippet, link, and domain
+### ✅ AI & Search Integration
+- **Model racing:** OpenRouter free models race per query; first token wins
+- **Semantic caching:** normalized queries return cached answers instantly
+- **Key pool:** multiple `OPENROUTER_API_KEYS` with automatic cooldown rotation
+- **Provider fallback:** SerpAPI → Google Custom Search with result dedupe
 
 ### ✅ Technical Standards
 - Server components by default, client components only where needed
-- Debounced typing for suggestions (500ms delay)
+- Debounced typing for suggestions (300ms)
 - Loading skeletons during data fetch
-- Error handling and user feedback
+- Error envelopes with standardized codes; no secrets or details leaked in production
 - Mobile-first responsive design
-- Accessibility (ARIA labels, keyboard navigation, proper semantics)
-- Fast and lightweight
+- Accessibility (ARIA labels, keyboard navigation, keyboard shortcut overlay via `?`)
 
 ## Usage Examples
 
 ### Basic Search
 1. Go to homepage
-2. Type a search query
-3. See AI suggestions in dropdown
-4. Press Enter or click a suggestion
-5. View AI answer + web results
+2. Type a search query (AI suggestions appear as you type)
+3. Press Enter or pick a suggestion
+4. Watch the AI answer stream in next to the web results
 
 ### Follow-up Questions
-1. After getting results, use "Refine your search" input
-2. Type a follow-up question
-3. Press Enter or click "Ask" button
-4. Results update with new search
+1. After an answer completes, type a follow-up into the search bar
+2. Results update with a fresh stream
 
 ## Customization
 
 ### Change Accent Color
-Edit `src/globals.css` and `src/components/SearchBar.tsx` to replace `indigo-500` with any Tailwind color:
-```css
-focus:ring-indigo-500 /* change 'indigo' to desired color */
-```
+Edit `src/globals.css` (HSL design tokens) — components reference the theme variables, not hard-coded colors.
 
-### Change Default Theme
-In `src/app/layout.tsx`, modify `ThemeProvider`:
-```tsx
-<ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-```
+### Adjust Suggestion Debounce
+Edit `DEBOUNCE_MS` in `src/lib/constants.ts`.
 
-### Adjust Debounce Delay
-In `src/components/SearchBar.tsx`:
-```tsx
-const debouncedQuery = useDebounce(query, 300) // change 500 to desired ms
+### Regenerate the OG Image
+```bash
+node scripts/generate-og-image.mjs
 ```
 
 ## Performance Notes
 
-- Search suggestions debounce prevents excessive API calls
-- Server-side API routes hide keys and handle caching
-- Images use next/image for optimization (if added)
-- CSS is optimized via Tailwind purging
-- Lightweight fonts (system fonts only)
+- Search results: <500ms via direct provider calls (15s result cache)
+- AI answer: first token typically <2-3s (model racing + streaming)
+- Suggestions: <1s, cached 10 minutes per edge instance
+- Cache hits: ~50ms
 
 ## Troubleshooting
 
-### "API Key Error" when searching
-- Check `.env.local` file exists in project root
-- Verify API keys are correct (no extra spaces)
-- Restart dev server after updating `.env.local`
+### "OPENROUTER_API_KEY missing" when searching
+- Ensure `.env.local` exists with a single key (`OPENROUTER_API_KEY`) or a pool (`OPENROUTER_API_KEYS`)
+- Restart `npm run dev` after editing `.env.local`
+
+### Search returning no results
+- Set `SERPAPI_KEY`, or `GOOGLE_SEARCH_API_KEY` + `GOOGLE_SEARCH_CX`
+- Confirm you haven't hit the per-IP rate limit (30 req/min for search, 20 req/min for streaming)
 
 ### Suggestions not appearing
-- Ensure query is at least 2 characters
-- Check browser console for error messages
-- Verify OpenRouter API key is valid
-
-### No web results
-- Check Google API key and CX are correct
-- Verify Google Custom Search is enabled
-- Check that you've created a search engine at cse.google.com
+- Ensure the query has at least 1 character
+- Check the dev server console for AI errors
 
 ### Dark mode not working
-- Browser should load system preference or saved preference
-- Check localStorage in browser DevTools for `theme` key
-- Hard refresh (Ctrl+Shift+R) may help
+- Theme follows system + saved preference (persisted by next-themes)
 
 ## Deployment
 
-### Vercel (Recommended for Next.js)
+### Vercel (Recommended)
 1. Push code to GitHub
-2. Go to [vercel.com](https://vercel.com)
-3. Import repository
-4. Add environment variables in project settings
-5. Deploy
+2. Import the repository at [vercel.com](https://vercel.com)
+3. Add environment variables in project settings (never in files)
+4. Deploy — all API routes run on the Edge Runtime automatically
 
 ### Other Platforms
 Build and run:
@@ -226,24 +181,20 @@ npm run build
 npm start
 ```
 
-Then deploy the `.next` folder with your platform's instructions.
-
 ## Security Notes
 
-- ✅ All API calls are server-side only
-- ✅ API keys are never exposed to client
-- ✅ Environment variables using OPENROUTER_API_KEY (no NEXT_PUBLIC_ prefix)
-- ✅ CORS is handled by Next.js API routes
-- ✅ User queries are not logged or tracked
+- ✅ All provider calls are server-side only; keys never reach the browser
+- ✅ No `NEXT_PUBLIC_` prefix on secret variables
+- ✅ Queries validated (UTF-8, length) and sanitized before provider calls
+- ✅ Per-IP rate limits on every API route
+- ✅ User queries are not logged beyond truncated debug previews
 
 ## Support & Customization
 
-- **Add analytics:** Integrate Vercel Analytics or your preferred provider
-- **Add authentication:** Use NextAuth.js for user accounts
-- **Cache results:** Add Redis or MongoDB for result caching
-- **Webhooks:** Integrate with external services via API routes
-- **Styling:** All classes are in `src/globals.css` and component files
+- **Analytics:** Vercel Analytics and Speed Insights are already integrated
+- **Persistent caching:** swap `semantic-cache.ts`/`rate-limit.ts` Maps for Upstash Redis (the interfaces are drop-in)
+- **Styling:** design tokens live in `src/globals.css` and `tailwind.config.js`
 
 ---
 
-**Built with Next.js 14, TypeScript, Tailwind CSS, and OpenRouter AI**
+**Built with Next.js 16, TypeScript, Tailwind CSS, and OpenRouter AI**
