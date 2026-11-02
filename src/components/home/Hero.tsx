@@ -7,32 +7,14 @@
 
 import { motion } from 'framer-motion'
 import Image from 'next/image'
+import FluidOrb from './FluidOrb'
 
 export default function Hero() {
   return (
     <section className="w-full flex flex-col items-center justify-center relative overflow-visible pointer-events-none py-8 sm:py-12">
       
-      {/* Apple Intelligence aurora glow behind logo */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] pointer-events-none"
-      >
-        {/* Rotating aurora gradient */}
-        <div className="absolute inset-0 rounded-full opacity-[0.08] dark:opacity-[0.12] animate-[ai-rotate_8s_linear_infinite]"
-          style={{
-            background: 'conic-gradient(from 0deg, #f59e0b, #e11d48, #7c3aed, #0284c7, #059669, #f59e0b)',
-            filter: 'blur(60px)',
-          }}
-        />
-        {/* Subtle radial glow */}
-        <div className="absolute inset-0 rounded-full opacity-[0.04] dark:opacity-[0.06]"
-          style={{
-            background: 'radial-gradient(circle, rgba(124, 58, 237, 0.3) 0%, transparent 70%)',
-          }}
-        />
-      </motion.div>
+      {/* Fluid orb behind logo */}
+      <FluidOrb />
 
       {/* HERO CONTENT */}
       <motion.div
