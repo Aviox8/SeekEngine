@@ -3,6 +3,11 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
+  // Pin Turbopack's workspace root to this project — a stray package-lock.json
+  // in the home directory otherwise makes Next infer C:\Users\<user> as root
+  turbopack: {
+    root: __dirname,
+  },
   images: {
     remotePatterns: [
       {
@@ -48,8 +53,10 @@ const nextConfig = {
 
 // ─── Build-time environment validation ───
 // Only enforce on CI/production (Vercel sets VERCEL=1)
-const required = ['OPENROUTER_API_KEY']
-const missing = required.filter((k) => !process.env[k])
+// Either a single key or the comma/newline-separated pool is sufficient.
+const hasOpenRouterKey =
+  !!process.env.OPENROUTER_API_KEY || !!process.env.OPENROUTER_API_KEYS
+const missing = hasOpenRouterKey ? [] : ['OPENROUTER_API_KEY (or OPENROUTER_API_KEYS)']
 if (missing.length > 0 && process.env.VERCEL === '1') {
   throw new Error(`❌ Missing required env vars: ${missing.join(', ')}`)
 } else if (missing.length > 0) {

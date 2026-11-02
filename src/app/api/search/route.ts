@@ -15,7 +15,7 @@ export const runtime = 'edge'
  * Falls back from SerpAPI → Google Custom Search if primary fails
  * 
  * Query Parameters:
- * - q (required): Search query (2-500 characters)
+ * - q (required): Search query (1-500 characters)
  * - time (optional): Time filter (h/d/w/m/y for hour/day/week/month/year)
  * 
  * Rate Limit: 30 requests/min per IP

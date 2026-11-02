@@ -12,7 +12,7 @@ import {
   CACHE_TTL,
   TASK_POLICIES,
 } from './config'
-import { MODEL_FAILURE_RECOVERY_WINDOW_MS } from '../constants'
+import { MODEL_FAILURE_RECOVERY_WINDOW_MS, MODEL_FETCH_TIMEOUT_MS } from '../constants'
 
 // ── Model Name Registry ──────────────────────────────────────────────────────
 /**
@@ -219,7 +219,7 @@ export async function getModelsByTier(): Promise<Record<ModelTier, string[]>> {
 
   try {
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 5000)
+    const timeoutId = setTimeout(() => controller.abort(), MODEL_FETCH_TIMEOUT_MS)
 
     const res = await fetch(MODELS_ENDPOINT, {
       headers: { 'Content-Type': 'application/json' },

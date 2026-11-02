@@ -6,7 +6,7 @@
 import { getOpenRouterApiKeys } from '../env'
 import { logger } from '../logger'
 import type { ChatMessage, AIResult, AITask, ModelTier } from './types'
-import { OPENROUTER_BASE_URL, TASK_POLICIES, MAX_MODEL_FAILURES } from './config'
+import { OPENROUTER_BASE_URL, SITE_URL, TASK_POLICIES, MAX_MODEL_FAILURES } from './config'
 import { humanizeModel, classifyModel, modelFailures, logTelemetry, getModelsForTask } from './models'
 import {
   getApiKeyPlan,
@@ -46,7 +46,7 @@ export async function callOpenRouter(
   })
   
   if (models.length === 0) {
-    console.warn(`⚠️ All models failed for ${task}. Resetting failures.`)
+    logger.warn(`All models have hit the failure threshold for ${task}. Resetting failures.`)
     modelFailures.clear()
     models = allModels
   }
@@ -99,7 +99,7 @@ export async function callOpenRouter(
             headers: {
               Authorization: `Bearer ${apiKey}`,
               'Content-Type': 'application/json',
-              'HTTP-Referer': 'https://github.com/archduke1337/seekengine',
+              'HTTP-Referer': SITE_URL,
               'X-Title': 'SeekEngine',
             },
             body: JSON.stringify({
@@ -139,7 +139,7 @@ export async function callOpenRouter(
 
         // 500-503 are transient server errors - mark as model failure
         if ([500, 502, 503].includes(response.status)) {
-          console.warn(`⚠️ Transient server error ${response.status} for ${model}`)
+          logger.warn(`Transient server error ${response.status} for ${model}`)
           const failInfo = modelFailures.get(model)
           modelFailures.set(model, {
             failures: (failInfo?.failures || 0) + 1,
@@ -152,7 +152,7 @@ export async function callOpenRouter(
 
         if (!response.ok) {
           const errorText = await response.text().catch(() => 'Unknown error')
-          console.error(`❌ Model ${model} failed with ${response.status}: ${errorText}`)
+          logger.error(`Model ${model} failed with ${response.status}`, new Error(errorText.slice(0, 100)))
           const failInfo = modelFailures.get(model)
           modelFailures.set(model, {
             failures: (failInfo?.failures || 0) + 1,

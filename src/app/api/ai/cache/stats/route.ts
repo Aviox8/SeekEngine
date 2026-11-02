@@ -7,6 +7,7 @@
 
 import { getCacheStats, clearExpiredEntries } from '@/lib/semantic-cache'
 import { checkRateLimit, getClientIP, rateLimitResponse } from '@/lib/rate-limit'
+import { timingSafeStringEqual } from '@/lib/utils'
 import { NextResponse, NextRequest } from 'next/server'
 
 export const runtime = 'edge'
@@ -25,7 +26,7 @@ export async function GET(request: NextRequest) {
   }
 
   const providedSecret = authHeader?.replace('Bearer ', '')
-  if (!providedSecret || providedSecret !== adminSecret) {
+  if (!providedSecret || !timingSafeStringEqual(providedSecret, adminSecret)) {
     return NextResponse.json(
       { error: { code: 'UNAUTHORIZED', message: 'Invalid or missing admin secret', retryable: false } },
       { status: 401 }

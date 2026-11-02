@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from 'react'
 import ResultCard from '../../components/search/ResultCard'
 import SearchBar from '../../components/search/SearchBar'
 import { ResultCardSkeleton } from '../../components/search/Skeleton'
-import { SearchResult } from '../../lib/google-search'
+import type { SearchResult } from '../../lib/google-search'
 import { StreamingAnswer } from '../../components/search/StreamingAnswer'
 import { useSearchHistory } from '../../hooks/useSearchHistory'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -69,11 +69,9 @@ export default function ResultsClient() {
   const copyResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const shareResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { addEntry } = useSearchHistory()
-  const [timeFilter, setTimeFilter] = useState(urlTime)
-
-  useEffect(() => {
-    setTimeFilter(urlTime)
-  }, [urlTime])
+  // Derived from the URL param; a local override only exists for in-flight user picks
+  const [timeOverride, setTimeOverride] = useState<string | null>(null)
+  const timeFilter = timeOverride ?? urlTime
 
   useEffect(() => {
     if (query) addEntry(query)
@@ -103,6 +101,8 @@ export default function ResultsClient() {
   useEffect(() => {
     if (!query) return
 
+    // Reset-on-query is intentional: a new query starts a fresh search state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setResultsLoading(true)
     setResultsError('')
     setResults([])
@@ -422,7 +422,7 @@ export default function ResultsClient() {
                     type="button"
                     key={opt.value}
                     onClick={() => {
-                      setTimeFilter(opt.value)
+                      setTimeOverride(opt.value)
                       // Update URL with time filter for bookmarking
                       const params = new URLSearchParams(searchParams.toString())
                       if (opt.value) {
@@ -493,7 +493,7 @@ export default function ResultsClient() {
                       <motion.button
                         type="button"
                         onClick={() => {
-                          setTimeFilter('')
+                          setTimeOverride('')
                           const params = new URLSearchParams(searchParams.toString())
                           params.delete('time')
                           router.push(`/results?${params.toString()}`, { scroll: false })

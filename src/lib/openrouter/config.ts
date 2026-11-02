@@ -4,41 +4,53 @@
  */
 
 import { getOpenRouterApiKeys } from '../env'
+import { logger } from '../logger'
 import type { AITask, TaskPolicy, ModelTier } from './types'
 import { AITask as AITaskEnum } from './types'
-import { MODEL_CACHE_TTL_MS, MAX_MODEL_FAILURES_THRESHOLD } from '../constants'
+import {
+  MODEL_CACHE_TTL_MS,
+  MAX_MODEL_FAILURES_THRESHOLD,
+  MAX_ANSWER_TOKENS,
+  MAX_SUGGESTION_TOKENS,
+  MAX_CODE_TOKENS,
+} from '../constants'
 
 export const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
 export const MODELS_ENDPOINT = 'https://openrouter.ai/api/v1/models'
 export const MAX_MODEL_FAILURES = MAX_MODEL_FAILURES_THRESHOLD
 export const CACHE_TTL = MODEL_CACHE_TTL_MS
 
+/**
+ * Public site URL used for OpenRouter attribution headers.
+ * Override with NEXT_PUBLIC_SITE_URL when deploying to another domain.
+ */
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://seekengine.vercel.app'
+
 export const BASE_SYSTEM_PROMPT = "You are SeekEngine AI. Concise markdown. Cite sources as [n]."
 
-// Debug API Key presence (safe log — development only)
+// Debug API Key presence (safe log — never prints the keys themselves)
 if (process.env.NODE_ENV === 'development') {
-  const keyCount = getOpenRouterApiKeys().length
-  console.log(`🔑 OpenRouter API Keys Configured: ${keyCount}`)
+  logger.debug(`OpenRouter API keys configured: ${getOpenRouterApiKeys().length}`)
 }
 
 export const TASK_POLICIES: Record<AITask, TaskPolicy> = {
   [AITaskEnum.SUGGESTIONS]: {
     temperature: 0.8,
-    maxTokens: 200,
+    maxTokens: MAX_SUGGESTION_TOKENS,
     preferredTiers: ['fast', 'balanced'],
     maxLatency: 3500,
     globalTimeout: 7500,
   },
   [AITaskEnum.ANSWER]: {
     temperature: 0.35,
-    maxTokens: 800,
+    maxTokens: MAX_ANSWER_TOKENS,
     preferredTiers: ['fast', 'balanced', 'heavy'],
     maxLatency: 6500,
     globalTimeout: 20000,
   },
   [AITaskEnum.CODE]: {
     temperature: 0.2,
-    maxTokens: 1200,
+    maxTokens: MAX_CODE_TOKENS,
     preferredTiers: ['code', 'balanced'],
     maxLatency: 7500,
     globalTimeout: 22000,
@@ -180,20 +192,18 @@ export function validateFallbackModels(): boolean {
       
       // Warn if model doesn't have :free suffix (not strictly required for some models)
       if (!model.includes(':') && !model.startsWith('openrouter/')) {
-        console.warn(`Model "${model}" in tier ${tier} may not be free — consider adding ":free" suffix`)
+        logger.warn(`Model "${model}" in tier ${tier} may not be free — consider adding ":free" suffix`)
       }
     }
-    
-    console.log(`✓ Validated tier ${tier}: ${models.length} models`)
   }
   
   return true
 }
 
-// Validate models at module load
+// Validate models at module load (fast-fail on bad config, not on every request)
 try {
   validateFallbackModels()
-  console.log(`✓ All ${Object.values(STATIC_FALLBACK_MODELS).flat().length} fallback models validated`)
+  logger.debug(`Blueprint fallback models validated (${Object.values(STATIC_FALLBACK_MODELS).flat().length} total)`)
 } catch (error) {
-  console.error(`❌ Fallback model validation failed:`, error)
+  logger.error('Fallback model validation failed', error instanceof Error ? error : new Error(String(error)))
 }

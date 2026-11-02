@@ -22,8 +22,5 @@ export { streamOpenRouter, createStreamingAnswerResponse } from './streaming'
 // Suggestions
 export { getSearchSuggestions } from './suggestions'
 
-// Answers & Code
-export { generateAIAnswer, generateCode } from './answers'
-
 // Models (for advanced usage)
 export { humanizeModel, classifyModel } from './models'

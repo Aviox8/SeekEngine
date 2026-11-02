@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useDebounce } from './useDebounce'
 import { useRouter } from 'next/navigation'
+import { DEBOUNCE_MS } from '@/lib/constants'
 
 export interface SearchState {
   query: string
@@ -19,7 +20,7 @@ export function useSearch() {
   const [prediction, setPrediction] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isTyping, setIsTyping] = useState(false)
-  const debouncedQuery = useDebounce(query, 300)
+  const debouncedQuery = useDebounce(query, DEBOUNCE_MS)
   const abortControllerRef = useRef<AbortController | null>(null)
   const suggestionsCacheRef = useRef<Map<string, string[]>>(new Map())
 
@@ -103,6 +104,7 @@ export function useSearch() {
   }, [])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- debounce-driven fetch sets state asynchronously
     fetchSuggestions(debouncedQuery)
   }, [debouncedQuery, fetchSuggestions])
 

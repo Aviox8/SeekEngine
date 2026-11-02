@@ -4,6 +4,11 @@ import { checkRateLimit, getClientIP, type RateLimitConfig } from '../src/lib/ra
 const config: RateLimitConfig = { maxRequests: 3, windowMs: 60_000 }
 const originalNodeEnv = process.env.NODE_ENV
 
+/** NODE_ENV is readonly in @types/node — assign through a widened view */
+function setNodeEnv(value: string) {
+  ;(process.env as Record<string, string | undefined>).NODE_ENV = value
+}
+
 describe('checkRateLimit', () => {
   it('allows requests under the limit', () => {
     const key = `test-allow-${Date.now()}`
@@ -33,11 +38,11 @@ describe('checkRateLimit', () => {
 
 describe('getClientIP', () => {
   afterEach(() => {
-    process.env.NODE_ENV = originalNodeEnv
+    setNodeEnv(originalNodeEnv ?? 'test')
   })
 
   it('prefers trusted platform headers', () => {
-    process.env.NODE_ENV = 'production'
+    setNodeEnv('production')
     const request = new Request('https://example.com', {
       headers: {
         'x-vercel-forwarded-for': '203.0.113.10',
@@ -48,20 +53,50 @@ describe('getClientIP', () => {
     expect(getClientIP(request)).toBe('203.0.113.10')
   })
 
-  it('ignores spoofable forwarding headers in production', () => {
-    process.env.NODE_ENV = 'production'
+  it('falls back to x-forwarded-for when no platform header is present', () => {
+    // On Vercel's edge the platform rewrites x-forwarded-for, so it is a
+    // reliable fallback that prevents all clients sharing one 'unknown' bucket
+    setNodeEnv('production')
     const request = new Request('https://example.com', {
       headers: {
         'x-forwarded-for': '198.51.100.10',
+      },
+    })
+
+    expect(getClientIP(request)).toBe('198.51.100.10')
+  })
+
+  it('falls back to x-real-ip when only it is present', () => {
+    setNodeEnv('production')
+    const request = new Request('https://example.com', {
+      headers: {
         'x-real-ip': '203.0.113.20',
       },
     })
+
+    expect(getClientIP(request)).toBe('203.0.113.20')
+  })
+
+  it('takes the first hop of a multi-value forwarded header', () => {
+    setNodeEnv('production')
+    const request = new Request('https://example.com', {
+      headers: {
+        'x-forwarded-for': '198.51.100.10, 203.0.113.20',
+      },
+    })
+
+    expect(getClientIP(request)).toBe('198.51.100.10')
+  })
+
+  it('returns unknown when no usable IP headers exist', () => {
+    setNodeEnv('production')
+    const request = new Request('https://example.com')
 
     expect(getClientIP(request)).toBe('unknown')
   })
 
   it('allows forwarded header fallback during development', () => {
-    process.env.NODE_ENV = 'development'
+    setNodeEnv('development')
     const request = new Request('https://example.com', {
       headers: {
         'x-forwarded-for': '198.51.100.10, 203.0.113.20',

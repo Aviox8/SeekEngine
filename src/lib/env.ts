@@ -66,21 +66,22 @@ function validateEnv(): EnvType {
     if (process.env.NODE_ENV === 'production') {
       logger.error('Production environment validation failure', Object.keys(errors).join(', '))
     }
-  } else {
-    const configuredKeys = parseOpenRouterApiKeys(env.data.OPENROUTER_API_KEY, env.data.OPENROUTER_API_KEYS)
-    if (configuredKeys.length === 0) {
-      logger.warn('Environment validation failed', {
-        errors: {
-          OPENROUTER_API_KEY: ['Provide OPENROUTER_API_KEY or OPENROUTER_API_KEYS']
-        }
-      })
-      if (process.env.NODE_ENV === 'production') {
-        logger.error('Production environment validation failure', 'OPENROUTER_API_KEY, OPENROUTER_API_KEYS')
+    return { NODE_ENV: 'development' }
+  }
+
+  const configuredKeys = parseOpenRouterApiKeys(env.data.OPENROUTER_API_KEY, env.data.OPENROUTER_API_KEYS)
+  if (configuredKeys.length === 0) {
+    logger.warn('Environment validation failed', {
+      errors: {
+        OPENROUTER_API_KEY: ['Provide OPENROUTER_API_KEY or OPENROUTER_API_KEYS']
       }
+    })
+    if (process.env.NODE_ENV === 'production') {
+      logger.error('Production environment validation failure', 'OPENROUTER_API_KEY, OPENROUTER_API_KEYS')
     }
   }
 
-  return env.success ? env.data : ({} as unknown as EnvType)
+  return env.data
 }
 
 export const ENV = validateEnv()

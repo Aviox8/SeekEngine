@@ -17,12 +17,23 @@ interface RateLimitEntry {
 }
 
 const store = new Map<string, RateLimitEntry>()
+
+// Platform-set headers: only honored first, most-specific wins.
 const TRUSTED_IP_HEADERS = [
   'x-vercel-forwarded-for',
   'cf-connecting-ip',
   'fly-client-ip',
   'fastly-client-ip',
   'true-client-ip',
+] as const
+
+// Platform-overridden proxies: on Vercel's edge (and any sane reverse proxy)
+// these are rewritten by the platform to the real client IP, so they are safe
+// as a fallback. Without them, clients without exotic headers would all share
+// a single 'unknown' rate-limit bucket.
+const FALLBACK_IP_HEADERS = [
+  'x-forwarded-for',
+  'x-real-ip',
 ] as const
 
 function extractIpCandidate(headerValue: string | null): string | null {
@@ -123,22 +134,17 @@ export function checkRateLimit(
 
 /**
  * Extract client IP from request headers (edge-compatible)
- * Checks multiple header sources in order of preference
+ * Checks multiple header sources in order of preference:
+ * 1. Dedicated platform headers (Vercel/Cloudflare/Fly/Fastly)
+ * 2. Proxy-forwarded headers (x-forwarded-for, x-real-ip) — these are
+ *    overwritten by the platform proxy before reaching this code
  * @param request - Request object with headers
  * @returns Client IP address or 'unknown'
  */
 export function getClientIP(request: Request): string {
-  for (const header of TRUSTED_IP_HEADERS) {
+  for (const header of [...TRUSTED_IP_HEADERS, ...FALLBACK_IP_HEADERS]) {
     const candidate = extractIpCandidate(request.headers.get(header))
     if (candidate) return candidate
-  }
-
-  if (process.env.NODE_ENV !== 'production') {
-    const forwarded = extractIpCandidate(request.headers.get('x-forwarded-for'))
-    if (forwarded) return forwarded
-
-    const realIp = extractIpCandidate(request.headers.get('x-real-ip'))
-    if (realIp) return realIp
   }
 
   return 'unknown'

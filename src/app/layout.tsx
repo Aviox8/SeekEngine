@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     siteName: 'SeekEngine',
     images: [
       {
-        url: '/og-image.png', // Ensure this exists or I should generate an asset
+        url: '/og-image.png',
         width: 1200,
         height: 630,
         alt: 'SeekEngine - Industrial Intelligence Interface',

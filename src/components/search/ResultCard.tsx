@@ -7,7 +7,7 @@
  * Responsive: Tighter padding on mobile, fluid text sizes
  */
 
-import { SearchResult } from '../../lib/google-search'
+import type { SearchResult } from '../../lib/google-search'
 import { motion } from 'framer-motion'
 import { memo, useMemo } from 'react'
 import Image from 'next/image'

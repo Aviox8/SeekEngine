@@ -12,7 +12,6 @@ export type ErrorCode =
   | 'TIMEOUT'
   | 'INVALID_INPUT'
   | 'INTERNAL_ERROR'
-  | 'CACHE_ERROR'
 
 export interface AppError extends Error {
   code: ErrorCode

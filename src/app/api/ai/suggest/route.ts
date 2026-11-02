@@ -7,6 +7,7 @@ import { getSearchSuggestions } from '@/lib/openrouter'
 import { validateSearchQuery } from '@/lib/validation'
 import { checkRateLimit, getClientIP, RATE_LIMITS, rateLimitResponse } from '@/lib/rate-limit'
 import { createErrorResponse } from '@/lib/errors'
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 
 // Simple in-memory cache for suggestions (shorter TTL)
@@ -45,14 +46,14 @@ export async function GET(request: NextRequest) {
   }
 
   const query = validation.query!
-  console.log(`💡 [SUGGEST] Query: "${query}"`)
+  logger.debug('Suggest request', { query: query.slice(0, 50) })
   const cacheKey = normalizeForCache(query)
 
   try {
     // Check cache first
     const cached = suggestionsCache.get(cacheKey)
     if (cached && Date.now() - cached.cachedAt < SUGGESTIONS_CACHE_TTL) {
-      console.log(`📦 Suggestions cache HIT for: "${query.slice(0, 30)}..."`)
+      logger.debug('Suggestions cache hit', { query: query.slice(0, 30), cacheKey })
       return NextResponse.json(
         {
           suggestions: cached.suggestions,
@@ -122,7 +123,7 @@ export async function GET(request: NextRequest) {
       }
     )
   } catch (error) {
-    console.error('Error in /api/ai/suggest:', error)
+    logger.error('Suggest endpoint error', error instanceof Error ? error.message : String(error))
     const errorResponse = createErrorResponse(error)
     return NextResponse.json(
       errorResponse.error,

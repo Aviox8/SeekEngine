@@ -10,6 +10,7 @@
  */
 
 import { CACHE_TTL_MS, SEMANTIC_CACHE_MAX_ENTRIES } from './constants'
+import { logger } from './logger'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 1️⃣ CACHE CONFIGURATION
@@ -99,7 +100,7 @@ export function getCachedAnswer(query: string, task?: string): CachedAnswer | nu
   entry.lastAccessedAt = now
   entry.hitCount++
   
-  console.log(`📦 Cache HIT for: "${query.slice(0, 50)}..." (${entry.hitCount} hits)`)
+  logger.debug(`Cache HIT for: "${query.slice(0, 50)}"`, { hits: entry.hitCount })
   
   return entry.data
 }
@@ -128,7 +129,7 @@ export function setCachedAnswer(
     for (const [entryKey] of entries) {
       cache.delete(entryKey)
     }
-    console.log(`🗑️ Batch evicted ${toEvict} entries (freed space for new entries)`)
+    logger.debug(`Batch evicted ${toEvict} cache entries`)
   }
   
   cache.set(key, {
@@ -142,7 +143,7 @@ export function setCachedAnswer(
     hitCount: 0,
   })
   
-  console.log(`💾 Cached answer for: "${query.slice(0, 50)}..."`)
+  logger.debug(`Cached answer for: "${query.slice(0, 50)}"`)
 }
 
 /**
@@ -170,7 +171,7 @@ export function clearExpiredEntries(): number {
   }
   
   if (cleared > 0) {
-    console.log(`🧹 Cleared ${cleared} expired cache entries`)
+    logger.debug(`Cleared ${cleared} expired cache entries`)
   }
   
   return cleared
@@ -208,7 +209,7 @@ export function getCacheStats(): {
  */
 export function clearCache(): void {
   cache.clear()
-  console.log('🧹 Cache cleared')
+  logger.debug('Cache cleared')
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

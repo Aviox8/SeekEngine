@@ -1,54 +1,15 @@
 /**
- * API Validation Schemas
- * Zod schemas for validating API requests and responses
+ * API Validation
+ * Queries, time ranges, and AI response schemas (zod-validated)
  */
 
 import { z } from 'zod'
-import { TIME_RANGES, type TimeRangeCode } from './constants'
+import { TIME_RANGES, QUERY_MIN_LENGTH, QUERY_MAX_LENGTH, type TimeRangeCode } from './constants'
 
-// Search query validation
-export const searchQuerySchema = z.object({
-  q: z
-    .string()
-    .min(1, 'Query is required')
-    .max(500, 'Query too long')
-    .transform((val) => val.trim()),
-})
-
-// AI suggestion response
+// AI suggestion response (validated at the model boundary)
 export const suggestionsResponseSchema = z.object({
   suggestions: z.array(z.string()).default([]),
 })
-
-// AI answer response
-export const answerResponseSchema = z.object({
-  answer: z.string().default(''),
-})
-
-// Search result item
-export const searchResultSchema = z.object({
-  title: z.string(),
-  link: z.string().url(),
-  snippet: z.string(),
-  displayLink: z.string().optional(),
-  source: z.string().optional(),
-})
-
-// Search results response
-export const searchResultsResponseSchema = z.object({
-  results: z.array(searchResultSchema).default([]),
-})
-
-// API error response
-export const errorResponseSchema = z.object({
-  error: z.string(),
-})
-
-// Utility function to safely parse with fallback
-export function safeParse<T>(schema: z.ZodSchema<T>, data: unknown): T | null {
-  const result = schema.safeParse(data)
-  return result.success ? result.data : null
-}
 
 // Validate search query from URL params
 export function validateSearchQuery(searchParams: URLSearchParams): {
@@ -68,12 +29,12 @@ export function validateSearchQueryValue(q: string | null | undefined): {
     return { valid: false, error: 'Query is required' }
   }
 
-  if (q.length > 500) {
-    return { valid: false, error: 'Query too long (max 500 characters)' }
+  if (q.length > QUERY_MAX_LENGTH) {
+    return { valid: false, error: `Query too long (max ${QUERY_MAX_LENGTH} characters)` }
   }
 
-  if (q.trim().length < 1) {
-    return { valid: false, error: 'Query must be at least 1 character' }
+  if (q.trim().length < QUERY_MIN_LENGTH) {
+    return { valid: false, error: `Query must be at least ${QUERY_MIN_LENGTH} character` }
   }
 
   return { valid: true, query: q.trim() }

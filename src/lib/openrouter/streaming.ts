@@ -14,9 +14,9 @@ import { getOpenRouterApiKeys } from '../env'
 import { logger } from '../logger'
 import type { ChatMessage, AITask, ModelTier, StreamEvent } from './types'
 import { AITask as AITaskEnum } from './types'
-import { OPENROUTER_BASE_URL, TASK_POLICIES, MAX_MODEL_FAILURES, BASE_SYSTEM_PROMPT } from './config'
+import { OPENROUTER_BASE_URL, SITE_URL, TASK_POLICIES, MAX_MODEL_FAILURES, BASE_SYSTEM_PROMPT } from './config'
 import { humanizeModel, classifyModel, modelFailures, logTelemetry, getModelsForTask } from './models'
-import { MAX_CONCURRENT_MODELS, SYSTEMIC_FAILURE_THRESHOLD_MS } from '../constants'
+import { MAX_CONCURRENT_MODELS, SYSTEMIC_FAILURE_THRESHOLD_MS, TTFT_FAST_MS, TTFT_SLOW_MS } from '../constants'
 import type { SearchContextItem } from '../search-context'
 import {
   getApiKeyPlan,
@@ -145,7 +145,7 @@ export async function* streamOpenRouter(
           headers: {
             Authorization: `Bearer ${activeApiKey}`,
             'Content-Type': 'application/json',
-            'HTTP-Referer': 'https://github.com/archduke1337/seekengine',
+            'HTTP-Referer': SITE_URL,
             'X-Title': 'SeekEngine',
           },
           body: JSON.stringify({
@@ -189,7 +189,7 @@ export async function* streamOpenRouter(
       let buffer = ''
       
       // Tier-aware TTFT (Time To First Token) timeouts
-      const ttftLimit = tier === 'fast' ? 2000 : 5000
+      const ttftLimit = tier === 'fast' ? TTFT_FAST_MS : TTFT_SLOW_MS
       const ttftTimeout = new Promise<never>((_, reject) => {
         ttftTimeoutId = setTimeout(
           () => reject(new Error('TTFT_TIMEOUT')),

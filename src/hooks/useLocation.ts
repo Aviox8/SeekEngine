@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 
 /**
  * useLocation — Shared hook for IP-based location and time-of-day detection.
- * Used by LocationGreeting and ResultsFooter to avoid duplicated logic.
+ * Used by ResultsFooter (and formerly SiteLoader) to avoid duplicated logic.
  * 
  * PERF: Caches location in sessionStorage to avoid redundant API calls.
  * FIX: Uses mounted flag to prevent hydration mismatch for time-based content.
@@ -55,21 +55,22 @@ export function useLocation() {
     updateTime()
     const timeInterval = setInterval(updateTime, 60_000)
 
-    // PERF: Check cache first
-    const cached = getCachedLocation()
-    if (cached) {
-      setLocation(cached)
-      return () => clearInterval(timeInterval)
-    }
-
-    // Prevent double-fetch in strict mode
-    if (fetchedRef.current) return () => clearInterval(timeInterval)
-    fetchedRef.current = true
-
+    // PERF: Check cache first, then fall back to a fetch (async state updates only)
+    let cancelled = false
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 1200)
 
     ;(async () => {
+      const cached = getCachedLocation()
+      if (cached && !cancelled) {
+        setLocation(cached)
+        return
+      }
+
+      // Prevent double-fetch in strict mode
+      if (fetchedRef.current) return
+      fetchedRef.current = true
+
       try {
         const res = await fetch('https://ipapi.co/json/', { signal: controller.signal })
         if (!res.ok) throw new Error('Location fetch failed')
@@ -91,6 +92,7 @@ export function useLocation() {
       clearInterval(timeInterval)
       clearTimeout(timeoutId)
       controller.abort()
+      cancelled = true
     }
   }, [])
 

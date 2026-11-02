@@ -64,13 +64,13 @@ class Logger {
   }
 
   /**
-   * Performance timing logger
+   * Performance timing logger (logged at info so it is visible in production)
    */
   time(label: string): () => void {
     const start = Date.now()
     return () => {
       const duration = Date.now() - start
-      this.debug(`${label} completed`, { durationMs: duration })
+      this.info(`${label} completed`, { durationMs: duration })
     }
   }
 }
