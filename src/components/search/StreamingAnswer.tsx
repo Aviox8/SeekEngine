@@ -75,9 +75,9 @@ function PhaseIndicator({ phase, sourceCount }: { phase: StreamPhase; sourceCoun
             </svg>
           ) : (
             <div className="flex items-center gap-0.5" aria-hidden="true">
-              <span className="w-1 h-1 rounded-full bg-foreground/60 animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-1 h-1 rounded-full bg-foreground/60 animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-1 h-1 rounded-full bg-foreground/60 animate-bounce" style={{ animationDelay: '300ms' }} />
+              <span className="thinking-dot w-1 h-1 rounded-full bg-foreground/60" style={{ animationDelay: '0ms' }} />
+              <span className="thinking-dot w-1 h-1 rounded-full bg-foreground/60" style={{ animationDelay: '150ms' }} />
+              <span className="thinking-dot w-1 h-1 rounded-full bg-foreground/60" style={{ animationDelay: '300ms' }} />
             </div>
           )}
         </div>
@@ -195,10 +195,10 @@ function ModelBadge({
             </svg>
             <span>{latencyMs}ms</span>
             {/* Latency bar visualization */}
-            <span className="hidden sm:inline-flex w-12 h-1 rounded-full bg-foreground/10 overflow-hidden">
+            <span className="hidden sm:inline-flex w-12 h-1 rounded-full bg-foreground/10 overflow-hidden" aria-hidden="true">
               <span
-                className="h-full rounded-full bg-foreground/30 transition-[width] duration-500"
-                style={{ width: `${latencyBarWidth}%` }}
+                className="h-full w-full origin-left rounded-full bg-foreground/30 transition-transform duration-500"
+                style={{ transform: `scaleX(${latencyBarWidth / 100})` }}
               />
             </span>
           </>

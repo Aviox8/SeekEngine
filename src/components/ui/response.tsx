@@ -35,7 +35,7 @@ const Response = React.forwardRef<HTMLDivElement, ResponseProps>(
           href={href} 
           target="_blank" 
           rel="noopener noreferrer" 
-          className="underline underline-offset-4 decoration-primary/30 hover:decoration-primary transition-colors text-primary break-words"
+          className="underline underline-offset-4 decoration-primary/30 hover:decoration-primary focus-visible:decoration-primary transition-colors text-primary break-words"
         >
           {children}
         </a>

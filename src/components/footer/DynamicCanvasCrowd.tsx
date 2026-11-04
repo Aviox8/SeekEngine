@@ -73,9 +73,9 @@ export default function DynamicCanvasCrowd() {
                 alt="SeekEngine"
                 width={20}
                 height={20}
-                className="opacity-40 group-hover:opacity-70 transition-opacity duration-300"
+                className="opacity-40 group-hover:opacity-70 group-focus-visible:opacity-70 transition-opacity duration-300"
               />
-              <span className="font-display text-sm tracking-tight text-muted-foreground/40 group-hover:text-muted-foreground/60 transition-colors duration-300">
+              <span className="font-display text-sm tracking-tight text-muted-foreground/40 group-hover:text-muted-foreground/60 group-focus-visible:text-muted-foreground/60 transition-colors duration-300">
                 SeekEngine
               </span>
             </Link>
@@ -92,7 +92,7 @@ export default function DynamicCanvasCrowd() {
                 { label: 'Developer', href: 'https://archduke.is-a.dev/about', external: true },
                 { label: 'Source', href: 'https://github.com/archduke1337/SeekEngine', external: true },
               ].map((link) => {
-                const className = 'text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/55 transition-colors duration-300 hover:text-foreground/85 sm:tracking-[0.15em]'
+                const className = 'text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/55 transition-colors duration-300 hover:text-foreground/85 focus-visible:text-foreground/85 sm:tracking-[0.15em]'
                 return link.external ? (
                   <a
                     key={link.label}

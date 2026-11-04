@@ -1,5 +1,11 @@
 # Design Decisions
 
+### 2026-11-04 — Violet/indigo aurora removed; AI presence is monochrome light only
+
+**Status**: accepted
+
+The conic aurora, shader borders, glows and orb gradients now use grayscale tones and `hsl(var(--foreground))` instead of hue gradients. Reason: B&W + one-accent budget is the product's differentiator; the rainbow aurora read as generic Apple-clone chrome. Alternatives considered: keep aurora at ≤10% opacity — rejected; user asked for removal outright.
+
 ### 2026-11-04 — OpenRouter free router replaces hand-picked free-model list
 
 **Status**: accepted

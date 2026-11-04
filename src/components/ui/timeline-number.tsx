@@ -49,7 +49,7 @@ export default function TimelineNumber({
             <div
               className={`absolute left-4 top-10 hidden h-20 w-0.5 bg-gradient-to-b ${
                 tone === 'purple' ? 'from-purple-500' : tone === 'blue' ? 'from-blue-500' : 'from-foreground/40'
-              } to-transparent opacity-30 transition-opacity group-hover:opacity-50 sm:block`}
+              } to-transparent opacity-30 transition-opacity group-hover:opacity-50 group-focus-visible:opacity-50 sm:block`}
             />
           )}
         </div>
