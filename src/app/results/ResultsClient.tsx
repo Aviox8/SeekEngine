@@ -245,7 +245,7 @@ export default function ResultsClient() {
           <button 
             type="button"
             onClick={shareResults}
-            className="px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all active:scale-95 border border-foreground/[0.08] text-muted-foreground hover:text-foreground hover:border-foreground/15 hover:bg-foreground/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:px-3.5 sm:py-2 sm:rounded-xl sm:text-xs"
+            className="px-3 py-1.5 rounded-lg text-[11px] font-medium transition-[color,background-color,border-color,transform] active:scale-95 border border-foreground/[0.08] text-muted-foreground hover:text-foreground hover:border-foreground/15 hover:bg-foreground/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:px-3.5 sm:py-2 sm:rounded-xl sm:text-xs"
           >
             {shareCopied ? 'Link Copied' : 'Share'}
           </button>
@@ -286,7 +286,7 @@ export default function ResultsClient() {
                     onClick={copyToClipboard}
                     disabled={!aiAnswer.trim()}
                     aria-label={copied ? 'Copied to clipboard' : 'Copy answer to clipboard'}
-                    className="flex items-center gap-1 text-[10px] sm:text-xs font-semibold uppercase tracking-wide transition-all px-2 py-1.5 rounded-md text-muted-foreground/70 hover:text-foreground hover:bg-accent/10 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:gap-1.5 sm:px-2.5 sm:rounded-lg"
+                    className="flex items-center gap-1 text-[10px] sm:text-xs font-semibold uppercase tracking-wide transition-[color,background-color,transform] px-2 py-1.5 rounded-md text-muted-foreground/70 hover:text-foreground hover:bg-accent/10 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:gap-1.5 sm:px-2.5 sm:rounded-lg"
                   >
                     {copied ? (
                       <>
@@ -345,7 +345,7 @@ export default function ResultsClient() {
                             setFollowUpQuery(suggestion)
                             handleSearch(suggestion)
                           }}
-                          className="px-3 py-1.5 text-[11px] font-medium rounded-full border border-foreground/10 text-muted-foreground hover:text-foreground hover:border-foreground/20 hover:bg-foreground/[0.02] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-xs"
+                          className="px-3 py-1.5 text-[11px] font-medium rounded-full border border-foreground/10 text-muted-foreground hover:text-foreground hover:border-foreground/20 hover:bg-foreground/[0.02] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-xs"
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                         >
@@ -383,7 +383,7 @@ export default function ResultsClient() {
                           if (e.key === 'Escape') followUpInputRef.current?.blur()
                         }}
                         placeholder="Ask a follow-up…"
-                        className="w-full rounded-lg py-2.5 pl-9 pr-12 text-base sm:text-sm font-medium transition-all outline-none bg-accent/5 border border-border/50 text-foreground placeholder:text-muted-foreground/40 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-border/80 sm:py-3 sm:pl-11 sm:pr-14"
+                        className="w-full rounded-lg py-2.5 pl-9 pr-12 text-base sm:text-sm font-medium transition-[border-color,box-shadow,background-color] outline-none bg-accent/5 border border-border/50 text-foreground placeholder:text-muted-foreground/40 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-border/80 sm:py-3 sm:pl-11 sm:pr-14"
                         style={{ caretColor: 'hsl(var(--primary))' }}
                       />
                       <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:right-2">
@@ -393,7 +393,7 @@ export default function ResultsClient() {
                           onClick={handleFollowUp}
                           disabled={!followUpQuery.trim()}
                           aria-label="Submit follow-up question"
-                          className="p-1.5 rounded-md transition-all disabled:opacity-30 disabled:cursor-not-allowed bg-primary text-primary-foreground hover:brightness-110 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:p-2 sm:rounded-lg sm:shadow-md"
+                          className="p-1.5 rounded-md transition-[color,background-color,filter] disabled:opacity-30 disabled:cursor-not-allowed bg-primary text-primary-foreground hover:brightness-110 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:p-2 sm:rounded-lg sm:shadow-md"
                           whileHover={{ scale: followUpQuery.trim() ? 1.05 : 1 }}
                           whileTap={{ scale: followUpQuery.trim() ? 0.95 : 1 }}
                         >
@@ -434,7 +434,7 @@ export default function ResultsClient() {
                       router.push(`/results?${params.toString()}`, { scroll: false })
                     }}
                     aria-pressed={timeFilter === opt.value}
-                    className={`relative shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all duration-200 border whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 ${
+                    className={`relative shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium transition-[color,background-color,border-color] duration-200 border whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 ${
                       timeFilter === opt.value
                         ? 'bg-foreground text-background border-foreground shadow-sm'
                         : 'border-foreground/[0.06] text-muted-foreground hover:border-foreground/15 hover:text-foreground'
@@ -500,7 +500,7 @@ export default function ResultsClient() {
                           params.delete('time')
                           router.push(`/results?${params.toString()}`, { scroll: false })
                         }}
-                        className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide rounded-full border border-foreground/10 text-muted-foreground hover:text-foreground hover:border-foreground/20 hover:bg-foreground/[0.02] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-[11px]"
+                        className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide rounded-full border border-foreground/10 text-muted-foreground hover:text-foreground hover:border-foreground/20 hover:bg-foreground/[0.02] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-[11px]"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.97 }}
                       >
@@ -510,7 +510,7 @@ export default function ResultsClient() {
                     <motion.button
                       type="button"
                       onClick={() => setRetryToken(t => t + 1)}
-                      className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide rounded-full border border-foreground/10 text-muted-foreground hover:text-foreground hover:border-foreground/20 hover:bg-foreground/[0.02] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-[11px]"
+                      className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide rounded-full border border-foreground/10 text-muted-foreground hover:text-foreground hover:border-foreground/20 hover:bg-foreground/[0.02] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-[11px]"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.97 }}
                     >
