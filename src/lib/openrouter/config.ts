@@ -14,17 +14,14 @@ import {
   MAX_SUGGESTION_TOKENS,
   MAX_CODE_TOKENS,
 } from '../constants'
+import { SITE_URL } from '../site'
+
+export { SITE_URL }
 
 export const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
 export const MODELS_ENDPOINT = 'https://openrouter.ai/api/v1/models'
 export const MAX_MODEL_FAILURES = MAX_MODEL_FAILURES_THRESHOLD
 export const CACHE_TTL = MODEL_CACHE_TTL_MS
-
-/**
- * Public site URL used for OpenRouter attribution headers.
- * Override with NEXT_PUBLIC_SITE_URL when deploying to another domain.
- */
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://seekengine.vercel.app'
 
 export const BASE_SYSTEM_PROMPT = "You are SeekEngine AI. Concise markdown. Cite sources as [n]."
 

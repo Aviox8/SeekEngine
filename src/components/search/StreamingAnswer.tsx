@@ -416,7 +416,6 @@ export function StreamingAnswer({
       ref={containerRef}
       className={`relative overflow-x-hidden ${className}`}
       style={style}
-      aria-live="polite"
       aria-busy={state === 'thinking' || state === 'streaming'}
     >
       <div className="relative">

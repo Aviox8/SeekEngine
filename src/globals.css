@@ -53,7 +53,6 @@
     --accent-amber: #f59e0b;
     --accent-emerald: #059669;
     --accent-sky: #0284c7;
-    --accent-violet: #7c3aed;
     --accent-zinc: #71717a;
 
     /* State colors */
@@ -69,10 +68,10 @@
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
 
-    /* Apple AI Aurora gradient */
+    /* Monochrome aurora — light without hue */
     --ai-aurora: conic-gradient(
       from 0deg,
-      #f59e0b, #e11d48, #7c3aed, #0284c7, #059669, #f59e0b
+      #d6d3d1, #fafafa, #a8a29e, #e7e5e4, #d6d3d1
     );
 
     /* Contrast shader tokens — light-to-dark gradients */
@@ -140,7 +139,6 @@
     --accent-amber: #fbbf24;
     --accent-emerald: #34d399;
     --accent-sky: #38bdf8;
-    --accent-violet: #a78bfa;
     --accent-zinc: #a1a1aa;
 
     /* State colors */
@@ -158,7 +156,7 @@
 
     --ai-aurora: conic-gradient(
       from 0deg,
-      #fbbf24, #fb7185, #a78bfa, #38bdf8, #34d399, #fbbf24
+      #525252, #f5f5f5, #737373, #262626, #525252
     );
 
     /* Dark-to-light contrast shaders */
@@ -461,7 +459,7 @@ html.theme-transition *, html.theme-transition *::before, html.theme-transition 
 .shader-card {
   background: var(--shader-card-1);
   border: 1px solid var(--glass-border);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: var(--shadow-xs);
 }
 .shader-card:hover {
@@ -474,7 +472,7 @@ html.theme-transition *, html.theme-transition *::before, html.theme-transition 
 .shader-card-2 {
   background: var(--shader-card-2);
   border: 1px solid var(--glass-border);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: var(--shadow-xs);
 }
 .shader-card-2:hover {
@@ -487,7 +485,7 @@ html.theme-transition *, html.theme-transition *::before, html.theme-transition 
 .shader-card-3 {
   background: var(--shader-card-3);
   border: 1px solid var(--glass-border);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: var(--shadow-xs);
 }
 .shader-card-3:hover {
@@ -531,7 +529,7 @@ html.theme-transition *, html.theme-transition *::before, html.theme-transition 
 */
 
 input, textarea, select {
-  @apply transition-all duration-200;
+  @apply transition duration-200;
 }
 
 input::placeholder, textarea::placeholder {
@@ -543,11 +541,11 @@ input:focus, textarea:focus, select:focus {
 }
 
 .input-base {
-  @apply w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground/50 transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground/50 transition duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
 .textarea-base {
-  @apply w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground/50 transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed resize-none;
+  @apply w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground/50 transition duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed resize-none;
 }
 
 /*
@@ -702,10 +700,7 @@ input:focus, textarea:focus, select:focus {
   inset: -1px;
   border-radius: inherit;
   padding: 1px;
-  background: conic-gradient(
-    from 0deg,
-    #f59e0b, #e11d48, #7c3aed, #0284c7, #059669, #f59e0b
-  );
+  background: var(--ai-aurora);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -759,14 +754,14 @@ input:focus, textarea:focus, select:focus {
 .ai-glow {
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, 0.03),
-    0 0 20px -4px rgba(124, 58, 237, 0.12),
-    0 0 40px -8px rgba(124, 58, 237, 0.08);
+    0 0 20px -4px rgba(0, 0, 0, 0.10),
+    0 0 40px -8px rgba(0, 0, 0, 0.06);
 }
 .dark .ai-glow {
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.04),
-    0 0 20px -4px rgba(124, 58, 237, 0.2),
-    0 0 40px -8px rgba(124, 58, 237, 0.12);
+    0 0 20px -4px rgba(255, 255, 255, 0.14),
+    0 0 40px -8px rgba(255, 255, 255, 0.08);
 }
 
 /* AI Shimmer — for loading states */
@@ -833,7 +828,7 @@ input:focus, textarea:focus, select:focus {
   box-shadow:
     0 0 0 2px hsl(var(--background)),
     0 0 0 4px hsl(var(--foreground) / 0.2),
-    0 0 16px -2px rgba(124, 58, 237, 0.15);
+    0 0 16px -2px hsl(var(--foreground) / 0.18);
 }
 
 /*

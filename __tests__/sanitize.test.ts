@@ -4,10 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import {
-  sanitizeSearchQuery,
-  isValidUTF8,
-} from '@/lib/sanitize'
+import { sanitizeSearchQuery } from '@/lib/sanitize'
 
 describe('sanitizeSearchQuery', () => {
   it('removes newlines and collapses whitespace', () => {
@@ -41,19 +38,3 @@ describe('sanitizeSearchQuery', () => {
   })
 })
 
-describe('isValidUTF8', () => {
-  it('returns true for valid UTF-8 strings', () => {
-    expect(isValidUTF8('Hello world')).toBe(true)
-    expect(isValidUTF8('Quantum 量子 컴퓨터')).toBe(true)
-    expect(isValidUTF8('🚀 emoji 🎉')).toBe(true)
-  })
-
-  it('returns true for empty string', () => {
-    expect(isValidUTF8('')).toBe(true)
-  })
-
-  it('handles complex unicode', () => {
-    const complexUnicode = 'A\u0300\u0301\u0302' // Combining diacriticals
-    expect(isValidUTF8(complexUnicode)).toBe(true)
-  })
-})

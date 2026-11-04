@@ -365,16 +365,17 @@ export default function ResultsClient() {
                     animate={{ opacity: 1, height: 'auto' }}
                     className="mt-4 pt-4 border-t border-foreground/5 sm:mt-6 sm:pt-5"
                   >
-                    <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-wide text-muted-foreground/60 mb-2 sm:text-sm sm:mb-3">
+                    <label htmlFor="follow-up-question" className="block text-[10px] sm:text-xs font-bold uppercase tracking-wide text-muted-foreground/60 mb-2 sm:text-sm sm:mb-3">
                       Follow-up Question
                     </label>
                     <div className="relative group">
-                      <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/40 group-focus-within:text-primary transition-colors sm:left-4 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/40 group-focus-within:text-primary transition-colors sm:left-4 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                         <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
                       </svg>
-                      <input 
+                      <input
                         ref={followUpInputRef}
-                        type="text" 
+                        id="follow-up-question"
+                        type="text"
                         value={followUpQuery}
                         onChange={(e) => setFollowUpQuery(e.target.value)}
                         onKeyDown={(e) => {
@@ -382,7 +383,7 @@ export default function ResultsClient() {
                           if (e.key === 'Escape') followUpInputRef.current?.blur()
                         }}
                         placeholder="Ask a follow-up…"
-                        className="w-full rounded-lg py-2.5 pl-9 pr-12 text-sm font-medium transition-all outline-none bg-accent/5 border border-border/50 text-foreground placeholder:text-muted-foreground/40 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-border/80 sm:py-3 sm:pl-11 sm:pr-14"
+                        className="w-full rounded-lg py-2.5 pl-9 pr-12 text-base sm:text-sm font-medium transition-all outline-none bg-accent/5 border border-border/50 text-foreground placeholder:text-muted-foreground/40 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-border/80 sm:py-3 sm:pl-11 sm:pr-14"
                         style={{ caretColor: 'hsl(var(--primary))' }}
                       />
                       <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:right-2">
@@ -432,6 +433,7 @@ export default function ResultsClient() {
                       }
                       router.push(`/results?${params.toString()}`, { scroll: false })
                     }}
+                    aria-pressed={timeFilter === opt.value}
                     className={`relative shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all duration-200 border whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 ${
                       timeFilter === opt.value
                         ? 'bg-foreground text-background border-foreground shadow-sm'

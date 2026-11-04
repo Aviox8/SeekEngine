@@ -18,7 +18,6 @@ import { validateSearchQuery, validateSearchQueryValue, validateTimeRange } from
 import { checkRateLimit, getClientIP, RATE_LIMITS, rateLimitResponse } from '@/lib/rate-limit'
 import { getCachedAnswer, setCachedAnswer, type CachedAnswer } from '@/lib/semantic-cache'
 import { logger } from '@/lib/logger'
-import { getOpenRouterApiKeys } from '@/lib/env'
 import { createErrorResponse, Errors } from '@/lib/errors'
 import { getSearchContext, type SearchContextItem } from '@/lib/search-context'
 import type { TimeRangeCode } from '@/lib/constants'
@@ -120,17 +119,9 @@ function getStreamCacheTask(timeRange?: TimeRangeCode): string {
 }
 
 async function handleRequest(request: NextRequest) {
-  // CRITICAL: Validate API key early to fail fast instead of streaming for 10+ seconds
-  if (getOpenRouterApiKeys().length === 0) {
-    logger.error('No OpenRouter API keys configured at stream endpoint')
-    return new Response(
-      JSON.stringify({ error: 'AI service not configured. Please set OPENROUTER_API_KEY or OPENROUTER_API_KEYS.' }),
-      { 
-        status: 503,
-        headers: { 'Content-Type': 'application/json' }
-      }
-    )
-  }
+  // Note: no hard provider gate here — the answer pipeline falls back
+  // OpenRouter → Ollama Cloud → Exa → local synthesis, so the endpoint
+  // stays useful even when individual providers are unconfigured or down.
 
   // Rate limiting
   const ip = getClientIP(request)

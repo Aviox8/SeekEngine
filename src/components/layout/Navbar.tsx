@@ -217,12 +217,12 @@ export default function Navbar() {
             transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
             className={`pointer-events-auto flex w-full max-w-[min(100%,38rem)] items-center justify-between gap-2 rounded-full border px-2 py-1.5 transition-all duration-700 ease-out sm:w-auto sm:max-w-none sm:gap-1 sm:px-2.5 sm:py-1.5 relative ${pillClass}`}
           >
-            {/* Subtle AI gradient glow when scrolled — Apple Intelligence style */}
+            {/* Subtle monochrome glow when scrolled */}
             {scrolled && (
-              <div 
+              <div
                 className="absolute -inset-[1px] rounded-full opacity-[0.08] pointer-events-none"
                 style={{
-                  background: 'linear-gradient(135deg, #f59e0b22, #7c3aed22, #0284c722, #05966922)',
+                  background: 'linear-gradient(135deg, hsl(var(--foreground)), transparent)',
                   filter: 'blur(8px)',
                 }}
               />
@@ -238,7 +238,7 @@ export default function Navbar() {
                 alt=""
                 width={26}
                 height={26}
-                className="h-6.5 w-6.5 transition-transform duration-300 motion-safe:group-hover:scale-105"
+                className="h-[26px] w-[26px] transition-transform duration-300 motion-safe:group-hover:scale-105"
                 priority
               />
             </Link>

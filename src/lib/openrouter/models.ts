@@ -10,7 +10,6 @@ import {
   MODELS_ENDPOINT,
   STATIC_FALLBACK_MODELS,
   CACHE_TTL,
-  TASK_POLICIES,
 } from './config'
 import { MODEL_FAILURE_RECOVERY_WINDOW_MS, MODEL_FETCH_TIMEOUT_MS } from '../constants'
 
@@ -21,6 +20,7 @@ import { MODEL_FAILURE_RECOVERY_WINDOW_MS, MODEL_FETCH_TIMEOUT_MS } from '../con
  */
 const MODEL_NAME_REGISTRY = [
   // Google Gemma models
+  { pattern: /^openrouter\/free$/i, name: 'OpenRouter Free Router' },
   { pattern: /gemma-3n-e2b/i, name: 'Gemma 3N 2B' },
   { pattern: /gemma-3n-e4b/i, name: 'Gemma 3N 4B' },
   { pattern: /gemma-4-26b-a4b/i, name: 'Gemma 4 26B A4B' },
@@ -153,8 +153,12 @@ function acceptsTextInput(model: OpenRouterModel): boolean {
   return model.architecture?.input_modalities?.includes('text') ?? false
 }
 
-/** Filter out meta-routers (e.g. openrouter/free) that would cause double-routing */
-const EXCLUDED_MODEL_IDS = new Set(['openrouter/free'])
+/**
+ * Meta-routers such as openrouter/free are used deliberately (the default
+ * answer path) instead of a hand-picked model, so there is no need to filter
+ * them out of the static catalog. Kept as a set for future exclusions.
+ */
+const EXCLUDED_MODEL_IDS = new Set<string>()
 const EXCLUDED_MODEL_PATTERNS = [
   /ocr/i,
 ] as const
@@ -278,43 +282,18 @@ export async function getModelsByTier(): Promise<Record<ModelTier, string[]>> {
 
 // ── Task-Aware Model Selector ────────────────────────────────────────────────
 /**
- * Get models ordered by preference for a specific task
- * Prioritizes preferred tiers, then sorts by health (failure count)
- * @param task - AI task type (ANSWER, SUGGESTIONS, CODE)
- * @returns Array of model IDs ordered by preference
+ * Get models ordered by preference for a specific task.
+ *
+ * SeekEngine uses OpenRouter's free router (`openrouter/free`) by default —
+ * OpenRouter picks a suitable free model per request, so we do not maintain
+ * a hand-picked model list. Override the model for all tasks with OPENROUTER_MODEL.
+ *
+ * @param task - AI task type (ANSWER, SUGGESTIONS, CODE) — kept for API compatibility
+ * @returns Array of model IDs (the router, unless OPENROUTER_MODEL pins one)
  */
 export async function getModelsForTask(task: AITask): Promise<string[]> {
-  // Recover models that have been healthy for long enough.
+  void task
   pruneStaleModelFailures()
-
-  const policy = TASK_POLICIES[task]
-  const tieredModels = await getModelsByTier()
-
-  const orderedModels: string[] = []
-
-  // Add models from preferred tiers first
-  for (const tier of policy.preferredTiers) {
-    orderedModels.push(...(tieredModels[tier] || []))
-  }
-
-  // Add remaining models from other tiers
-  for (const tier of ['fast', 'balanced', 'heavy', 'code'] as ModelTier[]) {
-    if (!policy.preferredTiers.includes(tier)) {
-      orderedModels.push(...(tieredModels[tier] || []))
-    }
-  }
-
-  // Remove duplicates
-  const uniqueModels = [...new Set(orderedModels)]
-  
-  // Sort by health (models with fewer failures first)
-  uniqueModels.sort((a, b) => {
-    const failureA = modelFailures.get(a)
-    const failureB = modelFailures.get(b)
-    const failCountA = failureA?.failures || 0
-    const failCountB = failureB?.failures || 0
-    return (failCountA - failCountB) || (Math.random() - 0.5)
-  })
-
-  return uniqueModels
+  const routerModel = (process.env.OPENROUTER_MODEL || 'openrouter/free').trim()
+  return [routerModel]
 }

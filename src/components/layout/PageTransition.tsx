@@ -22,8 +22,6 @@ function TransitionInner({ children }: { children: ReactNode }) {
     <AnimatePresence mode="wait">
       <motion.div
         key={key}
-        role="main"
-        aria-live="polite"
         initial={{ 
           opacity: 0, 
           y: prefersReducedMotion ? 0 : 8

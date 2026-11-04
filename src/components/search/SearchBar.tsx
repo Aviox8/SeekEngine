@@ -174,7 +174,7 @@ export default memo(function SearchBar({
             <div className="relative flex-1">
               {/* Ghost text prediction */}
               {ghostText && (
-                <div className="absolute inset-0 flex items-baseline pointer-events-none text-[15px] sm:text-[16px] tracking-normal overflow-hidden whitespace-pre">
+                <div className="absolute inset-0 flex items-baseline pointer-events-none text-[15px] sm:text-[16px] tracking-normal overflow-hidden whitespace-pre" aria-hidden="true">
                   <span className="opacity-0">{query}</span>
                   <span className="text-muted-foreground/25">{ghostText}</span>
                 </div>
@@ -203,8 +203,13 @@ export default memo(function SearchBar({
                 placeholder="Search anything…"
                 aria-label="Search query input"
                 aria-describedby="search-hint"
+                role="combobox"
+                aria-autocomplete="list"
                 aria-haspopup="listbox"
-                className="w-full bg-transparent border-none outline-none text-[15px] sm:text-[16px] font-normal tracking-normal text-foreground placeholder:text-muted-foreground/35 resize-none p-0 min-h-[44px] max-h-[160px] leading-normal"
+                aria-expanded={showSuggestionsList}
+                aria-controls="search-suggestions-listbox"
+                aria-activedescendant={selectedIndex >= 0 ? `search-suggestion-${selectedIndex}` : undefined}
+                className="w-full bg-transparent border-none outline-none text-base font-normal tracking-normal text-foreground placeholder:text-muted-foreground/35 resize-none p-0 min-h-[44px] max-h-[160px] leading-normal"
                 style={{ caretColor: 'hsl(var(--primary))' }}
                 spellCheck={false}
                 autoComplete="off"
@@ -236,14 +241,14 @@ export default memo(function SearchBar({
                       updateQuery('')
                       textareaRef.current?.focus()
                     }}
-                    className="p-1 rounded-md transition-colors duration-150 text-muted-foreground/30 hover:text-foreground/60 hover:bg-foreground/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20"
+                    className="flex h-10 w-10 items-center justify-center rounded-md transition-colors duration-150 text-muted-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20"
                     aria-label="Clear search"
                   >
                     <X className="w-3.5 h-3.5" />
                   </motion.button>
                   
                   {/* Submit hint */}
-                  <span className="text-[11px] text-muted-foreground/20 font-medium px-1">↵</span>
+                  <span className="text-[11px] text-muted-foreground/20 font-medium px-1" aria-hidden="true">↵</span>
                 </motion.div>
               ) : isFocused ? (
                 <motion.div
@@ -254,14 +259,30 @@ export default memo(function SearchBar({
                   transition={{ duration: 0.2 }}
                   className="flex items-center gap-1.5 flex-shrink-0"
                 >
-                  <kbd className="text-[10px] text-muted-foreground/20 font-medium px-1 py-0.5 rounded border border-foreground/[0.06] bg-foreground/[0.02]">/</kbd>
+                  <kbd className="text-[10px] text-muted-foreground/20 font-medium px-1 py-0.5 rounded border border-foreground/[0.06] bg-foreground/[0.02]" aria-hidden="true">/</kbd>
                 </motion.div>
               ) : null}
             </AnimatePresence>
-          </div>
         </div>
 
-
+        {/* Idle keyboard hint — hidden once the user engages the input */}
+        {!isTyping && !isFocused && (
+          <div className="mt-4 hidden items-center justify-center gap-3 text-[11px] font-medium text-muted-foreground/40 sm:flex" aria-hidden="true">
+            <span className="flex items-center gap-1.5">
+              <kbd className="inline-flex h-6 min-w-[28px] items-center justify-center rounded-md border border-foreground/10 bg-foreground/[0.03] px-1.5 text-[10px] text-muted-foreground/50">/</kbd>
+              to focus
+            </span>
+            <span className="flex items-center gap-1.5">
+              <kbd className="inline-flex h-6 min-w-[28px] items-center justify-center rounded-md border border-foreground/10 bg-foreground/[0.03] px-1.5 text-[10px] text-muted-foreground/50">↵</kbd>
+              to search
+            </span>
+            <span className="flex items-center gap-1.5">
+              <kbd className="inline-flex h-6 min-w-[28px] items-center justify-center rounded-md border border-foreground/10 bg-foreground/[0.03] px-1.5 text-[10px] text-muted-foreground/50">Tab</kbd>
+              to complete
+            </span>
+          </div>
+        )}
+      </div>
 
       </div>
 
@@ -275,8 +296,10 @@ export default memo(function SearchBar({
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="absolute top-full left-0 right-0 z-40 overflow-hidden"
           >
-            <div 
+            <div
               role="listbox"
+              id="search-suggestions-listbox"
+              aria-label="Search suggestions"
               className="rounded-2xl overflow-hidden border border-foreground/[0.06]"
               style={dropdownStyle}
             >
@@ -287,6 +310,7 @@ export default memo(function SearchBar({
                 {suggestions.slice(0, 10).map((suggestion, index) => (
                   <motion.div
                     key={`${suggestion}-${index}`}
+                    id={`search-suggestion-${index}`}
                     role="option"
                     aria-selected={index === selectedIndex}
                     initial={{ opacity: 0, x: -4 }}
@@ -362,28 +386,28 @@ export default memo(function SearchBar({
                     initial={{ opacity: 0, x: -4 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.03, duration: 0.2 }}
-                    className="px-4 py-3 cursor-pointer flex items-center gap-3 text-[14px] font-medium transition-all group hover:bg-foreground/[0.03]"
-                    onClick={() => {
-                      updateQuery(entry.query)
-                      handleSearch(entry.query)
-                      setShowSuggestions(false)
-                    }}
+                    className="relative group"
                   >
-                    <Clock className="w-3.5 h-3.5 shrink-0 text-muted-foreground/20 group-hover:text-muted-foreground/40 transition-colors duration-150" />
-                    <span className="flex-1 truncate text-foreground/60 group-hover:text-foreground/80 transition-colors duration-150">{entry.query}</span>
-                    <motion.button
+                    <button
                       type="button"
-                      initial={{ opacity: 0 }}
-                      whileHover={{ opacity: 1 }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        removeEntry(entry.query)
+                      onClick={() => {
+                        updateQuery(entry.query)
+                        handleSearch(entry.query)
+                        setShowSuggestions(false)
                       }}
-                      aria-label={`Remove ${entry.query} from history`}
-                      className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-1 rounded-md transition-all duration-150 text-muted-foreground/25 hover:text-destructive hover:bg-destructive/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:text-destructive"
+                      className="flex w-full items-center gap-3 px-4 py-3 min-h-[44px] text-left text-[14px] font-medium transition-all duration-150 hover:bg-foreground/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-foreground/20"
                     >
-                      <X className="w-3 h-3" />
-                    </motion.button>
+                      <Clock className="w-3.5 h-3.5 shrink-0 text-muted-foreground/20 group-hover:text-muted-foreground/40 transition-colors duration-150" aria-hidden="true" />
+                      <span className="flex-1 truncate text-foreground/60 group-hover:text-foreground/80 transition-colors duration-150">{entry.query}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeEntry(entry.query)}
+                      aria-label={`Remove ${entry.query} from history`}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-2 rounded-md transition-all duration-150 text-muted-foreground/25 hover:text-destructive hover:bg-destructive/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
+                    >
+                      <X className="w-3 h-3" aria-hidden="true" />
+                    </button>
                   </motion.div>
                 ))}
               </div>

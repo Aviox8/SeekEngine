@@ -9,6 +9,7 @@ import KeyboardShortcuts from '../components/layout/KeyboardShortcuts'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import ConditionalFooter from '../components/layout/ConditionalFooter'
+import { SITE_URL } from '../lib/site'
 import '../globals.css'
 
 const spaceGrotesk = Space_Grotesk({
@@ -35,15 +36,15 @@ export const metadata: Metadata = {
   description:
     'SeekEngine is an high-fidelity industrial AI search platform. Beyond traditional indexing, we operate at the intersection of neural resonance and raw mechanical speed.',
   keywords: ['AI Search', 'Neural Indexing', 'SeekEngine', 'RAG Intelligence', 'Industrial AI', 'Search Architecture', 'Future Search', 'Machine Learning Search'],
-  authors: [{ name: 'SeekEngine Team', url: 'https://seekengine.vercel.app' }],
-  metadataBase: new URL('https://seekengine.vercel.app'),
+  authors: [{ name: 'SeekEngine Team', url: SITE_URL }],
+  metadataBase: new URL(SITE_URL),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: 'SeekEngine | Sync of Human Intent',
     description: 'The future of discovery is not a list of links. It is a sensed synthesis of human intent.',
-    url: 'https://seekengine.vercel.app',
+    url: SITE_URL,
     siteName: 'SeekEngine',
     images: [
       {
@@ -111,10 +112,10 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebSite",
               "name": "SeekEngine",
-              "url": "https://seekengine.vercel.app",
+              "url": SITE_URL,
               "potentialAction": {
                 "@type": "SearchAction",
-                "target": "https://seekengine.vercel.app/results?q={search_term_string}",
+                "target": `${SITE_URL}/results?q={search_term_string}`,
                 "query-input": "required name=search_term_string"
               },
               "description": "High-fidelity industrial AI search platform.",
@@ -123,7 +124,7 @@ export default function RootLayout({
                 "name": "SeekEngine",
                 "logo": {
                   "@type": "ImageObject",
-                  "url": "https://seekengine.vercel.app/logo.png"
+                  "url": `${SITE_URL}/logo.png`
                 }
               }
             })
@@ -158,3 +159,4 @@ export default function RootLayout({
     </html>
   )
 }
+

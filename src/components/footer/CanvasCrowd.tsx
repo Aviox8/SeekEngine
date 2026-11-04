@@ -284,7 +284,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
   }, [src, rows, cols]);
 
   return (
-    <canvas ref={canvasRef} className="absolute bottom-0 h-[90vh] w-full" />
+    <canvas ref={canvasRef} className="absolute bottom-0 h-[90vh] w-full" aria-hidden="true" />
   );
 };
 

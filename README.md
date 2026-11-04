@@ -19,11 +19,17 @@ cp .env.example .env.local
 ```
 
 **Minimum Required**:
-- `OPENROUTER_API_KEY` - Get free key from [OpenRouter](https://openrouter.ai)
+- `OPENROUTER_API_KEY` - Get free key from [OpenRouter](https://openrouter.ai) (uses the `openrouter/free` router by default)
 
-**Optional (for web search)**:
+**Optional**:
+- `OLLAMA_API_KEY` - [Ollama Cloud](https://ollama.com) key (answer provider #2)
+- `EXA_API_KEY` - [Exa](https://exa.ai) key (search provider, and answer provider #3 when LLMs are down)
 - `SERPAPI_KEY` - For real-time Google search
 - `GOOGLE_SEARCH_API_KEY` + `GOOGLE_SEARCH_CX` - Alternative search provider
+
+**Resilient provider chains** (last-resort paths need no keys):
+- AI answers: OpenRouter → Ollama Cloud → Exa Answer → local synthesis of sources
+- Web search: SerpAPI → Google Custom Search → Exa → DuckDuckGo (keyless scrape)
 
 See [.env.example](./.env.example) for detailed setup instructions.
 
@@ -44,7 +50,7 @@ Visit `http://localhost:3000` in your browser.
 - 📱 **Mobile-first responsive** layout
 - ♿ **Accessible** (ARIA labels, keyboard navigation)
 - 🔐 **Production-grade architecture** with:
-  - Model racing for faster answers
+  - openrouter/free router + automatic provider failover
   - Semantic caching for duplicate queries (per instance)
   - Rate limiting per IP
   - Input sanitization
@@ -101,8 +107,8 @@ src/
 
 ## Architecture Highlights
 
-### Model Racing
-Simultaneously request answers from multiple AI models, streaming the first successful response (no waiting for slowest model). Losing connections immediately aborted to prevent token waste.
+### OpenRouter Free Router + Failover
+Answers stream from OpenRouter's `openrouter/free` router (override with `OPENROUTER_MODEL`), with automatic failover to Ollama Cloud → Exa Answer → a locally synthesized, citation-linked answer — so the app still returns a grounded result if every LLM provider is down.
 
 ### Semantic Caching
 Normalize queries to catch "What is AI?" vs "what IS artificial intelligence?" as the same question, returning cached answers instantly. Note: caches live in the edge instance's memory — each instance has its own, so hit rates follow instance traffic.
@@ -148,7 +154,7 @@ npm test -- models
 ## Security
 
 - Input sanitization on all queries
-- UTF-8 validation
+- Input sanitization on all queries
 - Rate limiting per IP
 - No API keys in client code
 - Structured error messages (no details leaked)
@@ -167,8 +173,8 @@ MIT - See [LICENSE](./LICENSE) for details.
 - Restart `npm run dev`
 
 **Search returning no results**
-- Set `SERPAPI_KEY` or Google Custom Search keys
-- Or use fallback (less accurate)  
+- All providers are tried in order (SerpAPI → Google CSE → Exa → DuckDuckGo) before giving up
+- Check the dev server console — each provider logs a warning with its failure reason
 - Check that rate limit not exceeded
 
 **Slow first query**
