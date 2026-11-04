@@ -102,9 +102,12 @@ export default function KeyboardShortcuts() {
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="fixed inset-0 z-[201] flex items-center justify-center px-4 pointer-events-none"
           >
-            <div 
+            <div
               ref={modalRef}
               tabIndex={-1}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="keyboard-shortcuts-title"
               onKeyDown={handleModalKeyDown}
               className="pointer-events-auto w-full max-w-sm rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden outline-none"
             >
@@ -115,14 +118,14 @@ export default function KeyboardShortcuts() {
                     <rect x="2" y="4" width="20" height="16" rx="2" />
                     <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h8M6 16h.01M10 16h4" />
                   </svg>
-                  <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
+                  <h3 id="keyboard-shortcuts-title" className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
                     Keyboard Shortcuts
                   </h3>
                 </div>
                 <button
                   onClick={() => setOpen(false)}
                   aria-label="Close keyboard shortcuts"
-                  className="p-1 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
+                  className="flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                     <line x1="18" y1="6" x2="6" y2="18" />
