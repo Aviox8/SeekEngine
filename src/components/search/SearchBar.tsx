@@ -142,7 +142,7 @@ export default memo(function SearchBar({
       <div className="relative">
 
         {/* Main search bar */}
-        <div className={`relative z-[1] rounded-full px-5 py-2.5 border transition-all duration-300 ${
+        <div className={`relative z-[1] rounded-full px-5 py-2.5 border transition-[border-color,background-color,box-shadow] duration-300 ${
           isFocused 
             ? 'border-foreground/[0.12]' 
             : 'border-foreground/[0.06] hover:border-foreground/[0.10]'
@@ -322,7 +322,7 @@ export default memo(function SearchBar({
                       setShowSuggestions(false)
                     }}
                     onMouseEnter={() => setSelectedIndex(index)}
-                    className={`px-4 py-3 cursor-pointer flex items-center gap-3 text-[14px] font-medium transition-all duration-150 ${
+                    className={`px-4 py-3 cursor-pointer flex items-center gap-3 text-[14px] font-medium transition-colors duration-150 ${
                       index === selectedIndex 
                         ? 'bg-primary/[0.06]' 
                         : 'hover:bg-foreground/[0.03]'
@@ -395,7 +395,7 @@ export default memo(function SearchBar({
                         handleSearch(entry.query)
                         setShowSuggestions(false)
                       }}
-                      className="flex w-full items-center gap-3 px-4 py-3 min-h-[44px] text-left text-[14px] font-medium transition-all duration-150 hover:bg-foreground/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-foreground/20"
+                      className="flex w-full items-center gap-3 px-4 py-3 min-h-[44px] text-left text-[14px] font-medium transition-colors duration-150 hover:bg-foreground/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-foreground/20"
                     >
                       <Clock className="w-3.5 h-3.5 shrink-0 text-muted-foreground/20 group-hover:text-muted-foreground/40 transition-colors duration-150" aria-hidden="true" />
                       <span className="flex-1 truncate text-foreground/60 group-hover:text-foreground/80 transition-colors duration-150">{entry.query}</span>
@@ -404,7 +404,7 @@ export default memo(function SearchBar({
                       type="button"
                       onClick={() => removeEntry(entry.query)}
                       aria-label={`Remove ${entry.query} from history`}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-2 rounded-md transition-all duration-150 text-muted-foreground/25 hover:text-destructive hover:bg-destructive/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-2 rounded-md transition-[opacity,color,background-color] duration-150 text-muted-foreground/25 hover:text-destructive hover:bg-destructive/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
                     >
                       <X className="w-3 h-3" aria-hidden="true" />
                     </button>
