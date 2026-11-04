@@ -28,7 +28,7 @@ export default function Hero() {
           className="mb-6 sm:mb-8 relative"
         >
           {/* Subtle glow behind logo */}
-          <div className="absolute inset-0 -m-4 rounded-full bg-gradient-to-br from-violet-500/10 via-transparent to-blue-500/10 blur-xl" />
+          <div className="absolute inset-0 -m-4 rounded-full bg-gradient-to-br from-foreground/[0.08] via-transparent to-foreground/[0.08] blur-xl" />
           <Image
             src="/logo.png"
             alt="SeekEngine"
@@ -46,7 +46,7 @@ export default function Hero() {
           transition={{ delay: 0.1, duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
           className="font-display text-[clamp(2.5rem,10vw,5.5rem)] leading-[0.92] tracking-[-0.03em] select-none text-foreground"
         >
-          Seek<span className="font-display-italic text-foreground/30">Engine</span>
+          Seek<span className="font-display-italic text-foreground/40">Engine</span>
         </motion.h1>
 
         {/* Subtle divider line with gradient */}
@@ -56,7 +56,7 @@ export default function Hero() {
           transition={{ delay: 0.4, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
           className="w-16 h-px mt-6 origin-center sm:w-20"
           style={{
-            background: 'linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.3), transparent)',
+            background: 'linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.3), transparent)',
           }}
         />
       </motion.div>
