@@ -73,15 +73,15 @@ export default function DynamicCanvasCrowd() {
                 alt="SeekEngine"
                 width={20}
                 height={20}
-                className="opacity-30 group-hover:opacity-60 transition-opacity duration-300"
+                className="opacity-40 group-hover:opacity-70 transition-opacity duration-300"
               />
-              <span className="font-display text-sm tracking-tight text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors duration-300">
+              <span className="font-display text-sm tracking-tight text-muted-foreground/40 group-hover:text-muted-foreground/60 transition-colors duration-300">
                 SeekEngine
               </span>
             </Link>
 
             {/* Decorative divider */}
-            <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-foreground/8 to-transparent" />
+            <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
 
             {/* Navigation links */}
             <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3 sm:gap-8">
@@ -91,25 +91,36 @@ export default function DynamicCanvasCrowd() {
                 { label: 'Privacy', href: '/privacy' },
                 { label: 'Developer', href: 'https://archduke.is-a.dev/about', external: true },
                 { label: 'Source', href: 'https://github.com/archduke1337/SeekEngine', external: true },
-              ].map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  target={link.external ? '_blank' : undefined}
-                  rel={link.external ? 'noopener noreferrer' : undefined}
-                  className="text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/35 transition-all duration-300 hover:text-foreground/60 hover:tracking-[0.16em] sm:tracking-[0.15em] sm:hover:tracking-[0.2em]"
-                >
-                  {link.label}
-                </a>
-              ))}
+              ].map((link) => {
+                const className = 'text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/55 transition-colors duration-300 hover:text-foreground/85 sm:tracking-[0.15em]'
+                return link.external ? (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={className}
+                  >
+                    {link.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    className={className}
+                  >
+                    {link.label}
+                  </Link>
+                )
+              })}
             </nav>
 
             {/* Copyright + tagline */}
             <div className="flex flex-col items-center gap-2 pt-2">
-              <p className="text-center text-[10px] sm:text-[11px] uppercase tracking-[0.22em] text-muted-foreground/25 sm:tracking-[0.3em]">
+              <p className="text-center text-[10px] sm:text-[11px] uppercase tracking-[0.22em] text-muted-foreground/45 sm:tracking-[0.3em]">
                 The future of discovery
               </p>
-              <p className="text-center text-[10px] sm:text-[11px] uppercase tracking-[0.15em] text-muted-foreground/30 sm:tracking-[0.2em]">
+              <p className="text-center text-[10px] sm:text-[11px] uppercase tracking-[0.15em] text-muted-foreground/50 sm:tracking-[0.2em]">
                 &copy; {year ?? ''} SeekEngine &middot; All rights reserved
               </p>
             </div>

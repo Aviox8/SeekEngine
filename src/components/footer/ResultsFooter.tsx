@@ -32,17 +32,17 @@ export default function ResultsFooter() {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col items-center gap-2"
           >
-            <span className="text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.3em] text-muted-foreground/30 sm:tracking-[0.4em]">
+            <span className="text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.3em] text-muted-foreground/45 sm:tracking-[0.4em]">
               Good {timeOfDay}
             </span>
-            <span className="text-center text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground/25 sm:tracking-[0.2em]">
+            <span className="text-center text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground/40 sm:tracking-[0.2em]">
               Connecting from {location}
             </span>
           </motion.div>
         )}
 
         {/* Keyboard shortcuts */}
-        <div className="flex flex-wrap items-center justify-center gap-4 text-[10px] sm:text-[11px] text-muted-foreground/30 sm:gap-5">
+        <div className="flex flex-wrap items-center justify-center gap-4 text-[10px] sm:text-[11px] text-muted-foreground/50 sm:gap-5">
           <div className="flex items-center gap-1.5">
             <kbd className="inline-flex items-center justify-center w-6 h-6 text-[10px] sm:text-[11px] font-medium rounded-md border border-foreground/[0.06] bg-foreground/[0.02] text-muted-foreground/30">/</kbd>
             <span>Focus</span>
@@ -68,9 +68,9 @@ export default function ResultsFooter() {
               alt="SeekEngine"
               width={14}
               height={14}
-              className="opacity-20 group-hover:opacity-40 transition-opacity duration-300"
+              className="opacity-30 group-hover:opacity-60 transition-opacity duration-300"
             />
-            <span className="font-display text-xs tracking-tight text-muted-foreground/20 group-hover:text-muted-foreground/40 transition-colors duration-300">
+            <span className="font-display text-xs tracking-tight text-muted-foreground/40 group-hover:text-muted-foreground/60 transition-colors duration-300">
               SeekEngine
             </span>
           </Link>
@@ -89,7 +89,7 @@ export default function ResultsFooter() {
                 href={link.href}
                 target={link.external ? '_blank' : undefined}
                 rel={link.external ? 'noopener noreferrer' : undefined}
-                className="text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground/30 transition-colors duration-200 hover:text-foreground/50"
+                className="text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground/50 transition-colors duration-200 hover:text-foreground/80"
               >
                 {link.label}
               </Link>
@@ -99,7 +99,7 @@ export default function ResultsFooter() {
 
         {/* Copyright */}
         <div className="flex flex-col items-center gap-1">
-          <p className="text-center text-[10px] sm:text-[11px] uppercase tracking-[0.15em] text-muted-foreground/25">
+          <p className="text-center text-[10px] sm:text-[11px] uppercase tracking-[0.15em] text-muted-foreground/45">
             &copy; {year ?? ''} SeekEngine &middot; All rights reserved
           </p>
         </div>
