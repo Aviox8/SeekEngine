@@ -10,7 +10,7 @@
  * - Performance telemetry: Logs per-model latency and success rates
  */
 
-import { getOpenRouterApiKeys } from '../env'
+import { getOpenRouterApiKeys, hasOllama, hasExa } from '../env'
 import { logger } from '../logger'
 import type { ChatMessage, AITask, ModelTier, StreamEvent } from './types'
 import { AITask as AITaskEnum } from './types'
@@ -18,6 +18,9 @@ import { OPENROUTER_BASE_URL, SITE_URL, TASK_POLICIES, MAX_MODEL_FAILURES, BASE_
 import { humanizeModel, classifyModel, modelFailures, logTelemetry, getModelsForTask } from './models'
 import { MAX_CONCURRENT_MODELS, SYSTEMIC_FAILURE_THRESHOLD_MS, TTFT_FAST_MS, TTFT_SLOW_MS } from '../constants'
 import type { SearchContextItem } from '../search-context'
+import { streamOllama } from '../ollama'
+import { getExaAnswer } from '../exa'
+import { synthesizeFromContext } from '../fallback-answer'
 import {
   getApiKeyPlan,
   markApiKeyAuthFailed,
@@ -579,6 +582,170 @@ export async function* streamOpenRouter(
   yield { type: 'error', error: 'All models failed across configured OpenRouter keys' }
 }
 
+// ── Provider Fallback Chain ──────────────────────────────────────────────────
+/**
+ * Answer provider order:
+ *   1. OpenRouter (default model: openrouter/free router, or OPENROUTER_MODEL)
+ *   2. Ollama Cloud (if OLLAMA_API_KEY is set)
+ *   3. Exa Answer API (if EXA_API_KEY is set)
+ *   4. Local synthesis from raw search context (no providers required)
+ * A provider only falls through when it fails before emitting any tokens —
+ * never mid-stream.
+ */
+async function* streamAnswerWithFallback(
+  messages: ChatMessage[],
+  query: string,
+  context: SearchContextItem[],
+  signal: AbortSignal
+): AsyncGenerator<StreamEvent> {
+  const errors: string[] = []
+  const startedAt = Date.now()
+
+  const faviconFor = (url: string): string | undefined => {
+    try {
+      const hostname = new URL(url).hostname
+      return hostname ? `https://www.google.com/s2/favicons?domain=${hostname}&sz=32` : undefined
+    } catch {
+      return undefined
+    }
+  }
+
+  const wordChunks = (text: string): string[] => text.match(/\S+\s*/g) ?? [text]
+
+  if (getOpenRouterApiKeys().length > 0) {
+    let tokensEmitted = 0
+    for await (const event of streamOpenRouter(messages, AITaskEnum.ANSWER, signal)) {
+      if (event.type === 'error') {
+        errors.push(`openrouter: ${event.error ?? 'unknown error'}`)
+        if (tokensEmitted === 0) {
+          logger.warn('OpenRouter answer provider failed before first token; falling back to Ollama Cloud', {
+            reason: event.error,
+          })
+          break
+        }
+        yield event
+        return
+      }
+      if (event.type === 'token') tokensEmitted += 1
+      yield event
+      if (event.type === 'done') return
+    }
+    if (tokensEmitted > 0) {
+      // Provider died mid-stream after emitting tokens — keep the partial answer.
+      return
+    }
+    // No tokens and no error event (stream ended silently) — fall through.
+    errors.push('openrouter: stream ended without tokens')
+    logger.warn('OpenRouter answer provider ended without tokens; falling back to Ollama Cloud')
+  } else {
+    logger.debug('No OpenRouter keys configured; skipping OpenRouter answer provider')
+  }
+
+  if (hasOllama()) {
+    let tokensEmitted = 0
+    for await (const event of streamOllama(messages, AITaskEnum.ANSWER, signal)) {
+      if (event.type === 'error') {
+        errors.push(`ollama: ${event.error ?? 'unknown error'}`)
+        if (tokensEmitted === 0) {
+          logger.warn('Ollama Cloud provider failed before first token; falling back to Exa Answer', {
+            reason: event.error,
+          })
+          break
+        }
+        yield event
+        return
+      }
+      if (event.type === 'token') tokensEmitted += 1
+      yield event
+      if (event.type === 'done') return
+    }
+    if (tokensEmitted > 0) return
+    errors.push('ollama: stream ended without tokens')
+    logger.warn('Ollama Cloud provider ended without tokens; falling back to Exa Answer')
+  } else {
+    logger.debug('OLLAMA_API_KEY not configured; skipping Ollama Cloud answer provider')
+  }
+
+  if (hasExa()) {
+    try {
+      logger.info('Attempting Exa Answer provider')
+      const { answer, citations } = await getExaAnswer(query, BASE_SYSTEM_PROMPT, signal)
+
+      if (context.length === 0 && citations.length > 0) {
+        yield {
+          type: 'sources',
+          sources: citations.slice(0, 8).map((c) => ({
+            title: c.title,
+            url: c.url,
+            favicon: faviconFor(c.url),
+          })),
+        }
+      }
+
+      yield {
+        type: 'model_selected',
+        model: 'exa/answer',
+        modelHuman: 'Exa Answer (fallback provider)',
+        tier: 'balanced',
+        attempts: 1,
+      }
+
+      for (const chunk of wordChunks(answer)) {
+        yield { type: 'token', content: chunk }
+      }
+
+      yield {
+        type: 'done',
+        content: answer,
+        model: 'exa/answer',
+        modelHuman: 'Exa Answer (fallback provider)',
+        tier: 'balanced',
+        latencyMs: Date.now() - startedAt,
+        attempts: 1,
+      }
+      logger.info('Exa Answer provider succeeded')
+      return
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error)
+      errors.push(`exa: ${reason}`)
+      logger.warn('Exa Answer provider failed; falling back to local synthesis', { reason })
+    }
+  } else {
+    logger.debug('EXA_API_KEY not configured; skipping Exa Answer provider')
+  }
+
+  const synthesized = synthesizeFromContext(query, context)
+  if (synthesized) {
+    logger.warn('All LLM answer providers failed — synthesizing from raw search context')
+    yield {
+      type: 'model_selected',
+      model: 'synthesis/local',
+      modelHuman: 'Local synthesis (AI providers unavailable)',
+      tier: 'fast',
+      attempts: 1,
+    }
+    for (const chunk of wordChunks(synthesized)) {
+      yield { type: 'token', content: chunk }
+    }
+    yield {
+      type: 'done',
+      content: synthesized,
+      model: 'synthesis/local',
+      modelHuman: 'Local synthesis (AI providers unavailable)',
+      tier: 'fast',
+      latencyMs: Date.now() - startedAt,
+      attempts: 1,
+    }
+    return
+  }
+
+  logger.error('All answer providers failed', new Error(errors.join('; ') || 'no providers configured'))
+  yield {
+    type: 'error',
+    error: `All answer providers failed (${errors.join(' · ') || 'no providers configured'}). Please retry shortly.`,
+  }
+}
+
 // ── Streaming Answer Response (For API Routes) ──────────────────────────────
 /**
  * Create a streaming response for search answer requests
@@ -692,8 +859,8 @@ export function createStreamingAnswerResponse(
 
         const messages = buildMessages(context)
 
-        // Stream events from model racing engine
-        for await (const event of streamOpenRouter(messages, AITaskEnum.ANSWER, requestAbortController.signal)) {
+        // Stream events from the provider fallback chain
+        for await (const event of streamAnswerWithFallback(messages, query, context, requestAbortController.signal)) {
           if (!enqueueEvent(event)) {
             break
           }
