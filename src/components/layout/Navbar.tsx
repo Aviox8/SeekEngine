@@ -199,10 +199,10 @@ export default function Navbar() {
     return () => { document.body.style.overflow = '' }
   }, [])
 
-  /* Nav pill styles — Apple Intelligence refined glass with subtle AI glow on scroll */
+  /* Nav pill — true pill, no edges: ambient shadow only, no border or glow */
   const pillClass = scrolled
-    ? 'bg-background/80 backdrop-blur-xl border-foreground/[0.08] shadow-[0_2px_20px_rgba(0,0,0,0.06)]'
-    : 'bg-background/60 backdrop-blur-lg border-foreground/[0.05]'
+    ? 'bg-background/85 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.08)]'
+    : 'bg-background/60 backdrop-blur-lg'
 
   return (
     <>
@@ -215,18 +215,8 @@ export default function Navbar() {
             initial={{ y: -100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-            className={`pointer-events-auto flex w-full max-w-[min(100%,38rem)] items-center justify-between gap-2 rounded-full border px-2 py-1.5 transition-[color,background-color,border-color,box-shadow] duration-700 ease-out sm:w-auto sm:max-w-none sm:gap-1 sm:px-2.5 sm:py-1.5 relative ${pillClass}`}
+            className={`pointer-events-auto flex w-auto max-w-full items-center justify-between gap-2 rounded-full px-2 py-1.5 transition-[color,background-color,box-shadow] duration-700 ease-out sm:gap-1 sm:px-2.5 sm:py-1.5 relative ${pillClass}`}
           >
-            {/* Subtle monochrome glow when scrolled */}
-            {scrolled && (
-              <div
-                className="absolute -inset-[1px] rounded-full opacity-[0.08] pointer-events-none"
-                style={{
-                  background: 'linear-gradient(135deg, hsl(var(--foreground)), transparent)',
-                  filter: 'blur(8px)',
-                }}
-              />
-            )}
             {/* ── Logo — refined with subtle scale ── */}
             <Link
               href="/"
@@ -381,7 +371,7 @@ export default function Navbar() {
               exit={{ opacity: 0, y: -8, scale: 0.98 }}
               transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
               onKeyDown={handleMobileMenuKeyDown}
-              className="fixed left-4 right-4 z-50 rounded-3xl border border-foreground/[0.06] bg-background/90 backdrop-blur-2xl p-1.5 shadow-[0_8px_40px_rgba(0,0,0,0.12)] sm:hidden"
+               className="fixed left-4 right-4 z-50 rounded-3xl bg-background/90 backdrop-blur-2xl p-1.5 shadow-[0_8px_40px_rgba(0,0,0,0.14)] sm:hidden"
               style={{ top: navHeight }}
             >
               <nav className="flex flex-col gap-0.5" aria-label="Mobile navigation">
