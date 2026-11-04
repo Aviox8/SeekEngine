@@ -7,14 +7,10 @@
 
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import FluidOrb from './FluidOrb'
 
 export default function Hero() {
   return (
     <section className="w-full flex flex-col items-center justify-center relative overflow-visible pointer-events-none py-8 sm:py-12">
-      
-      {/* Fluid orb behind logo */}
-      <FluidOrb />
 
       {/* HERO CONTENT */}
       <motion.div
@@ -27,8 +23,6 @@ export default function Hero() {
           transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
           className="mb-6 sm:mb-8 relative"
         >
-          {/* Subtle glow behind logo */}
-          <div className="absolute inset-0 -m-4 rounded-full bg-gradient-to-br from-foreground/[0.08] via-transparent to-foreground/[0.08] blur-xl" />
           <Image
             src="/logo.png"
             alt="SeekEngine"
