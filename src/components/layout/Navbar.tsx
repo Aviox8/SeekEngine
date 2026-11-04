@@ -56,7 +56,7 @@ function NavLink({ children, href, isActive, external }: {
       rel={external ? 'noopener noreferrer' : undefined}
       aria-label={external ? `${children} (opens in new tab)` : children}
       aria-current={isActive ? 'page' : undefined}
-      className={`group relative px-3 py-2 text-[13px] font-medium tracking-[-0.01em] rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 ${
+      className={`group relative px-3 py-2 text-[13px] font-medium tracking-[-0.01em] rounded-full transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 ${
         isActive
           ? 'text-foreground'
           : 'text-foreground/60 hover:text-foreground'
@@ -215,7 +215,7 @@ export default function Navbar() {
             initial={{ y: -100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-            className={`pointer-events-auto flex w-full max-w-[min(100%,38rem)] items-center justify-between gap-2 rounded-full border px-2 py-1.5 transition-all duration-700 ease-out sm:w-auto sm:max-w-none sm:gap-1 sm:px-2.5 sm:py-1.5 relative ${pillClass}`}
+            className={`pointer-events-auto flex w-full max-w-[min(100%,38rem)] items-center justify-between gap-2 rounded-full border px-2 py-1.5 transition-[color,background-color,border-color,box-shadow] duration-700 ease-out sm:w-auto sm:max-w-none sm:gap-1 sm:px-2.5 sm:py-1.5 relative ${pillClass}`}
           >
             {/* Subtle monochrome glow when scrolled */}
             {scrolled && (
@@ -231,7 +231,7 @@ export default function Navbar() {
             <Link
               href="/"
               aria-label="SeekEngine — go to homepage"
-              className="group relative flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full transition-all duration-300 hover:bg-foreground/[0.04] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2"
+              className="group relative flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full transition-[color,background-color,border-color,transform] duration-300 hover:bg-foreground/[0.04] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2"
             >
               <Image
                 src="/logo.png"
@@ -268,7 +268,7 @@ export default function Navbar() {
               <motion.button
                 type="button"
                 onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?', bubbles: true }))}
-                className="hidden sm:flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-foreground/50 transition-all duration-300 hover:bg-foreground/[0.06] hover:text-foreground active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2"
+                className="hidden sm:flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-foreground/50 transition-[color,background-color,border-color,transform] duration-300 hover:bg-foreground/[0.06] hover:text-foreground active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2"
                 aria-label="Show keyboard shortcuts"
                 whileTap={{ scale: 0.9 }}
               >
@@ -279,7 +279,7 @@ export default function Navbar() {
               <motion.button
                 type="button"
                 onClick={() => setTheme(isDarkMode ? 'light' : 'dark')}
-                className="relative flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-foreground/50 transition-all duration-300 hover:bg-foreground/[0.06] hover:text-foreground active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2"
+                className="relative flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-foreground/50 transition-[color,background-color,border-color,transform] duration-300 hover:bg-foreground/[0.06] hover:text-foreground active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2"
                 aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
                 aria-pressed={isDarkMode}
                 whileTap={{ rotate: 180, scale: 0.85 }}
@@ -308,7 +308,7 @@ export default function Navbar() {
                 type="button"
                 ref={hamburgerRef}
                 onClick={() => setMobileOpen(o => !o)}
-                className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-foreground/50 transition-all duration-300 hover:bg-foreground/[0.06] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2 sm:hidden"
+                className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-foreground/50 transition-colors duration-300 hover:bg-foreground/[0.06] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2 sm:hidden"
                 aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
                 aria-expanded={mobileOpen}
                 aria-controls={mobileMenuId}
@@ -400,7 +400,7 @@ export default function Navbar() {
                         rel={link.external ? 'noopener noreferrer' : undefined}
                         onClick={() => setMobileOpen(false)}
                         aria-current={isActive ? 'page' : undefined}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[15px] font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2 ${
+                        className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[15px] font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2 ${
                           isActive
                             ? 'bg-foreground/[0.06] text-foreground'
                             : 'text-foreground/60 hover:text-foreground hover:bg-foreground/[0.04]'
@@ -438,7 +438,7 @@ export default function Navbar() {
                 <motion.button
                   type="button"
                   onClick={() => setTheme(isDarkMode ? 'light' : 'dark')}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full text-[13px] font-medium text-foreground/50 hover:text-foreground hover:bg-foreground/[0.04] transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full text-[13px] font-medium text-foreground/50 hover:text-foreground hover:bg-foreground/[0.04] transition-colors duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 focus-visible:ring-offset-2"
                   aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
                   aria-pressed={isDarkMode}
                   whileTap={{ scale: 0.95 }}
