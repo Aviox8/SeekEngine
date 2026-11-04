@@ -236,6 +236,7 @@ export function useStreamingAnswer() {
               receivedDone = true
               setState('error')
               setError(event.error || 'Unknown error')
+              console.error('[SeekEngine] AI answer provider reported an error:', event.error || 'Unknown error')
               break
           }
         } catch {
@@ -277,6 +278,7 @@ export function useStreamingAnswer() {
       } else {
         setState('error')
         setError((err as Error).message)
+        console.error('[SeekEngine] Failed to stream AI answer:', (err as Error).message)
       }
     } finally {
       if (abortControllerRef.current === requestController) {

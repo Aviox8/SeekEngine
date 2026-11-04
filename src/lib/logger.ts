@@ -57,10 +57,10 @@ class Logger {
     const errorStr = error instanceof Error ? error.message : error
     const fullContext = {
       ...context,
+      ...(errorStr ? { error: errorStr } : {}),
       ...(error instanceof Error && { stack: error.stack }),
     }
     console.error(this.format('error', message, fullContext))
-    if (errorStr) console.error(`Details: ${errorStr}`)
   }
 
   /**
