@@ -24,16 +24,3 @@ export function sanitizeSearchQuery(query: string): string {
     .replace(/[?!]/g, '') // Normalize trailing query punctuation
     .trim()
 }
-
-/**
- * Validate UTF-8 encoding
- */
-export function isValidUTF8(str: string): boolean {
-  try {
-    const encoded = new TextEncoder().encode(str)
-    new TextDecoder().decode(encoded)
-    return true
-  } catch {
-    return false
-  }
-}

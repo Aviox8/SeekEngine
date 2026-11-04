@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { checkRateLimit, getClientIP, RATE_LIMITS, rateLimitResponse } from '@/lib/rate-limit'
-import { sanitizeSearchQuery, isValidUTF8 } from '@/lib/sanitize'
+import { sanitizeSearchQuery } from '@/lib/sanitize'
 import { logger } from '@/lib/logger'
 import { createErrorResponse, Errors } from '@/lib/errors'
 import { validateSearchQuery, validateTimeRange } from '@/lib/validation'
@@ -44,7 +44,6 @@ export async function GET(request: Request) {
 
     // Parse and validate query
     const { searchParams } = new URL(request.url)
-    const rawQuery = searchParams.get('q')
 
     const validation = validateSearchQuery(searchParams)
     if (!validation.valid) {
@@ -56,15 +55,6 @@ export async function GET(request: Request) {
     }
 
     const query = validation.query!
-
-    // Validate UTF-8 encoding
-    if (!isValidUTF8(query)) {
-      logger.warn('Invalid UTF-8 encoding', { query: rawQuery })
-      const { error, status } = createErrorResponse(
-        Errors.invalidInput('query', 'Invalid character encoding')
-      )
-      return NextResponse.json(error, { status })
-    }
 
     // Sanitize query for external APIs
     const sanitizedQuery = sanitizeSearchQuery(query)
