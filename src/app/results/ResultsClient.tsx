@@ -253,12 +253,6 @@ export default function ResultsClient() {
 
         {/* Query Title — fluid, responsive */}
         <div className="mb-6 animate-fade-in-up sm:mb-8 lg:mb-10">
-          <div className="flex items-center gap-2 mb-2 sm:mb-3">
-            <div className="w-1 h-4 rounded-full bg-primary/40 sm:h-5" />
-            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground/60 sm:tracking-[0.15em]">
-              Results
-            </span>
-          </div>
           <h1 className="font-display break-words text-[clamp(1.5rem,5vw,3.5rem)] leading-[1.08] tracking-tight text-foreground">
             {query}
           </h1>
@@ -329,9 +323,6 @@ export default function ResultsClient() {
                     exit={{ opacity: 0, height: 0 }}
                     className="mt-4 pt-4 border-t border-foreground/5 sm:mt-6 sm:pt-5"
                   >
-                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-muted-foreground/50 mb-2 sm:text-sm">
-                      Suggested follow-ups
-                    </p>
                     <div className="flex flex-wrap gap-2">
                       {[
                         'Tell me more about this',
@@ -383,7 +374,7 @@ export default function ResultsClient() {
                           if (e.key === 'Escape') followUpInputRef.current?.blur()
                         }}
                         placeholder="Ask a follow-up…"
-                        className="w-full rounded-lg py-2.5 pl-9 pr-12 text-base sm:text-sm font-medium transition-[border-color,box-shadow,background-color] outline-none bg-accent/5 border border-border/50 text-foreground placeholder:text-muted-foreground/40 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-border/80 sm:py-3 sm:pl-11 sm:pr-14"
+                        className="w-full rounded-lg py-2.5 pl-9 pr-12 text-base sm:text-sm font-medium transition-[border-color,box-shadow,background-color] outline-none bg-accent/5 border border-border/50 text-foreground placeholder:text-muted-foreground/40 focus:border-primary focus:ring-2 focus:ring-primary/20 focus-visible:ring-primary/40 group-hover:border-border/80 sm:py-3 sm:pl-11 sm:pr-14"
                         style={{ caretColor: 'hsl(var(--primary))' }}
                       />
                       <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:right-2">

@@ -103,7 +103,7 @@ export default function LegalPageShell({
                 })}
               </time>
               {' · '}
-              <Link href="/about" className={`${styles.link} hover:underline font-medium`}>
+              <Link href="/about" className={`${styles.link} hover:underline focus-visible:underline font-medium`}>
                 ← Back to About
               </Link>
             </p>
@@ -125,7 +125,7 @@ export default function LegalPageShell({
                     <li key={item.id}>
                       <a
                         href={`#${item.id}`}
-                        className="group flex items-start gap-2 -ml-px pl-3 py-1 text-[12px] leading-snug text-foreground/50 hover:text-foreground transition-colors border-l border-transparent hover:border-foreground/40"
+                        className="group flex items-start gap-2 -ml-px pl-3 py-1 text-[12px] leading-snug text-foreground/50 hover:text-foreground focus-visible:text-foreground transition-colors border-l border-transparent hover:border-foreground/40"
                       >
                         <span className="text-foreground/30 tabular-nums shrink-0 mt-px">
                           {String(idx + 1).padStart(2, '0')}

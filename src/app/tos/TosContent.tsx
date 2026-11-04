@@ -71,7 +71,7 @@ export default function TosContent() {
             <Link
               href="https://github.com/archduke1337/SeekEngine/blob/main/LICENSE"
               target="_blank"
-              className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+              className="text-blue-600 dark:text-blue-400 hover:underline focus-visible:underline font-medium"
             >
               LICENSE
             </Link>{' '}
@@ -80,19 +80,19 @@ export default function TosContent() {
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[12px] text-foreground/55">
             <span>Related:</span>
-            <Link href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+            <Link href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline focus-visible:underline font-medium">
               Privacy policy
             </Link>
             <span className="text-foreground/25">·</span>
             <Link
               href="https://github.com/archduke1337/SeekEngine"
               target="_blank"
-              className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+              className="text-blue-600 dark:text-blue-400 hover:underline focus-visible:underline font-medium"
             >
               GitHub repository
             </Link>
             <span className="text-foreground/25">·</span>
-            <Link href="/about" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+            <Link href="/about" className="text-blue-600 dark:text-blue-400 hover:underline focus-visible:underline font-medium">
               About the project
             </Link>
           </div>
@@ -146,7 +146,7 @@ export default function TosContent() {
           The public instance logs anonymized query patterns for debugging and research, IP addresses (not stored persistently), response times, and error rates. We do not sell or share data. Logs are retained for 90 days and then deleted. If you run your own SeekEngine instance, you control all logging and data retention.
         </p>
         <p>
-          Read the full <Link href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">Privacy Policy</Link> for the details.
+          Read the full <Link href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline focus-visible:underline font-medium">Privacy Policy</Link> for the details.
         </p>
       </LegalSection>
 
@@ -201,7 +201,7 @@ export default function TosContent() {
 
       <LegalSection id="contact" index={9} total={TOC.length} tone="blue" title="Contact" summary="GitHub issues for questions. Email for abuse.">
         <p>
-          For questions about these terms, the project, or the research behind it, open an issue on GitHub. For abuse reports on the public demo, email <a href="mailto:gauravramyadav@gmail.com" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">gauravramyadav@gmail.com</a>.
+          For questions about these terms, the project, or the research behind it, open an issue on GitHub. For abuse reports on the public demo, email <a href="mailto:gauravramyadav@gmail.com" className="text-blue-600 dark:text-blue-400 hover:underline focus-visible:underline font-medium">gauravramyadav@gmail.com</a>.
         </p>
       </LegalSection>
     </LegalPageShell>
