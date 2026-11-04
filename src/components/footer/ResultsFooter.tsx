@@ -44,15 +44,15 @@ export default function ResultsFooter() {
         {/* Keyboard shortcuts */}
         <div className="flex flex-wrap items-center justify-center gap-4 text-[10px] sm:text-[11px] text-muted-foreground/50 sm:gap-5">
           <div className="flex items-center gap-1.5">
-            <kbd className="inline-flex items-center justify-center w-6 h-6 text-[10px] sm:text-[11px] font-medium rounded-md border border-foreground/[0.06] bg-foreground/[0.02] text-muted-foreground/30">/</kbd>
+            <kbd className="inline-flex items-center justify-center w-6 h-6 text-[10px] sm:text-[11px] font-medium rounded-md bg-foreground/[0.02] text-muted-foreground/30">/</kbd>
             <span>Focus</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <kbd className="inline-flex items-center justify-center px-1.5 h-6 text-[10px] sm:text-[11px] font-medium rounded-md border border-foreground/[0.06] bg-foreground/[0.02] text-muted-foreground/30">Esc</kbd>
+            <kbd className="inline-flex items-center justify-center px-1.5 h-6 text-[10px] sm:text-[11px] font-medium rounded-md bg-foreground/[0.02] text-muted-foreground/30">Esc</kbd>
             <span>Dismiss</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <kbd className="inline-flex items-center justify-center px-1.5 h-6 text-[10px] sm:text-[11px] font-medium rounded-md border border-foreground/[0.06] bg-foreground/[0.02] text-muted-foreground/30">Tab</kbd>
+            <kbd className="inline-flex items-center justify-center px-1.5 h-6 text-[10px] sm:text-[11px] font-medium rounded-md bg-foreground/[0.02] text-muted-foreground/30">Tab</kbd>
             <span>Complete</span>
           </div>
         </div>

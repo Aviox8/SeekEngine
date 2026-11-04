@@ -32,13 +32,13 @@ export type LegalShellProps = {
 
 const ACCENTS = {
   tos: {
-    chip: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+    chip: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
     bullet: 'bg-blue-500',
     link: 'text-blue-600 dark:text-blue-400',
     dot: 'bg-blue-500',
   },
   privacy: {
-    chip: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800',
+    chip: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
     bullet: 'bg-purple-500',
     link: 'text-purple-600 dark:text-purple-400',
     dot: 'bg-purple-500',
@@ -75,7 +75,7 @@ export default function LegalPageShell({
         >
           <div className="max-w-3xl space-y-5">
             <div className="flex flex-wrap items-center gap-2.5">
-              <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide border ${styles.chip}`}>
+              <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide ${styles.chip}`}>
                 {badge}
               </span>
               {badgeMeta && (

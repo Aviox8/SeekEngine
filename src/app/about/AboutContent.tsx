@@ -100,7 +100,7 @@ export default function AboutContent() {
           transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
           className="mb-12 sm:mb-16"
         >
-          <div className="relative overflow-hidden rounded-md border border-foreground/[0.08] bg-black">
+          <div className="relative overflow-hidden rounded-md bg-black">
             <Image
               src="/images/about-hero.png"
               alt="SeekEngine — four curious observers framing the brand from every corner"
@@ -111,7 +111,7 @@ export default function AboutContent() {
             />
           </div>
           <div className="mt-5 flex flex-wrap items-center gap-2.5">
-            <span className="px-3 py-1 rounded-full bg-foreground/[0.04] text-foreground/55 text-[11px] font-medium border border-foreground/[0.06]">
+            <span className="px-3 py-1 rounded-full bg-foreground/[0.04] text-foreground/55 text-[11px] font-medium  ">
               Open source · MIT
             </span>
             <span className="text-[11px] font-medium text-foreground/35 tracking-wide">
@@ -162,7 +162,7 @@ export default function AboutContent() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: idx * 0.06 }}
                 viewport={{ once: true, margin: '-80px' }}
-                className="group relative rounded-2xl border border-foreground/[0.07] bg-foreground/[0.01] p-5 sm:p-6 transition-colors hover:border-foreground/15 hover:bg-foreground/[0.02]"
+                className="group relative rounded-2xl bg-foreground/[0.03] p-5 sm:p-6 transition-[background-color,box-shadow] duration-200 hover:bg-foreground/[0.05] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)]"
               >
                 <div className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/[0.04] text-foreground/65 transition-colors group-hover:bg-foreground/[0.07] group-hover:text-foreground/85">
                   {feature.icon}
@@ -255,7 +255,7 @@ export default function AboutContent() {
             </h2>
           </div>
 
-          <div className="rounded-2xl border border-foreground/[0.07] overflow-hidden">
+          <div className="rounded-2xl overflow-hidden bg-foreground/[0.02]">
             <dl className="divide-y divide-foreground/[0.07]">
               {architecture.map((row) => (
                 <div key={row.label} className="grid grid-cols-1 gap-1 px-5 py-3.5 sm:grid-cols-[10rem_1fr] sm:gap-4 sm:px-6 sm:py-4">

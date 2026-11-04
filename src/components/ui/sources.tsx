@@ -63,7 +63,7 @@ export function Sources({ sources, isLoading, className, ...props }: SourcesProp
         {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="h-[60px] w-36 flex-shrink-0 animate-pulse rounded-lg border border-foreground/[0.04] bg-foreground/[0.01] sm:h-[68px] sm:w-48 sm:rounded-xl"
+              className="h-[60px] w-36 flex-shrink-0 animate-pulse rounded-lg bg-foreground/[0.02] sm:h-[68px] sm:w-48 sm:rounded-xl"
             />
           ))}
       </div>
@@ -104,7 +104,7 @@ export function Sources({ sources, isLoading, className, ...props }: SourcesProp
                 }}
                 whileHover={{ y: -2, transition: { duration: 0.15, ease: 'easeOut' } }}
                 whileTap={{ scale: 0.98 }}
-                className="group/source snap-start flex w-36 flex-shrink-0 rounded-2xl border border-foreground/[0.04] bg-foreground/[0.02] p-2.5 transition-[border-color,background-color,box-shadow] duration-200 hover:border-foreground/[0.10] hover:bg-foreground/[0.04] hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] focus-visible:border-foreground/[0.14] focus-visible:outline-offset-2 focus-visible:outline-2 focus-visible:outline-primary sm:w-48 sm:p-3 sm:snap-center"
+                className="group/source snap-start flex w-36 flex-shrink-0 rounded-2xl bg-foreground/[0.04] p-2.5 transition-[background-color,box-shadow] duration-200 hover:bg-foreground/[0.06] hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] focus-visible:outline-offset-2 focus-visible:outline-2 focus-visible:outline-primary sm:w-48 sm:p-3 sm:snap-center"
                 aria-label={`${source.title} - ${displayUrl}`}
               >
                 <div className="flex items-center gap-2 mb-2">

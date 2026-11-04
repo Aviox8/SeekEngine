@@ -258,7 +258,7 @@ export default memo(function SearchBar({
                   transition={{ duration: 0.2 }}
                   className="flex items-center gap-1.5 flex-shrink-0"
                 >
-                  <kbd className="text-[10px] text-muted-foreground/20 font-medium px-1 py-0.5 rounded border border-foreground/[0.06] bg-foreground/[0.02]" aria-hidden="true">/</kbd>
+                  <kbd className="text-[10px] text-muted-foreground/20 font-medium px-1 py-0.5 rounded bg-foreground/[0.02]" aria-hidden="true">/</kbd>
                 </motion.div>
               ) : null}
             </AnimatePresence>
@@ -268,15 +268,15 @@ export default memo(function SearchBar({
         {!isTyping && !isFocused && (
           <div className="mt-4 hidden items-center justify-center gap-3 text-[11px] font-medium text-muted-foreground/40 sm:flex" aria-hidden="true">
             <span className="flex items-center gap-1.5">
-              <kbd className="inline-flex h-6 min-w-[28px] items-center justify-center rounded-md border border-foreground/10 bg-foreground/[0.03] px-1.5 text-[10px] text-muted-foreground/50">/</kbd>
+              <kbd className="inline-flex h-6 min-w-[28px] items-center justify-center rounded-md bg-foreground/[0.03] px-1.5 text-[10px] text-muted-foreground/50">/</kbd>
               to focus
             </span>
             <span className="flex items-center gap-1.5">
-              <kbd className="inline-flex h-6 min-w-[28px] items-center justify-center rounded-md border border-foreground/10 bg-foreground/[0.03] px-1.5 text-[10px] text-muted-foreground/50">↵</kbd>
+              <kbd className="inline-flex h-6 min-w-[28px] items-center justify-center rounded-md bg-foreground/[0.03] px-1.5 text-[10px] text-muted-foreground/50">↵</kbd>
               to search
             </span>
             <span className="flex items-center gap-1.5">
-              <kbd className="inline-flex h-6 min-w-[28px] items-center justify-center rounded-md border border-foreground/10 bg-foreground/[0.03] px-1.5 text-[10px] text-muted-foreground/50">Tab</kbd>
+              <kbd className="inline-flex h-6 min-w-[28px] items-center justify-center rounded-md bg-foreground/[0.03] px-1.5 text-[10px] text-muted-foreground/50">Tab</kbd>
               to complete
             </span>
           </div>
@@ -343,7 +343,7 @@ export default memo(function SearchBar({
                     <motion.kbd
                       animate={{ opacity: index === selectedIndex ? 1 : 0 }}
                       transition={{ duration: 0.15 }}
-                      className="text-[10px] px-1.5 py-0.5 rounded-md border border-foreground/10 text-muted-foreground/40 bg-foreground/[0.02]"
+                      className="text-[10px] px-1.5 py-0.5 rounded-md text-muted-foreground/40 bg-foreground/[0.02]"
                     >
                       ↵
                     </motion.kbd>
@@ -353,7 +353,7 @@ export default memo(function SearchBar({
                 <div className="px-4 py-2 border-t border-foreground/[0.05] flex justify-between items-center">
                   <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/30">{suggestions.length > 10 ? `${suggestions.length} results` : '\u2191\u2193 to navigate'}</span>
                   <div className="flex items-center gap-1.5">
-                    <kbd className="px-1.5 py-0.5 text-[10px] rounded border border-foreground/10 text-muted-foreground/30 bg-foreground/[0.02]">↵</kbd>
+                    <kbd className="px-1.5 py-0.5 text-[10px] rounded bg-foreground/[0.02] text-muted-foreground/30 bg-foreground/[0.02]">↵</kbd>
                   </div>
                 </div>
               </div>
