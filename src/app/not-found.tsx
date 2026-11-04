@@ -18,7 +18,7 @@ export default function NotFound() {
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center space-y-3">
             <h2 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight">
-              Page Not Found
+              Page not found
             </h2>
             <p className="text-sm text-foreground/40 max-w-[280px] leading-relaxed font-light">
               This page doesn&apos;t exist or has been moved.
@@ -30,7 +30,7 @@ export default function NotFound() {
       <div className="flex items-center gap-3 mt-2">
         <Link
           href="/"
-          className="px-6 py-2.5 rounded-full bg-foreground text-background text-sm font-medium hover:opacity-85 transition-opacity active:scale-95"
+          className="px-6 py-2.5 rounded-full bg-foreground text-background text-sm font-medium hover:opacity-85 transition-[opacity,transform] duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
         >
           Return to Engine
         </Link>
