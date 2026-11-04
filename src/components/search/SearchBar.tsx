@@ -40,7 +40,6 @@ export default memo(function SearchBar({
   const dropdownStyle = useMemo(() => ({
     background: 'var(--dropdown-surface)',
     backdropFilter: 'blur(40px)',
-    borderColor: 'var(--glass-border)',
     boxShadow: 'var(--dropdown-shadow)',
     maxHeight: '60vh',
     overflowY: 'auto' as const
@@ -141,11 +140,11 @@ export default memo(function SearchBar({
       {/* ── Search bar ── */}
       <div className="relative">
 
-        {/* Main search bar */}
-        <div className={`relative z-[1] rounded-full px-5 py-2.5 border transition-[border-color,background-color,box-shadow] duration-300 ${
-          isFocused 
-            ? 'border-foreground/[0.12]' 
-            : 'border-foreground/[0.06] hover:border-foreground/[0.10]'
+        {/* Main search bar — pill, no edges: ambient shadow only */}
+        <div className={`relative z-[1] rounded-full px-5 py-2.5 bg-foreground/[0.02] transition-[background-color,box-shadow] duration-300 ${
+          isFocused
+            ? 'shadow-[0_8px_30px_rgba(0,0,0,0.10)]'
+            : 'shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.10)]'
         }`}>
 
           {/* Input wrapper */}
@@ -298,10 +297,10 @@ export default memo(function SearchBar({
           >
             <div
               role="listbox"
-              id="search-suggestions-listbox"
-              aria-label="Search suggestions"
-              className="rounded-2xl overflow-hidden border border-foreground/[0.06]"
-              style={dropdownStyle}
+               id="search-suggestions-listbox"
+               aria-label="Search suggestions"
+               className="rounded-2xl overflow-hidden"
+               style={dropdownStyle}
             >
                 <div className="px-4 py-2.5 border-b border-foreground/[0.05] flex items-center gap-2">
                   <Search className="w-3.5 h-3.5 text-muted-foreground/30" />
@@ -372,9 +371,9 @@ export default memo(function SearchBar({
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="absolute top-full left-0 right-0 z-40 overflow-hidden"
           >
-            <div 
-              className="rounded-2xl overflow-hidden border border-foreground/[0.06]"
-              style={dropdownStyle}
+             <div
+               className="rounded-2xl overflow-hidden"
+               style={dropdownStyle}
             >
                 <div className="px-4 py-2.5 border-b border-foreground/[0.05] flex items-center gap-2">
                   <Clock className="w-3.5 h-3.5 text-muted-foreground/30" />
