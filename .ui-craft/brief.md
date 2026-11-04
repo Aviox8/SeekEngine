@@ -1,23 +1,17 @@
 # Project Brief
 
-<!-- Always-loaded by the ui-craft skill. Keep this concise — it anchors every design decision. -->
-
 ## Design Intent
-
-<!-- What is this product trying to feel like? What emotion or experience does it create?
-     Example: "A calm, focused productivity tool — no noise, no decoration, just clarity." -->
+A high-fidelity industrial AI search interface. Monochrome, confident, quiet. It should feel like a precision instrument — not a chatbot toy, not a marketing page. Black/white first, violet aurora used sparingly as "AI presence", everything else restrained.
 
 ## Audience
-
-<!-- Who uses this? What do they care about? What's their context (device, environment, expertise)?
-     Example: "Software engineers on desktop. They want density and information, not marketing." -->
+Curious, technically-competent searchers on desktop and mobile. They want a fast answer with sources they can verify, not a feed. They tolerate dense type over decoration.
 
 ## Voice and Tone
-
-<!-- How does the product communicate? Formal or casual? Terse or warm?
-     Example: "Direct and honest. No marketing fluff. Errors explain the root cause." -->
+Direct, honest, literal. Status copy names the actual step ("Retrieving sources", "Synthesizing answer") — never anthropomorphic ("thinking…" is banned except as a state label). Errors explain the root cause and what to do next. No marketing fluff. No exclamation marks.
 
 ## Constraints
-
-<!-- Hard design constraints that override skill defaults.
-     Example: "No animations — the product runs in low-bandwidth environments." -->
+- Monochrome B&W is the brand. Do not introduce a blue/violet/green palette as accent; violet/indigo lives only inside the orb/aurora effects and one-off AI-presence moments.
+- Instrument Serif is reserved for display type (h1 hero, query title, logo wordmark). Space Grotesk for body. JetBrains Mono for code/kbd only.
+- Every animation must respect prefers-reduced-motion. Marquee/canvas effects are opt-out (skip-link + DynamicCanvasCrowd reduced-motion branch).
+- Copy is sentence case. Uppercase only for 10–11px category labels with wide tracking.
+- No secrets in client code. No animations on keyboard actions.
