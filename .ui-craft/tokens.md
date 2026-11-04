@@ -9,8 +9,8 @@ Source of truth: `src/globals.css` (HSL CSS variables, light + dark) and `tailwi
 - Neutral ramp: `--neutral-50 … --neutral-900` (stone scale, #fafaf9 → #1c1917)
 - Muted foreground: `hsl(0 0% 45%)` light / `hsl(0 0% 55%)` dark — text-only use ≥ /40 opacity
 - Destructive: `hsl(0 84% 60%)`; Success `hsl(142 76% 36%)`; Warning `hsl(38 92% 50%)`
-- Aurora (AI presence only): indigo/violet gradient `#818cf8 → #a78bfa → #6366f1` at ≤14% opacity, blur 60–90px
-- Accents per shader (gradients, not flat fills): rose #e11d48, amber #f59e0b, emerald #059669, sky #0284c7, violet #7c3aed
+- Aurora (AI presence only): monochrome `conic-gradient` (#d6d3d1 → #fafafa → #a8a29e) at ≤14% opacity in light, (#525252 → #f5f5f5 → #737373 → #262626) in dark, blur 60–90px. No hue anywhere.
+- Shader gradients (legacy, per card variants): rose #e11d48, amber #f59e0b, emerald #059669, sky #0284c7 — gradients, not flat fills
 
 ## Typography
 - Body: Space Grotesk, fluid `clamp()` scale in globals.css (h1 clamp(1.75rem, 4vw+0.5rem, 3rem)), `letter-spacing: -0.012em`, line-height 1.6
