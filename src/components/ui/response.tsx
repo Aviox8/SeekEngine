@@ -43,7 +43,7 @@ const Response = React.forwardRef<HTMLDivElement, ResponseProps>(
       code: ({ inline, className, children, ...props }: MarkdownCodeProps) => {
         return !inline ? (
           <div 
-            className="my-4 overflow-hidden rounded-lg border border-foreground/10 bg-foreground/[0.03] p-2.5 font-mono text-[11px] sm:my-6 sm:rounded-xl sm:p-4 sm:text-xs md:text-sm"
+            className="my-4 overflow-hidden rounded-lg bg-foreground/[0.04] p-2.5 font-mono text-[11px] sm:my-6 sm:rounded-xl sm:p-4 sm:text-xs md:text-sm"
           >
             <code className={cn(className, "block overflow-x-auto")} {...props}>
               {children}
@@ -51,7 +51,7 @@ const Response = React.forwardRef<HTMLDivElement, ResponseProps>(
           </div>
         ) : (
           <code
-            className="rounded border border-primary/20 bg-primary/5 px-1 py-0.5 font-mono text-[11px] text-primary sm:rounded-md sm:px-1.5 sm:text-[12px] md:text-[13px]"
+            className="rounded bg-primary/5 px-1 py-0.5 font-mono text-[11px] text-primary sm:rounded-md sm:px-1.5 sm:text-[12px] md:text-[13px]"
             {...props}
           >
             {children}

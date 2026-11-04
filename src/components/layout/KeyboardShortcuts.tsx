@@ -109,7 +109,7 @@ export default function KeyboardShortcuts() {
               aria-modal="true"
               aria-labelledby="keyboard-shortcuts-title"
               onKeyDown={handleModalKeyDown}
-              className="pointer-events-auto w-full max-w-sm rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden"
+              className="pointer-events-auto w-full max-w-sm rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl overflow-hidden"
             >
               {/* Header */}
               <div className="flex items-center justify-between px-6 pt-5 pb-4">
@@ -149,7 +149,7 @@ export default function KeyboardShortcuts() {
                             {shortcut.keys.map((key, j) => (
                               <kbd
                                 key={j}
-                                className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 text-[11px] font-mono font-medium bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-lg border border-zinc-200 dark:border-zinc-700 shadow-[0_1px_0_rgba(0,0,0,0.05)] dark:shadow-[0_1px_0_rgba(255,255,255,0.05)]"
+                                className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 text-[11px] font-mono font-medium bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-lg shadow-[0_1px_0_rgba(0,0,0,0.05)] dark:shadow-[0_1px_0_rgba(255,255,255,0.05)]"
                               >
                                 {key}
                               </kbd>
@@ -165,7 +165,7 @@ export default function KeyboardShortcuts() {
               {/* Footer */}
               <div className="px-6 py-3 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30">
                 <p className="text-[11px] text-zinc-400 text-center">
-                  Press <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-white dark:bg-zinc-800 rounded border border-zinc-200 dark:border-zinc-700">?</kbd> anywhere to toggle
+                  Press <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-white dark:bg-zinc-800 rounded">?</kbd> anywhere to toggle
                 </p>
               </div>
             </div>

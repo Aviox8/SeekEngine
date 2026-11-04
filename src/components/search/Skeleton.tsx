@@ -30,7 +30,7 @@ export function AnswerSkeleton() {
 
 export function ResultCardSkeleton() {
   return (
-    <div className="p-5 rounded-2xl border border-foreground/[0.04] bg-foreground/[0.01] dark:bg-foreground/[0.02]" aria-hidden="true">
+    <div className="p-5 rounded-2xl bg-foreground/[0.02] dark:bg-foreground/[0.02]" aria-hidden="true">
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 rounded-full animate-pulse bg-foreground/[0.06]" />

@@ -65,10 +65,10 @@ function PhaseIndicator({ phase, sourceCount }: { phase: StreamPhase; sourceCoun
   const stepIndex = phase === 'done' ? steps.length : steps.findIndex((s) => s.key === phase)
 
   return (
-    <div className="mb-3 sm:mb-4 rounded-2xl border border-foreground/[0.06] bg-foreground/[0.01] px-3 py-3 sm:px-4 sm:py-3.5" role="status" aria-live="polite">
+    <div className="mb-3 sm:mb-4 rounded-2xl bg-foreground/[0.02] px-3 py-3 sm:px-4 sm:py-3.5" role="status" aria-live="polite">
       <div className="flex items-center gap-2.5">
         {/* Active marker */}
-        <div className="flex h-5 w-5 items-center justify-center rounded-full border border-foreground/[0.1] bg-background shrink-0">
+        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-background shadow-sm shrink-0">
           {phase === 'done' ? (
             <svg className="w-2.5 h-2.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -130,15 +130,15 @@ function PhaseIndicator({ phase, sourceCount }: { phase: StreamPhase; sourceCoun
 function getTierStyles(tier: string) {
   switch (tier) {
     case 'fast':
-      return { className: 'bg-emerald-500/[0.08] text-emerald-600 dark:text-emerald-400 border-emerald-500/15' }
+      return { className: 'bg-emerald-500/[0.08] text-emerald-600 dark:text-emerald-400' }
     case 'balanced':
-      return { className: 'bg-blue-500/[0.08] text-blue-600 dark:text-blue-400 border-blue-500/15' }
+      return { className: 'bg-blue-500/[0.08] text-blue-600 dark:text-blue-400' }
     case 'heavy':
-      return { className: 'bg-violet-500/[0.08] text-violet-600 dark:text-violet-400 border-violet-500/15' }
+      return { className: 'bg-violet-500/[0.08] text-violet-600 dark:text-violet-400' }
     case 'code':
-      return { className: 'bg-amber-500/[0.08] text-amber-600 dark:text-amber-400 border-amber-500/15' }
+      return { className: 'bg-amber-500/[0.08] text-amber-600 dark:text-amber-400' }
     default:
-      return { className: 'bg-foreground/[0.04] text-foreground/60 border-foreground/[0.08]' }
+      return { className: 'bg-foreground/[0.04] text-foreground/60' }
   }
 }
 
@@ -163,7 +163,7 @@ function ModelBadge({
   return (
     <div className="flex items-center gap-2 mt-5 pt-4 flex-wrap border-t border-foreground/5 animate-fade-in sm:gap-3 sm:mt-7 sm:pt-5">
       {cached && (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium bg-amber-500/[0.08] text-amber-600 dark:text-amber-400 border border-amber-500/15 sm:gap-1.5 sm:px-3 sm:py-1">
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium bg-amber-500/[0.08] text-amber-600 dark:text-amber-400 sm:gap-1.5 sm:px-3 sm:py-1">
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
@@ -171,7 +171,7 @@ function ModelBadge({
         </span>
       )}
 
-      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium border sm:gap-1.5 sm:px-3 sm:py-1 ${tierStyle.className}`}>
+      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium sm:gap-1.5 sm:px-3 sm:py-1 ${tierStyle.className}`}>
         {tier}
       </span>
 
@@ -374,7 +374,7 @@ export function StreamingAnswer({
       case 'error':
         return (
           <motion.div
-            className="flex flex-col gap-2.5 p-3 rounded-lg bg-destructive/5 border border-destructive/20 sm:gap-3 sm:p-4 sm:rounded-xl"
+            className="flex flex-col gap-2.5 p-3 rounded-lg bg-destructive/5  sm:gap-3 sm:p-4 sm:rounded-xl"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}

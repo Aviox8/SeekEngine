@@ -47,7 +47,7 @@ export default function PrivacyContent() {
       toc={TOC}
       lastUpdated="2026-01-15"
       tldr={
-        <div className="rounded-2xl border border-purple-200/60 dark:border-purple-800/40 bg-purple-50/60 dark:bg-purple-900/[0.07] p-5 sm:p-6 space-y-5">
+        <div className="rounded-2xl bg-purple-50/60 dark:bg-purple-900/[0.07] p-5 sm:p-6 space-y-5">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-purple-700 dark:text-purple-300 mb-2">
               The short version
@@ -94,7 +94,7 @@ export default function PrivacyContent() {
       }
       closing={
         <>
-          <div className="rounded-2xl border border-purple-200/60 dark:border-purple-800/40 bg-purple-50/50 dark:bg-purple-900/[0.05] p-5 sm:p-6 space-y-2">
+          <div className="rounded-2xl bg-purple-50/50 dark:bg-purple-900/[0.05] p-5 sm:p-6 space-y-2">
             <p className="text-sm font-semibold text-foreground/85">
               The open-source advantage
             </p>

@@ -2,7 +2,7 @@
 
 /**
  * ResultCard Component — Clean, restrained source card
- * Features: Subtle border styling, proper mobile spacing,
+ * Features: Frameless card with ambient shadow, proper mobile spacing,
  * smooth hover transitions, favicon with fallback
  * Responsive: Tighter padding on mobile, fluid text sizes
  */
@@ -63,7 +63,7 @@ export default memo(function ResultCard({ result, index = 0 }: { result: SearchR
       }}
       whileHover={{ y: -2, transition: { duration: 0.15, ease: 'easeOut' } }}
       whileTap={{ scale: 0.98 }}
-      className="block p-4 rounded-2xl group relative overflow-hidden border border-foreground/[0.04] transition-[border-color,background-color,box-shadow] duration-200 hover:border-foreground/[0.10] hover:bg-foreground/[0.02] hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] focus-visible:border-foreground/[0.14] focus-visible:bg-foreground/[0.02] focus-visible:shadow-[0_4px_24px_rgba(0,0,0,0.08)] sm:p-5 md:p-6"
+      className="block p-4 rounded-2xl group relative overflow-hidden transition-[background-color,box-shadow] duration-200 hover:bg-foreground/[0.04] hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] focus-visible:bg-foreground/[0.04] focus-visible:bg-foreground/[0.02] focus-visible:shadow-[0_4px_24px_rgba(0,0,0,0.08)] sm:p-5 md:p-6"
     >
        <div className="relative z-10 space-y-1.5 sm:space-y-2.5">
           {/* Source */}

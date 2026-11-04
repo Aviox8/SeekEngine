@@ -263,7 +263,7 @@ export default function ResultsClient() {
             
           {/* LEFT COLUMN: Synthesis — sticky on desktop */}
           <div className="w-full min-w-0 lg:w-[63%] animate-fade-in-up lg:sticky lg:top-24 lg:self-start">
-            <div className="relative overflow-hidden rounded-xl p-4 group border border-foreground/[0.06] bg-foreground/[0.01] sm:rounded-2xl sm:p-6 md:p-8">
+            <div className="relative overflow-hidden rounded-xl p-4 group bg-foreground/[0.02] sm:rounded-2xl sm:p-6 md:p-8">
                
               {/* Top accent line with gradient */}
               <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
@@ -378,7 +378,7 @@ export default function ResultsClient() {
                         style={{ caretColor: 'hsl(var(--primary))' }}
                       />
                       <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:right-2">
-                        <kbd className="hidden sm:inline-flex items-center justify-center px-2 py-1 text-[10px] sm:text-[11px] font-semibold rounded border border-border/50 text-muted-foreground/40 bg-muted/30">/</kbd>
+                        <kbd className="hidden sm:inline-flex items-center justify-center px-2 py-1 text-[10px] sm:text-[11px] font-semibold rounded bg-foreground/[0.04] text-muted-foreground/40 bg-muted/30">/</kbd>
                         <motion.button 
                           type="button"
                           onClick={handleFollowUp}
@@ -427,8 +427,8 @@ export default function ResultsClient() {
                     aria-pressed={timeFilter === opt.value}
                     className={`relative shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium transition-[color,background-color,border-color] duration-200 border whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 ${
                       timeFilter === opt.value
-                        ? 'bg-foreground text-background border-foreground shadow-sm'
-                        : 'border-foreground/[0.06] text-muted-foreground hover:border-foreground/15 hover:text-foreground'
+                        ? 'bg-foreground text-background shadow-sm'
+                        : 'bg-foreground/[0.04] text-muted-foreground hover:bg-foreground/[0.07] hover:text-foreground'
                     }`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -446,7 +446,7 @@ export default function ResultsClient() {
               {resultsLoading ? (
                 Array.from({ length: 4 }).map((_, i) => <ResultCardSkeleton key={i} />)
               ) : resultsError ? (
-                <div className="p-4 text-center rounded-xl border border-dashed border-destructive/30 sm:p-6">
+                <div className="p-4 text-center rounded-xl bg-destructive/[0.04] sm:p-6">
                   <div className="flex justify-center mb-2 sm:mb-3">
                     <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
                       <svg className="w-5 h-5 text-destructive/60 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -471,7 +471,7 @@ export default function ResultsClient() {
                   <ResultCard key={result.link} result={result} index={index} />
                 ))
               ) : (
-                <div className="p-4 text-center rounded-xl border border-dashed border-foreground/10 sm:p-6">
+                <div className="p-4 text-center rounded-xl bg-foreground/[0.03] sm:p-6">
                   <div className="flex justify-center mb-2 sm:mb-3">
                     <div className="w-10 h-10 rounded-full bg-foreground/5 flex items-center justify-center">
                       <svg className="w-5 h-5 text-muted-foreground/30 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

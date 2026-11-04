@@ -27,7 +27,7 @@ function ResultsFallback() {
           {Array.from({ length: 4 }).map((_, index) => (
             <div
               key={index}
-              className="rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 space-y-3"
+              className="rounded-lg bg-zinc-200/60 dark:bg-zinc-800/60 p-4 space-y-3"
             >
               <div className="h-4 w-3/4 rounded bg-zinc-200 dark:bg-zinc-800" />
               <div className="h-4 w-full rounded bg-zinc-200 dark:bg-zinc-800" />

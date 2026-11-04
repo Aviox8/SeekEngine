@@ -42,7 +42,7 @@ export default function TosContent() {
       toc={TOC}
       lastUpdated="2026-01-15"
       tldr={
-        <div className="rounded-2xl border border-blue-200/60 dark:border-blue-800/40 bg-blue-50/60 dark:bg-blue-900/[0.07] p-5 sm:p-6 space-y-5">
+        <div className="rounded-2xl bg-blue-50/60 dark:bg-blue-900/[0.07] p-5 sm:p-6 space-y-5">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-700 dark:text-blue-300 mb-2">
               The short version

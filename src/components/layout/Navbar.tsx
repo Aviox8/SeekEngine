@@ -262,7 +262,7 @@ export default function Navbar() {
                 aria-label="Show keyboard shortcuts"
                 whileTap={{ scale: 0.9 }}
               >
-                <kbd className="text-[11px] font-medium text-foreground/50 px-1.5 py-0.5 rounded border border-foreground/[0.08]">?</kbd>
+                <kbd className="text-[11px] font-medium text-foreground/50 px-1.5 py-0.5 rounded bg-foreground/[0.04]">?</kbd>
               </motion.button>
 
               {/* Theme toggle — smooth rotation */}
