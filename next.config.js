@@ -50,7 +50,8 @@ const nextConfig = {
             value: [
               "default-src 'self'",
               // Next.js App Router uses inline bootstrap scripts — nonce-based strict CSP is not configured yet
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              // 'unsafe-eval' is only needed for the dev server (React refresh); production does not get it
+              `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://www.google.com",
               "font-src 'self' data:",
@@ -69,10 +70,14 @@ const nextConfig = {
 
 // ─── Build-time environment validation ───
 // Only enforce on CI/production (Vercel sets VERCEL=1)
-// Either a single key or the comma/newline-separated pool is sufficient.
-const hasOpenRouterKey =
-  !!process.env.OPENROUTER_API_KEY || !!process.env.OPENROUTER_API_KEYS
-const missing = hasOpenRouterKey ? [] : ['OPENROUTER_API_KEY (or OPENROUTER_API_KEYS)']
+// Any single LLM provider is sufficient: OpenRouter (single key or pool),
+// Ollama Cloud, or Exa. Search falls back SerpAPI → Google CSE → Exa → DuckDuckGo.
+const hasAnswerProvider =
+  !!process.env.OPENROUTER_API_KEY ||
+  !!process.env.OPENROUTER_API_KEYS ||
+  !!process.env.OLLAMA_API_KEY ||
+  !!process.env.EXA_API_KEY
+const missing = hasAnswerProvider ? [] : ['OPENROUTER_API_KEY (or OPENROUTER_API_KEYS, or OLLAMA_API_KEY, or EXA_API_KEY)']
 if (missing.length > 0 && process.env.VERCEL === '1') {
   throw new Error(`❌ Missing required env vars: ${missing.join(', ')}`)
 } else if (missing.length > 0) {
