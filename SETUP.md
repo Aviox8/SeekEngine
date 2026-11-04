@@ -104,10 +104,10 @@ seekengine/
 - **Time filters:** past hour / day / week / month / year
 
 ### ✅ AI & Search Integration
-- **Model racing:** OpenRouter free models race per query; first token wins
+- **Free-model router:** answers stream from `openrouter/free` (override with `OPENROUTER_MODEL`); OpenRouter routes each request to a suitable free model
 - **Semantic caching:** normalized queries return cached answers instantly
 - **Key pool:** multiple `OPENROUTER_API_KEYS` with automatic cooldown rotation
-- **Provider fallback:** SerpAPI → Google Custom Search with result dedupe
+- **Provider failover:** answers OpenRouter → Ollama Cloud → Exa Answer → local synthesis; search SerpAPI → Google CSE → Exa → DuckDuckGo (keyless). Result dedupe at every step
 
 ### ✅ Technical Standards
 - Server components by default, client components only where needed
@@ -145,7 +145,7 @@ node scripts/generate-og-image.mjs
 ## Performance Notes
 
 - Search results: <500ms via direct provider calls (15s result cache)
-- AI answer: first token typically <2-3s (model racing + streaming)
+- AI answer: first token typically <2-3s (router + streaming); cached answers ~0ms
 - Suggestions: <1s, cached 10 minutes per edge instance
 - Cache hits: ~50ms
 
@@ -185,7 +185,7 @@ npm start
 
 - ✅ All provider calls are server-side only; keys never reach the browser
 - ✅ No `NEXT_PUBLIC_` prefix on secret variables
-- ✅ Queries validated (UTF-8, length) and sanitized before provider calls
+- ✅ Queries validated (length, charset) and sanitized before provider calls
 - ✅ Per-IP rate limits on every API route
 - ✅ User queries are not logged beyond truncated debug previews
 
