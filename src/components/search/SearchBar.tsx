@@ -209,7 +209,7 @@ export default memo(function SearchBar({
                 aria-expanded={showSuggestionsList}
                 aria-controls="search-suggestions-listbox"
                 aria-activedescendant={selectedIndex >= 0 ? `search-suggestion-${selectedIndex}` : undefined}
-                className="w-full bg-transparent border-none outline-none text-base font-normal tracking-normal text-foreground placeholder:text-muted-foreground/35 resize-none p-0 min-h-[44px] max-h-[160px] leading-normal"
+                className="w-full bg-transparent border-none text-base font-normal tracking-normal text-foreground placeholder:text-muted-foreground/35 resize-none p-0 min-h-[44px] max-h-[160px] leading-normal"
                 style={{ caretColor: 'hsl(var(--primary))' }}
                 spellCheck={false}
                 autoComplete="off"
@@ -352,7 +352,7 @@ export default memo(function SearchBar({
                 ))}
                 
                 <div className="px-4 py-2 border-t border-foreground/[0.05] flex justify-between items-center">
-                  <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/30">{suggestions.length > 10 ? `${suggestions.length} results` : 'suggestions'}</span>
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/30">{suggestions.length > 10 ? `${suggestions.length} results` : '\u2191\u2193 to navigate'}</span>
                   <div className="flex items-center gap-1.5">
                     <kbd className="px-1.5 py-0.5 text-[10px] rounded border border-foreground/10 text-muted-foreground/30 bg-foreground/[0.02]">↵</kbd>
                   </div>

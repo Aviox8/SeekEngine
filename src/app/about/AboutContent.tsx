@@ -149,9 +149,6 @@ export default function AboutContent() {
           className="mb-20 sm:mb-24"
         >
           <div className="mb-8 sm:mb-10">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground/35 mb-2">
-              What it does
-            </p>
             <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
               Three things, done deliberately.
             </h2>
@@ -190,9 +187,6 @@ export default function AboutContent() {
           className="mb-20 sm:mb-24"
         >
           <div className="mb-6">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground/35 mb-2">
-              The motivation
-            </p>
             <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
               Hallucination is a coordination problem.
             </h2>
@@ -216,9 +210,6 @@ export default function AboutContent() {
           className="mb-20 sm:mb-24"
         >
           <div className="mb-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground/35 mb-2">
-              The work
-            </p>
             <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
               The research journey
             </h2>
@@ -259,9 +250,6 @@ export default function AboutContent() {
           className="mb-20 sm:mb-24"
         >
           <div className="mb-6">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground/35 mb-2">
-              How it&apos;s built
-            </p>
             <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
               The architecture, in one table.
             </h2>
@@ -292,9 +280,6 @@ export default function AboutContent() {
           className="mb-20 sm:mb-24"
         >
           <div className="mb-6">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground/35 mb-2">
-              Honesty
-            </p>
             <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
               What this is not, and what it can&apos;t do.
             </h2>
@@ -356,7 +341,7 @@ export default function AboutContent() {
                 <p className="text-sm">
                   <a
                     href="mailto:gauravramyadav@gmail.com"
-                    className="text-foreground/65 hover:text-foreground underline underline-offset-4 decoration-foreground/15 hover:decoration-foreground/30 transition-colors font-medium"
+                    className="text-foreground/65 hover:text-foreground focus-visible:text-foreground underline underline-offset-4 decoration-foreground/15 hover:decoration-foreground/30 transition-colors font-medium"
                   >
                     gauravramyadav@gmail.com
                   </a>
@@ -369,19 +354,19 @@ export default function AboutContent() {
                 Elsewhere
               </p>
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                <Link href="https://github.com/archduke1337/SeekEngine" target="_blank" className="text-foreground/55 hover:text-foreground transition-colors">
+                <Link href="https://github.com/archduke1337/SeekEngine" target="_blank" className="text-foreground/55 hover:text-foreground focus-visible:text-foreground transition-colors">
                   GitHub →
                 </Link>
-                <Link href="https://archduke.is-a.dev/research/seekengine" target="_blank" className="text-foreground/55 hover:text-foreground transition-colors">
+                <Link href="https://archduke.is-a.dev/research/seekengine" target="_blank" className="text-foreground/55 hover:text-foreground focus-visible:text-foreground transition-colors">
                   Research paper →
                 </Link>
-                <Link href="https://archduke.is-a.dev" target="_blank" className="text-foreground/55 hover:text-foreground transition-colors">
+                <Link href="https://archduke.is-a.dev" target="_blank" className="text-foreground/55 hover:text-foreground focus-visible:text-foreground transition-colors">
                   Portfolio →
                 </Link>
-                <Link href="/tos" className="text-foreground/55 hover:text-foreground transition-colors">
+                <Link href="/tos" className="text-foreground/55 hover:text-foreground focus-visible:text-foreground transition-colors">
                   Terms →
                 </Link>
-                <Link href="/privacy" className="text-foreground/55 hover:text-foreground transition-colors">
+                <Link href="/privacy" className="text-foreground/55 hover:text-foreground focus-visible:text-foreground transition-colors">
                   Privacy →
                 </Link>
               </div>

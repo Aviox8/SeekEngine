@@ -68,9 +68,9 @@ export default function ResultsFooter() {
               alt="SeekEngine"
               width={14}
               height={14}
-              className="opacity-30 group-hover:opacity-60 transition-opacity duration-300"
+              className="opacity-30 group-hover:opacity-60 group-focus-visible:opacity-60 transition-opacity duration-300"
             />
-            <span className="font-display text-xs tracking-tight text-muted-foreground/40 group-hover:text-muted-foreground/60 transition-colors duration-300">
+            <span className="font-display text-xs tracking-tight text-muted-foreground/40 group-hover:text-muted-foreground/60 group-focus-visible:text-muted-foreground/60 transition-colors duration-300">
               SeekEngine
             </span>
           </Link>
@@ -89,7 +89,7 @@ export default function ResultsFooter() {
                 href={link.href}
                 target={link.external ? '_blank' : undefined}
                 rel={link.external ? 'noopener noreferrer' : undefined}
-                className="text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground/50 transition-colors duration-200 hover:text-foreground/80"
+                className="text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground/50 transition-colors duration-200 hover:text-foreground/80 focus-visible:text-foreground/80"
               >
                 {link.label}
               </Link>

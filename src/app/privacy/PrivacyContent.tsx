@@ -99,21 +99,21 @@ export default function PrivacyContent() {
               The open-source advantage
             </p>
             <p className="text-prose-tight">
-              With SeekEngine, you are not trusting a company&apos;s privacy promises — you can audit the code yourself. Run it on your own hardware. Modify it. That is the entire point of open source. Your data, your rules.
+              You do not have to trust a company&apos;s privacy promises. You can audit the code yourself, run it on your own hardware, and modify it. That is the entire point of open source. Your data, your rules.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[12px] text-foreground/55">
             <span>Related:</span>
-            <Link href="/tos" className="text-purple-600 dark:text-purple-400 hover:underline font-medium">
+            <Link href="/tos" className="text-purple-600 dark:text-purple-400 hover:underline focus-visible:underline font-medium">
               Terms of service
             </Link>
             <span className="text-foreground/25">·</span>
-            <Link href="https://github.com/archduke1337/SeekEngine" target="_blank" className="text-purple-600 dark:text-purple-400 hover:underline font-medium">
+            <Link href="https://github.com/archduke1337/SeekEngine" target="_blank" className="text-purple-600 dark:text-purple-400 hover:underline focus-visible:underline font-medium">
               GitHub repository
             </Link>
             <span className="text-foreground/25">·</span>
-            <Link href="/about" className="text-purple-600 dark:text-purple-400 hover:underline font-medium">
+            <Link href="/about" className="text-purple-600 dark:text-purple-400 hover:underline focus-visible:underline font-medium">
               About the project
             </Link>
           </div>
@@ -156,10 +156,10 @@ export default function PrivacyContent() {
         </p>
         <ul className="space-y-2 mt-3">
           <li className="pl-4 border-l-2 border-purple-500/30">
-            <span className="font-semibold text-foreground/85">Google Custom Search</span> — receives your search query to retrieve sources.
+            <span className="font-semibold text-foreground/85">Google Custom Search</span>: receives your search query, used to retrieve sources.
           </li>
           <li className="pl-4 border-l-2 border-purple-500/30">
-            <span className="font-semibold text-foreground/85">OpenRouter</span> — receives the retrieved context to synthesize an answer.
+            <span className="font-semibold text-foreground/85">OpenRouter</span>: receives the retrieved context, used to synthesize an answer.
           </li>
         </ul>
         <p className="mt-3">
@@ -184,7 +184,7 @@ export default function PrivacyContent() {
 
       <LegalSection id="regulations" index={7} total={TOC.length} tone="purple" title="GDPR and privacy regulations" summary="Minimal data collection = minimal compliance burden.">
         <p>
-          We operate under the principle that minimal data collection means minimal compliance burden. We do not build profiles, so GDPR&apos;s &ldquo;right to be forgotten&rdquo; is straightforward — there is nothing to forget. For EU residents: we comply with data-protection principles by design. If you use SeekEngine, you are in control of your data.
+          We operate under the principle that minimal data collection means minimal compliance burden. We do not build profiles, so GDPR&apos;s &ldquo;right to be forgotten&rdquo; is straightforward: there is nothing to forget. For EU residents, we comply with data-protection principles by design. If you use SeekEngine, you are in control of your data.
         </p>
       </LegalSection>
 
@@ -211,7 +211,7 @@ export default function PrivacyContent() {
           Questions about privacy? Open an issue on GitHub. Want to audit the code? It is all there. Want to see what data we collect? Check the server logs in the implementation. Transparency is built in. We have nothing to hide because the project itself is auditable.
         </p>
         <p>
-          Abuse reports on the public demo: <a href="mailto:gauravramyadav@gmail.com" className="text-purple-600 dark:text-purple-400 hover:underline font-medium">gauravramyadav@gmail.com</a>.
+          Abuse reports on the public demo: <a href="mailto:gauravramyadav@gmail.com" className="text-purple-600 dark:text-purple-400 hover:underline focus-visible:underline font-medium">gauravramyadav@gmail.com</a>.
         </p>
       </LegalSection>
     </LegalPageShell>
