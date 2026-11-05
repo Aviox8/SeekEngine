@@ -230,6 +230,10 @@ export async function getModelsByTier(): Promise<Record<ModelTier, string[]>> {
       signal: controller.signal,
     })
 
+    if (!res.ok) {
+      throw new Error(`Models fetch failed: HTTP ${res.status}`)
+    }
+
     clearTimeout(timeoutId)
 
     if (!res.ok) throw new Error(`Models fetch failed: ${res.status}`)
