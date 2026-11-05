@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 
 const SHORTCUT_GROUPS = [
   {
@@ -42,12 +41,20 @@ export default function KeyboardShortcuts() {
     dialogRef.current?.close()
   }, [])
 
+  // Close on backdrop click (clicking directly on the dialog backdrop, not the inner content)
+  const handleBackdropClick = useCallback((e: MouseEvent) => {
+    if (e.target === dialogRef.current) {
+      dialogRef.current?.close()
+    }
+  }, [])
+
   return (
     <>
       <dialog
         ref={dialogRef}
-        className="fixed inset-0 z-[200] flex items-center justify-center px-4 pointer-events-none"
+        className="fixed inset-0 z-[200] flex items-center justify-center px-4"
         onClose={handleClose}
+        onClick={handleBackdropClick}
       >
         <div className="pointer-events-auto w-full max-w-sm rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl overflow-hidden">
           {/* Header */}
@@ -97,15 +104,15 @@ export default function KeyboardShortcuts() {
                     </div>
                   ))}
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          {/* Footer */}
-          <div className="px-6 py-3 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30">
-            <p className="text-[11px] text-zinc-400 text-center">
-              Press <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-white dark:bg-zinc-800 rounded">?</kbd> anywhere to toggle
-            </p>
+            {/* Footer */}
+            <div className="px-6 py-3 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30">
+              <p className="text-[11px] text-zinc-400 text-center">
+                Press <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-white dark:bg-zinc-800 rounded">?</kbd> anywhere to toggle
+              </p>
+            </div>
           </div>
         </div>
       </dialog>
