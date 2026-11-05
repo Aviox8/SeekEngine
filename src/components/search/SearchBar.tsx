@@ -46,6 +46,7 @@ export default memo(function SearchBar({
   }), [])
 
   const [isFocused, setIsFocused] = useState(false)
+  const [removingQuery, setRemovingQuery] = useState<string | null>(null)
   const isCommand = query.startsWith('/')
   const isTyping = query.length > 0
 
@@ -399,14 +400,28 @@ export default memo(function SearchBar({
                       <Clock className="w-3.5 h-3.5 shrink-0 text-muted-foreground/20 group-hover:text-muted-foreground/40 transition-colors duration-150" aria-hidden="true" />
                       <span className="flex-1 truncate text-foreground/60 group-hover:text-foreground/80 transition-colors duration-150">{entry.query}</span>
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => removeEntry(entry.query)}
-                      aria-label={`Remove ${entry.query} from history`}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-2 rounded-md transition-[opacity,color,background-color] duration-150 text-muted-foreground/25 hover:text-destructive hover:bg-destructive/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
-                    >
-                      <X className="w-3 h-3" aria-hidden="true" />
-                    </button>
+                    {removingQuery === entry.query ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          removeEntry(entry.query)
+                          setRemovingQuery(null)
+                        }}
+                        aria-label={`Remove ${entry.query} from history`}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-md transition-[opacity,color,background-color] duration-150 text-destructive hover:bg-destructive/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
+                      >
+                        <X className="w-3 h-3" aria-hidden="true" />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setRemovingQuery(entry.query)}
+                        aria-label={`Remove ${entry.query} from history`}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-2 rounded-md transition-[opacity,color,background-color] duration-150 text-muted-foreground/25 hover:text-destructive hover:bg-destructive/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
+                      >
+                        <X className="w-3 h-3" aria-hidden="true" />
+                      </button>
+                    )}
                   </motion.div>
                 ))}
               </div>
