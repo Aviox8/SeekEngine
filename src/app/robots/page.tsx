@@ -62,10 +62,10 @@ Sitemap: https://seekengine.vercel.app/sitemap.xml</pre>
 <p>Every page declares its own crawl behavior through <code>&lt;meta name="robots"&gt;</code>:</p>
 <pre className="overflow-x-auto rounded-xl bg-foreground/[0.04] p-4 font-mono text-[11px] leading-relaxed text-foreground/80">&lt;meta name="robots" content="index, follow, 'max-snippet':-1, 'max-image-preview':large" /&gt;</pre>
 <ul className="list-disc space-y-1 pl-5">
-  <li><code>index</code> — the page may appear in search results</li>
-  <li><code>follow</code> — links on the page may be followed by crawlers</li>
-  <li><code>'max-snippet':-1</code> — no limit on snippet length</li>
-  <li><code>'max-image-preview':large</code> — large image previews allowed</li>
+  <li><code>index</code>. the page may appear in search results</li>
+  <li><code>follow</code>. links on the page may be followed by crawlers</li>
+  <li><code>'max-snippet':-1</code>. no limit on snippet length</li>
+  <li><code>'max-image-preview':large</code>. large image previews allowed</li>
 </ul>
 <p>API routes and internal paths are not indexed; they are excluded at the <code>/robots.txt</code> level and return JSON rather than HTML.</p>
 `
@@ -77,16 +77,16 @@ Sitemap: https://seekengine.vercel.app/sitemap.xml</pre>
     content: `
 <p><code>/sitemap.xml</code> is generated at build time and registered in <code>/robots.txt</code>. It covers:</p>
 <ul className="list-disc space-y-1 pl-5">
-  <li><code>/</code> — homepage</li>
-  <li><code>/results</code> — search results page</li>
-  <li><code>/about</code> — about / how it works</li>
-  <li><code>/docs</code> — documentation</li>
-  <li><code>/api</code> — API reference</li>
-  <li><code>/developer</code> — developer information</li>
-  <li><code>/legal</code> — legal index</li>
-  <li><code>/compliance</code> — data &amp; compliance</li>
-  <li><code>/privacy</code> — privacy policy</li>
-  <li><code>/tos</code> — terms of service</li>
+  <li><code>/</code>. homepage</li>
+  <li><code>/results</code>. search results page</li>
+  <li><code>/about</code>. about / how it works</li>
+  <li><code>/docs</code>. documentation</li>
+  <li><code>/api</code>. API reference</li>
+  <li><code>/developer</code>. developer information</li>
+  <li><code>/legal</code>. legal index</li>
+  <li><code>/compliance</code>. data &amp; compliance</li>
+  <li><code>/privacy</code>. privacy policy</li>
+  <li><code>/tos</code>. terms of service</li>
 </ul>
 `
   },
