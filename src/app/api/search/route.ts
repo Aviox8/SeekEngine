@@ -36,7 +36,7 @@ export async function GET(request: Request) {
   try {
     // Rate limiting
     const ip = getClientIP(request)
-    const rl = checkRateLimit(`search:${ip}`, RATE_LIMITS.search)
+    const rl = await checkRateLimit(`search:${ip}`, RATE_LIMITS.search)
     if (!rl.allowed) {
       logger.warn('Rate limit exceeded', { endpoint: '/api/search', ip })
       return rateLimitResponse(rl)

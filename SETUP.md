@@ -192,7 +192,7 @@ npm start
 ## Support & Customization
 
 - **Analytics:** Vercel Analytics and Speed Insights are already integrated
-- **Persistent caching:** swap `semantic-cache.ts`/`rate-limit.ts` Maps for Upstash Redis (the interfaces are drop-in)
+- **Persistent caching:** shared Redis is wired via `src/lib/redis.ts` — set `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` (primary) and optionally `LAYERBASE_REDIS_REST_URL`/`LAYERBASE_REDIS_REST_TOKEN` (fallback, kept warm every 10 min by `.github/workflows/redis-warm.yml`)
 - **Styling:** design tokens live in `src/globals.css` and `tailwind.config.js`
 
 ---

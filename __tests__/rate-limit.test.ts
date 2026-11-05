@@ -10,28 +10,28 @@ function setNodeEnv(value: string) {
 }
 
 describe('checkRateLimit', () => {
-  it('allows requests under the limit', () => {
+  it('allows requests under the limit', async () => {
     const key = `test-allow-${Date.now()}`
-    expect(checkRateLimit(key, config).allowed).toBe(true)
-    expect(checkRateLimit(key, config).allowed).toBe(true)
-    expect(checkRateLimit(key, config).allowed).toBe(true)
+    expect((await checkRateLimit(key, config)).allowed).toBe(true)
+    expect((await checkRateLimit(key, config)).allowed).toBe(true)
+    expect((await checkRateLimit(key, config)).allowed).toBe(true)
   })
 
-  it('blocks requests over the limit', () => {
+  it('blocks requests over the limit', async () => {
     const key = `test-block-${Date.now()}`
-    checkRateLimit(key, config)
-    checkRateLimit(key, config)
-    checkRateLimit(key, config)
-    const result = checkRateLimit(key, config)
+    await checkRateLimit(key, config)
+    await checkRateLimit(key, config)
+    await checkRateLimit(key, config)
+    const result = await checkRateLimit(key, config)
     expect(result.allowed).toBe(false)
     expect(result.remaining).toBe(0)
   })
 
-  it('returns correct remaining count', () => {
+  it('returns correct remaining count', async () => {
     const key = `test-remaining-${Date.now()}`
-    const r1 = checkRateLimit(key, config)
+    const r1 = await checkRateLimit(key, config)
     expect(r1.remaining).toBe(2)
-    const r2 = checkRateLimit(key, config)
+    const r2 = await checkRateLimit(key, config)
     expect(r2.remaining).toBe(1)
   })
 })
