@@ -32,7 +32,7 @@ export default function ResultsFooter() {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col items-center gap-2"
           >
-            <span className="text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.3em] text-muted-foreground/45 sm:tracking-[0.4em]">
+            <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground/45 sm:tracking-[0.4em]">
               Good {timeOfDay}
             </span>
             <span className="text-center text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground/40 sm:tracking-[0.2em]">
