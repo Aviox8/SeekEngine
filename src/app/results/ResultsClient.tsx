@@ -11,6 +11,8 @@ import { useSearchHistory } from '../../hooks/useSearchHistory'
 import { motion, AnimatePresence } from 'framer-motion'
 import LivingIcon from '../../components/shared/LivingIcon'
 import ResultsFooter from '../../components/footer/ResultsFooter'
+import OsintCard from '../../components/search/OsintCard'
+import type { OsintResult } from '../../components/search/OsintCard'
 
 // CRITICAL FIX: Add response validation to prevent type errors from API changes
 function validateSearchResponse(data: unknown): SearchResult[] {
@@ -65,6 +67,10 @@ export default function ResultsClient() {
 
   const [followUpQuery, setFollowUpQuery] = useState('')
   const [groundedQuery, setGroundedQuery] = useState(query)
+  const [osintData, setOsintData] = useState<OsintResult | null>(null)
+  const [osintLoading, setOsintLoading] = useState(false)
+  const [osintError, setOsintError] = useState<string | null>(null)
+  const [osintTarget, setOsintTarget] = useState<string | null>(null)
   const followUpInputRef = useRef<HTMLInputElement>(null)
   const aiCardRef = useRef<HTMLDivElement>(null)
   const searchAbortRef = useRef<AbortController | null>(null)
@@ -176,6 +182,24 @@ export default function ResultsClient() {
     setAiAnswer('')
     setGroundedQuery(trimmed)
     aiCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const fetchOsint = async (target: string) => {
+    setOsintTarget(target)
+    setOsintLoading(true)
+    setOsintError(null)
+    try {
+      const response = await fetch(`/api/ai/osint?q=${encodeURIComponent(target)}`)
+      if (!response.ok) {
+        throw new Error(`OSINT lookup failed: HTTP ${response.status}`)
+      }
+      const data = await response.json()
+      setOsintData(data)
+    } catch (err) {
+      setOsintError(err instanceof Error ? err.message : 'OSINT lookup failed')
+    } finally {
+      setOsintLoading(false)
+    }
   }
 
   const copyTextToClipboard = async (text: string): Promise<boolean> => {
@@ -342,6 +366,16 @@ export default function ResultsClient() {
                 />
               )}
 
+              {/* OSINT Card — Open Source Intelligence for the main query domain */}
+              {osintTarget && (
+                <div className="mt-6">
+                  <OsintCard
+                    target={osintTarget}
+                    type={osintTarget.includes('.') && !osintTarget.includes(':') ? 'domain' : 'ip'}
+                  />
+                </div>
+              )}
+
               {/* Suggestion chips — show when answer is complete */}
               <AnimatePresence>
                 {aiAnswer && !followUpQuery && (
@@ -495,9 +529,9 @@ export default function ResultsClient() {
                   </motion.button>
                 </div>
               ) : results.length > 0 ? (
-                results.map((result, index) => (
-                  <ResultCard key={result.link} result={result} index={index} />
-                ))
+                  results.map((result, index) => (
+                    <ResultCard key={result.link} result={result} index={index} onOsintClick={(hostname) => setOsintTarget(hostname)} />
+                  ))
               ) : (
                 <div className="p-4 text-center rounded-xl bg-foreground/[0.03] sm:p-6">
                   <div className="flex justify-center mb-2 sm:mb-3">
