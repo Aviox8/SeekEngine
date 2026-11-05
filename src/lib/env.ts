@@ -115,7 +115,7 @@ export const hasGoogleSearch = () => !!ENV.GOOGLE_SEARCH_API_KEY && !!ENV.GOOGLE
 export const hasSerpAPI = () => !!ENV.SERPAPI_KEY
 
 export const OLLAMA_BASE_URL = (process.env.OLLAMA_BASE_URL || 'https://ollama.com/v1').replace(/\/+$/, '')
-export const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'gemma4:31b'
+export const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'beam:cloud'
 export const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'openrouter/free'
 export const EXA_ANSWER_MODEL = process.env.EXA_ANSWER_MODEL || 'exa-fast'
 

@@ -22,7 +22,7 @@ cp .env.example .env.local
 - `OPENROUTER_API_KEY` - Get free key from [OpenRouter](https://openrouter.ai) (uses the `openrouter/free` router by default)
 
 **Optional**:
-- `OLLAMA_API_KEY` - [Ollama Cloud](https://ollama.com) key (answer provider #2)
+- `OLLAMA_API_KEY` - [Ollama Cloud](https://ollama.com) key (answer provider #2, default model `beam:cloud` — Reflection's Beam, zero data retention, free on Ollama Cloud for a limited time)
 - `EXA_API_KEY` - [Exa](https://exa.ai) key (search provider, and answer provider #3 when LLMs are down)
 - `SERPAPI_KEY` - For real-time Google search
 - `GOOGLE_SEARCH_API_KEY` + `GOOGLE_SEARCH_CX` - Alternative search provider
