@@ -78,6 +78,7 @@ const Response = React.forwardRef<HTMLDivElement, ResponseProps>(
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
           className="prose prose-zinc dark:prose-invert max-w-none break-words"
+          aria-live="polite"
         >
           <ReactMarkdown 
             components={markdownComponents}
