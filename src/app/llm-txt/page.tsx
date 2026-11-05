@@ -1,8 +1,39 @@
 import type { Metadata } from 'next'
+import { SITE_URL } from '../../lib/site'
 
 export const metadata: Metadata = {
   title: 'llms.txt | SeekEngine',
   description: 'Machine-readable site summary for AI crawlers and answer engines.',
+  alternates: {
+    canonical: '/llm-txt',
+  },
+  openGraph: {
+    title: 'llms.txt | SeekEngine',
+    description: 'Machine-readable site summary for AI crawlers and answer engines.',
+    url: 'https://seekengine.vercel.app/llm-txt',
+    siteName: 'SeekEngine',
+    type: 'website',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'SeekEngine - llms.txt',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'llms.txt | SeekEngine',
+    description: 'Machine-readable site summary for AI crawlers and answer engines.',
+    images: ['/og-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    'max-snippet': -1,
+    'max-image-preview': 'large',
+  },
 }
 
 const sections = [

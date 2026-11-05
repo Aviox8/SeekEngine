@@ -1,8 +1,39 @@
 import type { Metadata } from 'next'
+import { SITE_URL } from '../../lib/site'
 
 export const metadata: Metadata = {
   title: 'Robots.txt & Crawler Control | SeekEngine',
   description: 'SeekEngine robots.txt rules, meta robots directives, and how search engines crawl the site.',
+  alternates: {
+    canonical: '/robots',
+  },
+  openGraph: {
+    title: 'Robots.txt & Crawler Control | SeekEngine',
+    description: 'SeekEngine robots.txt rules, meta robots directives, and how search engines crawl the site.',
+    url: 'https://seekengine.vercel.app/robots',
+    siteName: 'SeekEngine',
+    type: 'website',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'SeekEngine - Robots.txt & Crawler Control',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Robots.txt & Crawler Control | SeekEngine',
+    description: 'SeekEngine robots.txt rules, meta robots directives, and how search engines crawl the site.',
+    images: ['/og-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    'max-snippet': -1,
+    'max-image-preview': 'large',
+  },
 }
 
 const sections = [
@@ -29,12 +60,12 @@ Sitemap: https://seekengine.vercel.app/sitemap.xml</pre>
     summary: 'Per-page indexing and following instructions served in HTML head.',
     content: `
 <p>Every page declares its own crawl behavior through <code>&lt;meta name="robots"&gt;</code>:</p>
-<pre className="overflow-x-auto rounded-xl bg-foreground/[0.04] p-4 font-mono text-[11px] leading-relaxed text-foreground/80">&lt;meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" /&gt;</pre>
+<pre className="overflow-x-auto rounded-xl bg-foreground/[0.04] p-4 font-mono text-[11px] leading-relaxed text-foreground/80">&lt;meta name="robots" content="index, follow, 'max-snippet':-1, 'max-image-preview':large" /&gt;</pre>
 <ul className="list-disc space-y-1 pl-5">
   <li><code>index</code> — the page may appear in search results</li>
   <li><code>follow</code> — links on the page may be followed by crawlers</li>
-  <li><code>max-snippet:-1</code> — no limit on snippet length</li>
-  <li><code>max-image-preview:large</code> — large image previews allowed</li>
+  <li><code>'max-snippet':-1</code> — no limit on snippet length</li>
+  <li><code>'max-image-preview':large</code> — large image previews allowed</li>
 </ul>
 <p>API routes and internal paths are not indexed; they are excluded at the <code>/robots.txt</code> level and return JSON rather than HTML.</p>
 `
