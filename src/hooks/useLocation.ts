@@ -39,6 +39,7 @@ function setCachedLocation(location: string) {
 
 export function useLocation() {
   const [location, setLocation] = useState<string>('your world')
+  const [locationError, setLocationError] = useState<string | null>(null)
   // FIX: Don't render time-based greeting until mounted to prevent hydration mismatch
   const [timeOfDay, setTimeOfDay] = useState<string>('')
   const fetchedRef = useRef(false)
@@ -82,7 +83,8 @@ export function useLocation() {
           setCachedLocation(loc)
         }
       } catch {
-        // Expected if aborted or network error - silently fail
+        // Expected if aborted or network error
+        setLocationError('Location unavailable')
       } finally {
         clearTimeout(timeoutId)
       }
@@ -96,5 +98,5 @@ export function useLocation() {
     }
   }, [])
 
-  return { location, timeOfDay }
+  return { location, timeOfDay, locationError }
 }
