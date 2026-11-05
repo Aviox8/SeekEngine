@@ -113,6 +113,11 @@ export async function callOpenRouter(
           }
         )
 
+        if (!response.ok) {
+          const bodyText = await response.text().catch(() => '')
+          throw new Error(`OpenRouter API error: HTTP ${response.status}${bodyText ? ` - ${bodyText}` : ''}`)
+        }
+
         clearTimeout(timeoutId)
         const latency = Date.now() - modelStartTime
 

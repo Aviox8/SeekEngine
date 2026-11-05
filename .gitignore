@@ -128,3 +128,5 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+# GitHub Wiki content (separate repo: archduke1337/SeekEngine.wiki.git)
+wiki-content/

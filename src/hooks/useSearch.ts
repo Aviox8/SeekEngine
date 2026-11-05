@@ -11,6 +11,7 @@ export interface SearchState {
   prediction: string
   isLoading: boolean
   isTyping: boolean
+  error: string | null
 }
 
 export function useSearch() {
@@ -20,6 +21,7 @@ export function useSearch() {
   const [prediction, setPrediction] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isTyping, setIsTyping] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const debouncedQuery = useDebounce(query, DEBOUNCE_MS)
   const abortControllerRef = useRef<AbortController | null>(null)
   const suggestionsCacheRef = useRef<Map<string, string[]>>(new Map())
@@ -88,6 +90,7 @@ export function useSearch() {
       if ((error as Error).name === 'AbortError') return // Expected cancellation
       const errorMsg = error instanceof Error ? error.message : 'Unknown error'
       console.error('Error fetching suggestions:', errorMsg)
+      setError(errorMsg)
       setSuggestions([])
       setPrediction('')
       // CRITICAL FIX: Clear ref to prevent accumulating abandoned AbortControllers
