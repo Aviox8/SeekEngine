@@ -17,21 +17,21 @@ export default function ResultsPage() {
 
 function ResultsFallback() {
   return (
-    <main className="min-h-screen bg-white dark:bg-black pt-20">
+    <main className="min-h-screen bg-background pt-20">
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
         <div className="space-y-4">
-          <div className="h-6 w-48 rounded bg-zinc-200 dark:bg-zinc-800" />
-          <div className="h-4 w-64 rounded bg-zinc-200 dark:bg-zinc-800" />
+          <div className="h-6 w-48 rounded bg-foreground/[0.04]" />
+          <div className="h-4 w-64 rounded bg-foreground/[0.04]" />
         </div>
         <div className="space-y-4">
           {Array.from({ length: 4 }).map((_, index) => (
             <div
               key={index}
-              className="rounded-lg bg-zinc-200/60 dark:bg-zinc-800/60 p-4 space-y-3"
+              className="rounded-2xl bg-foreground/[0.02] p-5 space-y-3"
             >
-              <div className="h-4 w-3/4 rounded bg-zinc-200 dark:bg-zinc-800" />
-              <div className="h-4 w-full rounded bg-zinc-200 dark:bg-zinc-800" />
-              <div className="h-4 w-5/6 rounded bg-zinc-200 dark:bg-zinc-800" />
+              <div className="h-4 w-3/4 rounded bg-foreground/[0.04]" />
+              <div className="h-4 w-full rounded bg-foreground/[0.04]" />
+              <div className="h-4 w-5/6 rounded bg-foreground/[0.04]" />
             </div>
           ))}
         </div>
