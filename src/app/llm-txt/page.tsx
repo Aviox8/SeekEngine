@@ -57,7 +57,7 @@ const sections = [
     summary: 'HTML pages AI agents can read and link to.',
     content: `
   <div className="overflow-x-auto">
-    <table className="w-full text-left border-collapse mb-4 text-[13px] sm:text-sm">
+    <table className="overflow-x-auto w-full text-left border-collapse mb-4 text-[13px] sm:text-sm">
       <thead>
         <tr className="sticky top-0 z-10 border-b border-foreground/[0.08] bg-background">
           <th className="pb-2 text-foreground/40 font-medium text-[11px] uppercase tracking-wide">Path</th>
@@ -124,7 +124,7 @@ const sections = [
     summary: 'Programmatic access to search and answer generation.',
     content: `
   <div className="overflow-x-auto">
-    <table className="w-full text-left border-collapse mb-4 text-[13px] sm:text-sm">
+    <table className="overflow-x-auto w-full text-left border-collapse mb-4 text-[13px] sm:text-sm">
       <thead>
         <tr className="sticky top-0 z-10 border-b border-foreground/[0.08] bg-background">
           <th className="pb-2 text-foreground/40 font-medium text-[11px] uppercase tracking-wide">Endpoint</th>
