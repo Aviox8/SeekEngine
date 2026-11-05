@@ -67,15 +67,8 @@ export async function* streamOllama(
 
     if (!response.ok || !response.body) {
       const status = response.status
-      logger.warn('Ollama Cloud request failed', { status, model })
-      if (status === 429) {
-        yield { type: 'error', error: 'Ollama Cloud rate limit reached' }
-      } else if (status === 401 || status === 403) {
-        yield { type: 'error', error: 'Ollama Cloud authentication failed. Check OLLAMA_API_KEY.' }
-      } else {
-        yield { type: 'error', error: `Ollama Cloud unavailable (HTTP ${status || 'unknown'})` }
-      }
-      return
+      const bodyText = await response.text().catch(() => '')
+      throw new Error(`Ollama API error: HTTP ${status}${bodyText ? ` - ${bodyText}` : ''}`)
     }
 
     const reader = response.body.getReader()
