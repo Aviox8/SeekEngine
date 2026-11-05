@@ -42,12 +42,12 @@ const sections = [
     title: 'About SeekEngine',
     summary: 'MIT-licensed AI search engine research project.',
     content: `
-<p>SeekEngine is an open source AI search engine research project. It fans out queries across multiple search providers in parallel, merges and deduplicates results, and synthesizes grounded answers with citations — all while keeping every source one click away.</p>
+<p>SeekEngine is an open source AI search engine research project. It fans out queries across multiple search providers in parallel, merges and deduplicates results, and synthesizes grounded answers with citations. all while keeping every source one click away.</p>
 <ul className="list-disc space-y-1 pl-5">
   <li>License: MIT</li>
   <li>Homepage: <code>https://seekengine.vercel.app</code></li>
   <li>Source: <code>https://github.com/archduke1337/SeekEngine</code></li>
-  <li>Maintainer: <a href="https://archduke.is-a.dev" className="underline underline-offset-2 hover:text-foreground">archduke.is-a.dev</a></li>
+  <li>Maintainer: <a href="https://archduke.is-a.dev" className="underline underline-offset-2 hover:text-foreground focus-visible:text-foreground">archduke.is-a.dev</a></li>
 </ul>
 `
   },
@@ -56,13 +56,14 @@ const sections = [
     title: 'Public pages',
     summary: 'HTML pages AI agents can read and link to.',
     content: `
-<table className="w-full text-left border-collapse mb-4 text-[13px] sm:text-sm">
-  <thead>
-    <tr className="border-b border-foreground/[0.08]">
-      <th className="pb-2 text-foreground/40 font-medium text-[11px] uppercase tracking-wide">Path</th>
-      <th className="pb-2 text-foreground/40 font-medium text-[11px] uppercase tracking-wide">Purpose</th>
-    </tr>
-  </thead>
+  <div className="overflow-x-auto">
+    <table className="w-full text-left border-collapse mb-4 text-[13px] sm:text-sm">
+      <thead>
+        <tr className="sticky top-0 z-10 border-b border-foreground/[0.08] bg-background">
+          <th className="pb-2 text-foreground/40 font-medium text-[11px] uppercase tracking-wide">Path</th>
+          <th className="pb-2 text-foreground/40 font-medium text-[11px] uppercase tracking-wide">Purpose</th>
+        </tr>
+      </thead>
   <tbody>
     <tr className="border-b border-foreground/[0.04]">
       <td className="py-2 font-mono text-[11px]">/</td>
@@ -114,21 +115,23 @@ const sections = [
     </tr>
   </tbody>
 </table>
-`
+  </div>
+  `
   },
   {
     id: 'api',
     title: 'API endpoints',
     summary: 'Programmatic access to search and answer generation.',
     content: `
-<table className="w-full text-left border-collapse mb-4 text-[13px] sm:text-sm">
-  <thead>
-    <tr className="border-b border-foreground/[0.08]">
-      <th className="pb-2 text-foreground/40 font-medium text-[11px] uppercase tracking-wide">Endpoint</th>
-      <th className="pb-2 text-foreground/40 font-medium text-[11px] uppercase tracking-wide">Method</th>
-      <th className="pb-2 text-foreground/40 font-medium text-[11px] uppercase tracking-wide">Purpose</th>
-    </tr>
-  </thead>
+  <div className="overflow-x-auto">
+    <table className="w-full text-left border-collapse mb-4 text-[13px] sm:text-sm">
+      <thead>
+        <tr className="sticky top-0 z-10 border-b border-foreground/[0.08] bg-background">
+          <th className="pb-2 text-foreground/40 font-medium text-[11px] uppercase tracking-wide">Endpoint</th>
+          <th className="pb-2 text-foreground/40 font-medium text-[11px] uppercase tracking-wide">Method</th>
+          <th className="pb-2 text-foreground/40 font-medium text-[11px] uppercase tracking-wide">Purpose</th>
+        </tr>
+      </thead>
   <tbody>
     <tr className="border-b border-foreground/[0.04]">
       <td className="py-2 font-mono text-[11px]">/api/search</td>
@@ -152,7 +155,8 @@ const sections = [
     </tr>
   </tbody>
 </table>
-`
+  </div>
+  `
   },
   {
     id: 'crawl',
@@ -160,9 +164,9 @@ const sections = [
     summary: 'robots.txt and sitemap for crawlers.',
     content: `
 <ul className="list-disc space-y-1 pl-5">
-  <li><code>/robots.txt</code> — crawler rules; allows public pages, disallows <code>/api/</code> and <code>/_next/</code></li>
-  <li><code>/sitemap.xml</code> — XML sitemap of all public pages</li>
-  <li><code>/robots</code> — HTML documentation of crawler control</li>
+  <li><code>/robots.txt</code>. crawler rules; allows public pages, disallows <code>/api/</code> and <code>/_next/</code></li>
+  <li><code>/sitemap.xml</code>. XML sitemap of all public pages</li>
+  <li><code>/robots</code>. HTML documentation of crawler control</li>
 </ul>
 `
   },
