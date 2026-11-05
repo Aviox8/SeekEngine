@@ -21,7 +21,7 @@ function getInitial(result: SearchResult, hostname: string): string {
   return source.charAt(0).toUpperCase()
 }
 
-export default memo(function ResultCard({ result, index = 0 }: { result: SearchResult; index?: number }) {
+export default memo(function ResultCard({ result, index = 0, onOsintClick }: { result: SearchResult; index?: number; onOsintClick?: (hostname: string) => void }) {
   const reduceMotion = useReducedMotion()
   const hostname = useMemo(() => getHostname(result.link, result.displayLink), [result.link, result.displayLink])
   const initial = useMemo(() => getInitial(result, hostname), [result, hostname])
@@ -60,6 +60,23 @@ export default memo(function ResultCard({ result, index = 0 }: { result: SearchR
                 aria-hidden="true">
                 <path d="M7 17L17 7M17 7H7M17 7V17" />
               </svg>
+              {hostname && onOsintClick && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    onOsintClick(hostname)
+                  }}
+                  aria-label={`OSINT lookup for ${hostname}`}
+                  className="flex h-5 w-5 items-center justify-center rounded bg-foreground/[0.08] text-[9px] font-bold text-foreground/60 hover:bg-foreground/[0.12] transition-colors"
+                >
+                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="M21 21l-4.35-4.35" />
+                  </svg>
+                </button>
+              )}
           </div>
 
           {/* Title */}
