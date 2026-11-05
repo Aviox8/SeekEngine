@@ -8,12 +8,13 @@ import { isRedisConfigured, redisKeys, redisTry } from './redis'
 
 const SEARCH_CONTEXT_TTL_MS = 15_000
 const MAX_SEARCH_CACHE_ENTRIES = 100
+const MAX_GROUNDING_RESULTS = 12
 
 export type SearchContextItem = Pick<SearchResult, 'title' | 'link' | 'snippet'>
 
 export interface SearchContextResult {
   results: SearchResult[]
-  provider: 'serpapi' | 'google' | 'exa' | 'duckduckgo'
+  provider: 'serpapi' | 'google' | 'exa' | 'duckduckgo' | 'merged'
   cached: boolean
 }
 
@@ -123,85 +124,41 @@ async function loadSearchContext(
 ): Promise<Omit<SearchContextResult, 'cached'>> {
   const rangeConfig = timeRange ? TIME_RANGES[timeRange] : undefined
 
-  let serpResults: SearchResult[] | null = null
-  let googleResults: SearchResult[] | null = null
-  let exaResults: SearchResult[] | null = null
-  let ddgResults: SearchResult[] | null = null
-  let serpError: unknown
-  let googleError: unknown
-  let exaError: unknown
-  let ddgError: unknown
-
-  try {
-    serpResults = dedupeResults(
-      normalizeSerpResults(await getSerpResults(query, rangeConfig?.tbs, signal))
-    )
-
-    if (serpResults.length > 0) {
-      return { results: serpResults, provider: 'serpapi' }
-    }
-    logger.warn('SerpApi returned no results; trying Google Custom Search', {
-      query: query.slice(0, 80),
-      timeRange,
-    })
-  } catch (error) {
-    serpError = error
-    logger.warn('SerpApi search failed, attempting Google fallback', {
-      query: query.slice(0, 80),
-      timeRange,
-      reason: error instanceof Error ? error.message : String(error),
-    })
-  }
-
-  try {
-    googleResults = dedupeResults(
-      normalizeGoogleResults(await getWebSearchResults(query, 1, rangeConfig?.dateRestrict, signal))
-    )
-
-    if (googleResults.length > 0) {
-      return { results: googleResults, provider: 'google' }
-    }
-    logger.warn('Google Custom Search returned no results; trying Exa', {
-      query: query.slice(0, 80),
-      timeRange,
-    })
-  } catch (error) {
-    googleError = error
-    logger.warn('Google search fallback failed, attempting Exa', {
-      query: query.slice(0, 80),
-      timeRange,
-      reason: error instanceof Error ? error.message : String(error),
-    })
-  }
-
-  // Exa works without a time filter; its retrieval is neural, not index-based
-  try {
-    exaResults = dedupeResults(normalizeExaResults(await getExaResults(query, signal)))
-
-    if (exaResults.length > 0) {
-      return { results: exaResults, provider: 'exa' }
-    }
-    logger.warn('Exa returned no results; trying DuckDuckGo scrape', {
-      query: query.slice(0, 80),
-    })
-  } catch (error) {
-    exaError = error
-    logger.warn('Exa search failed, attempting DuckDuckGo scrape', {
-      query: query.slice(0, 80),
-      reason: error instanceof Error ? error.message : String(error),
-    })
-  }
-
-  try {
-    ddgResults = dedupeResults(normalizeDuckDuckGoResults(await getDuckDuckGoResults(query, signal)))
-
-    if (ddgResults.length > 0) {
-      return { results: ddgResults, provider: 'duckduckgo' }
-    }
-  } catch (error) {
-    ddgError = error
-    logger.error('DuckDuckGo scrape failed', error instanceof Error ? error : String(error))
-  }
+  // Parallel fan-out: every configured provider is queried on each search,
+  // never sequentially. Exa leads the merged order — it is the primary
+  // OSINT grounding path (neural retrieval, freshness-oriented) — with
+  // SerpAPI, Google CSE and the keyless DuckDuckGo scrape folded in behind.
+  const [serp, google, exa, ddg] = await Promise.all([
+    getSerpResults(query, rangeConfig?.tbs, signal)
+      .then(normalizeSerpResults)
+      .then(dedupeResults)
+      .then(
+        (results: SearchResult[]) => ({ results }),
+        (error: unknown) => ({ error }),
+      ),
+    getWebSearchResults(query, 1, rangeConfig?.dateRestrict, signal)
+      .then(normalizeGoogleResults)
+      .then(dedupeResults)
+      .then(
+        (results: SearchResult[]) => ({ results }),
+        (error: unknown) => ({ error }),
+      ),
+    // Exa works without a time filter; its retrieval is neural, not index-based
+    getExaResults(query, signal)
+      .then(normalizeExaResults)
+      .then(dedupeResults)
+      .then(
+        (results: SearchResult[]) => ({ results }),
+        (error: unknown) => ({ error }),
+      ),
+    getDuckDuckGoResults(query, signal)
+      .then(normalizeDuckDuckGoResults)
+      .then(dedupeResults)
+      .then(
+        (results: SearchResult[]) => ({ results }),
+        (error: unknown) => ({ error }),
+      ),
+  ])
 
   if (signal?.aborted) {
     throw signal.reason instanceof Error
@@ -209,38 +166,63 @@ async function loadSearchContext(
       : new DOMException('The operation was aborted.', 'AbortError')
   }
 
-  const failures = [serpError, googleError, exaError, ddgError].filter(Boolean)
+  const outcomes = [exa, serp, google, ddg] as const
+  const counts = {
+    exa: 'results' in exa ? exa.results.length : -1,
+    serpapi: 'results' in serp ? serp.results.length : -1,
+    googleCse: 'results' in google ? google.results.length : -1,
+    duckduckgo: 'results' in ddg ? ddg.results.length : -1,
+  }
+
+  const failures = [exa, serp, google, ddg]
+    .map((o) => ('error' in o ? o.error : undefined))
+    .filter(Boolean)
+
   if (failures.length === 4) {
     logger.error('All search providers failed', new Error('serpapi + google + exa + duckduckgo all failed'), {
       query: query.slice(0, 80),
-      serpApi: serpError instanceof Error ? serpError.message : String(serpError),
-      googleCse: googleError instanceof Error ? googleError.message : String(googleError),
-      exa: exaError instanceof Error ? exaError.message : String(exaError),
-      duckduckgo: ddgError instanceof Error ? ddgError.message : String(ddgError),
+      exa: 'error' in exa ? (exa.error instanceof Error ? exa.error.message : String(exa.error)) : 'unknown',
+      serpapi: 'error' in serp ? (serp.error instanceof Error ? serp.error.message : String(serp.error)) : 'unknown',
+      googleCse: 'error' in google ? (google.error instanceof Error ? google.error.message : String(google.error)) : 'unknown',
+      duckduckgo: 'error' in ddg ? (ddg.error instanceof Error ? ddg.error.message : String(ddg.error)) : 'unknown',
     })
-    throw googleError instanceof Error
-      ? googleError
-      : (serpError instanceof Error ? serpError : new Error('All search providers failed'))
+    throw google && 'error' in google && google.error instanceof Error
+      ? google.error
+      : serp && 'error' in serp && serp.error instanceof Error
+        ? serp.error
+        : new Error('All search providers failed')
   }
 
-  if (ddgResults && ddgResults.length > 0) {
-    return { results: ddgResults, provider: 'duckduckgo' }
-  }
-  if (exaResults && exaResults.length > 0) {
-    return { results: exaResults, provider: 'exa' }
-  }
-  if (googleResults && googleResults.length > 0) {
-    return { results: googleResults, provider: 'google' }
-  }
-  if (serpResults && serpResults.length > 0) {
-    return { results: serpResults, provider: 'serpapi' }
+  // Merge in Exa-first priority order, dedupe by link, cap the grounding set
+  const merged: SearchResult[] = []
+  const seen = new Set<string>()
+  for (const outcome of outcomes) {
+    if (!('results' in outcome)) continue
+    for (const result of outcome.results) {
+      if (seen.has(result.link)) continue
+      seen.add(result.link)
+      merged.push(result)
+      if (merged.length >= MAX_GROUNDING_RESULTS) break
+    }
+    if (merged.length >= MAX_GROUNDING_RESULTS) break
   }
 
-  logger.warn('All search providers returned empty result sets', {
-    query: query.slice(0, 80),
-    timeRange,
-  })
-  return { results: [], provider: 'duckduckgo' }
+  if (failures.length > 0) {
+    logger.warn('Some search providers failed; continuing with merged results', {
+      query: query.slice(0, 80),
+      counts,
+    })
+  }
+
+  if (merged.length === 0) {
+    logger.warn('All search providers returned empty result sets', {
+      query: query.slice(0, 80),
+      timeRange,
+    })
+    return { results: [], provider: 'merged' }
+  }
+
+  return { results: merged, provider: 'merged' }
 }
 
 export async function getSearchContext(

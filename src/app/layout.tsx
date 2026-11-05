@@ -130,6 +130,24 @@ export default function RootLayout({
             })
           }}
         />
+        {/* Organization structured data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "SeekEngine",
+              "url": SITE_URL,
+              "logo": `${SITE_URL}/logo.png`,
+              "sameAs": [
+                "https://github.com/archduke1337/SeekEngine",
+                "https://archduke.is-a.dev"
+              ],
+              "description": "Open source AI search engine research project."
+            })
+          }}
+        />
       </head>
       <body className={`${spaceGrotesk.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} font-sans antialiased min-h-screen flex flex-col overflow-x-hidden`}>
         <Providers>

@@ -30,7 +30,7 @@ cp .env.example .env.local
 
 **Minimum required:** `OPENROUTER_API_KEY` (get a free key at [openrouter.ai](https://openrouter.ai)).
 
-**Optional:** `SERPAPI_KEY` (primary web results) or `GOOGLE_SEARCH_API_KEY` + `GOOGLE_SEARCH_CX` (fallback web results). Without either, search results are limited.
+**Optional:** `SERPAPI_KEY`, `GOOGLE_SEARCH_API_KEY` + `GOOGLE_SEARCH_CX`, and `EXA_API_KEY` (neural primary). Providers fan out in parallel and merge; DuckDuckGo works keyless, so without any keys search leans on it.
 
 See [.env.example](./.env.example) for every supported variable, including the `OPENROUTER_API_KEYS` key pool and the `CACHE_STATS_SECRET`/`ADMIN_SECRET` used by the `/api/ai/cache/stats` monitoring endpoint.
 
@@ -60,7 +60,7 @@ seekengine/
 │   │   ├── results/                # Results page (AI + web results)
 │   │   ├── about/ | tos/ | privacy/ # Static/legal pages
 │   │   └── api/
-│   │       ├── search/route.ts     # Web search aggregation (SerpAPI → Google CSE)
+│   │       ├── search/route.ts     # Web search fan-out (SerpAPI, Google CSE, Exa, DuckDuckGo merged)
 │   │       └── ai/
 │   │           ├── stream/route.ts # Streaming AI answers (SSE, main feature)
 │   │           ├── suggest/route.ts # AI search suggestions
@@ -107,7 +107,7 @@ seekengine/
 - **Free-model router:** answers stream from `openrouter/free` (override with `OPENROUTER_MODEL`); OpenRouter routes each request to a suitable free model
 - **Semantic caching:** normalized queries return cached answers instantly
 - **Key pool:** multiple `OPENROUTER_API_KEYS` with automatic cooldown rotation
-- **Provider failover:** answers OpenRouter → Ollama Cloud → local synthesis; search SerpAPI → Google CSE → Exa → DuckDuckGo (keyless). Result dedupe at every step
+- **Provider failover:** answers OpenRouter → Ollama Cloud → local synthesis; search parallel fan-out (SerpAPI, Google CSE, Exa primary, DuckDuckGo, merged). Result dedupe at every step
 
 ### ✅ Technical Standards
 - Server components by default, client components only where needed
@@ -156,7 +156,7 @@ node scripts/generate-og-image.mjs
 - Restart `npm run dev` after editing `.env.local`
 
 ### Search returning no results
-- Set `SERPAPI_KEY`, or `GOOGLE_SEARCH_API_KEY` + `GOOGLE_SEARCH_CX`
+- Set `SERPAPI_KEY`, `GOOGLE_SEARCH_API_KEY` + `GOOGLE_SEARCH_CX`, and `EXA_API_KEY`
 - Confirm you haven't hit the per-IP rate limit (30 req/min for search, 20 req/min for streaming)
 
 ### Suggestions not appearing

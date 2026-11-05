@@ -12,8 +12,8 @@ export type SectionToc = {
 }
 
 export type LegalShellProps = {
-  /** 'tos' for the blue color family, 'privacy' for purple, or a custom value. */
-  accent: 'tos' | 'privacy'
+  /** 'tos' for blue, 'privacy' for purple, 'neutral' for monochrome docs pages. */
+  accent: 'tos' | 'privacy' | 'neutral'
   badge: string
   badgeMeta?: string
   title: string
@@ -42,6 +42,12 @@ const ACCENTS = {
     bullet: 'bg-purple-500',
     link: 'text-purple-600 dark:text-purple-400',
     dot: 'bg-purple-500',
+  },
+  neutral: {
+    chip: 'bg-foreground/[0.06] text-foreground/75',
+    bullet: 'bg-foreground/60',
+    link: 'text-foreground/70',
+    dot: 'bg-foreground/60',
   },
 } as const
 
@@ -192,7 +198,7 @@ export function LegalSection({
   id: string
   index: number
   total: number
-  tone: 'blue' | 'purple'
+  tone: 'blue' | 'purple' | 'neutral'
   title: string
   summary?: string
   children: ReactNode

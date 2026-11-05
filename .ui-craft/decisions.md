@@ -19,6 +19,7 @@ OpenRouter's `openrouter/free` router assigns a suitable free model per request,
 **Status**: accepted
 
 Answer chain: OpenRouter → Ollama Cloud → local synthesis from raw search context (deterministic, citation-linked, zero-key). Search chain: SerpAPI → Google CSE → Exa → DuckDuckGo HTML scrape (keyless last resort, neural Exa pass for freshness). A fallback only engages when a provider fails *before emitting tokens*; a mid-stream failure keeps the partial answer. (Correction 2026-11-05: Exa is the search grounding provider only, never an answer provider; an earlier revision of this decision listed a phantom answer step and has been removed.) Alternatives considered:
+(Addendum 2026-11-05: search grounding changed from sequential fallback to parallel fan-out: SerpAPI, Google CSE, Exa and DuckDuckGo all queried per search; Exa leads the merged order as the OSINT-oriented neural path; results deduped by link, capped at 12. Trades extra provider quota for breadth and freshness. Cost note: every cold search spends up to 4 provider calls; warm hits stay on the 15s context cache. Answer chain unchanged: OpenRouter → Ollama Cloud → local synthesis; Exa is never a provider.)
 - Silent single-provider dependency — rejected: one 429/1015 key rotation outage blanked the product.
 - Retry same provider N times — rejected: adds latency on the critical path; fail-over beats retry.
 

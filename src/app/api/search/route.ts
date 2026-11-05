@@ -12,7 +12,7 @@ export const runtime = 'edge'
  * GET /api/search
  * 
  * Web search endpoint that aggregates results from multiple providers
- * Falls back from SerpAPI → Google Custom Search if primary fails
+ * Fans out to SerpAPI, Google CSE, Exa and DuckDuckGo in parallel; merged and deduped
  * 
  * Query Parameters:
  * - q (required): Search query (1-500 characters)
