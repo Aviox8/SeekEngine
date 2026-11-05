@@ -107,7 +107,7 @@ seekengine/
 - **Free-model router:** answers stream from `openrouter/free` (override with `OPENROUTER_MODEL`); OpenRouter routes each request to a suitable free model
 - **Semantic caching:** normalized queries return cached answers instantly
 - **Key pool:** multiple `OPENROUTER_API_KEYS` with automatic cooldown rotation
-- **Provider failover:** answers OpenRouter → Ollama Cloud → Exa Answer → local synthesis; search SerpAPI → Google CSE → Exa → DuckDuckGo (keyless). Result dedupe at every step
+- **Provider failover:** answers OpenRouter → Ollama Cloud → local synthesis; search SerpAPI → Google CSE → Exa → DuckDuckGo (keyless). Result dedupe at every step
 
 ### ✅ Technical Standards
 - Server components by default, client components only where needed

@@ -10,7 +10,7 @@
  * - Performance telemetry: Logs per-model latency and success rates
  */
 
-import { getOpenRouterApiKeys, hasOllama, hasExa } from '../env'
+import { getOpenRouterApiKeys, hasOllama } from '../env'
 import { logger } from '../logger'
 import type { ChatMessage, AITask, ModelTier, StreamEvent } from './types'
 import { AITask as AITaskEnum } from './types'
@@ -19,7 +19,6 @@ import { humanizeModel, classifyModel, modelFailures, logTelemetry, getModelsFor
 import { MAX_CONCURRENT_MODELS, SYSTEMIC_FAILURE_THRESHOLD_MS, TTFT_FAST_MS, TTFT_SLOW_MS } from '../constants'
 import type { SearchContextItem } from '../search-context'
 import { streamOllama } from '../ollama'
-import { getExaAnswer } from '../exa'
 import { synthesizeFromContext } from '../fallback-answer'
 import {
   getApiKeyPlan,
@@ -587,8 +586,7 @@ export async function* streamOpenRouter(
  * Answer provider order:
  *   1. OpenRouter (default model: openrouter/free router, or OPENROUTER_MODEL)
  *   2. Ollama Cloud (if OLLAMA_API_KEY is set)
- *   3. Exa Answer API (if EXA_API_KEY is set)
- *   4. Local synthesis from raw search context (no providers required)
+ *   3. Local synthesis from raw search context (no providers required)
  * A provider only falls through when it fails before emitting any tokens —
  * never mid-stream.
  */
@@ -600,15 +598,6 @@ async function* streamAnswerWithFallback(
 ): AsyncGenerator<StreamEvent> {
   const errors: string[] = []
   const startedAt = Date.now()
-
-  const faviconFor = (url: string): string | undefined => {
-    try {
-      const hostname = new URL(url).hostname
-      return hostname ? `https://www.google.com/s2/favicons?domain=${hostname}&sz=32` : undefined
-    } catch {
-      return undefined
-    }
-  }
 
   const wordChunks = (text: string): string[] => text.match(/\S+\s*/g) ?? [text]
 
@@ -647,7 +636,7 @@ async function* streamAnswerWithFallback(
       if (event.type === 'error') {
         errors.push(`ollama: ${event.error ?? 'unknown error'}`)
         if (tokensEmitted === 0) {
-          logger.warn('Ollama Cloud provider failed before first token; falling back to Exa Answer', {
+          logger.warn('Ollama Cloud provider failed before first token; falling back to local synthesis', {
             reason: event.error,
           })
           break
@@ -661,57 +650,9 @@ async function* streamAnswerWithFallback(
     }
     if (tokensEmitted > 0) return
     errors.push('ollama: stream ended without tokens')
-    logger.warn('Ollama Cloud provider ended without tokens; falling back to Exa Answer')
+    logger.warn('Ollama Cloud provider ended without tokens; falling back to local synthesis')
   } else {
     logger.debug('OLLAMA_API_KEY not configured; skipping Ollama Cloud answer provider')
-  }
-
-  if (hasExa()) {
-    try {
-      logger.info('Attempting Exa Answer provider')
-      const { answer, citations } = await getExaAnswer(query, BASE_SYSTEM_PROMPT, signal)
-
-      if (context.length === 0 && citations.length > 0) {
-        yield {
-          type: 'sources',
-          sources: citations.slice(0, 8).map((c) => ({
-            title: c.title,
-            url: c.url,
-            favicon: faviconFor(c.url),
-          })),
-        }
-      }
-
-      yield {
-        type: 'model_selected',
-        model: 'exa/answer',
-        modelHuman: 'Exa Answer (fallback provider)',
-        tier: 'balanced',
-        attempts: 1,
-      }
-
-      for (const chunk of wordChunks(answer)) {
-        yield { type: 'token', content: chunk }
-      }
-
-      yield {
-        type: 'done',
-        content: answer,
-        model: 'exa/answer',
-        modelHuman: 'Exa Answer (fallback provider)',
-        tier: 'balanced',
-        latencyMs: Date.now() - startedAt,
-        attempts: 1,
-      }
-      logger.info('Exa Answer provider succeeded')
-      return
-    } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error)
-      errors.push(`exa: ${reason}`)
-      logger.warn('Exa Answer provider failed; falling back to local synthesis', { reason })
-    }
-  } else {
-    logger.debug('EXA_API_KEY not configured; skipping Exa Answer provider')
   }
 
   const synthesized = synthesizeFromContext(query, context)

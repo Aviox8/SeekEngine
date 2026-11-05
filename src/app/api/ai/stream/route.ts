@@ -119,8 +119,8 @@ function getStreamCacheTask(timeRange?: TimeRangeCode): string {
 }
 
 async function handleRequest(request: NextRequest) {
-  // Note: no hard provider gate here — the answer pipeline falls back
-  // OpenRouter → Ollama Cloud → Exa → local synthesis, so the endpoint
+  // Note: no hard provider gate here - the answer pipeline falls back
+  // OpenRouter -> Ollama Cloud -> local synthesis, so the endpoint
   // stays useful even when individual providers are unconfigured or down.
 
   // Rate limiting
