@@ -399,7 +399,7 @@ export default function ResultsClient() {
                           if (e.key === 'Escape') followUpInputRef.current?.blur()
                         }}
                         placeholder="Ask a follow-up…"
-                        className="w-full rounded-lg py-2.5 pl-9 pr-12 text-base sm:text-sm font-medium transition-[color,background-color,box-shadow] outline-none bg-accent/5 text-foreground placeholder:text-muted-foreground/40 focus:bg-accent/10 focus:ring-2 focus:ring-foreground/15 group-hover:bg-accent/10 sm:py-3 sm:pl-11 sm:pr-14"
+                        className="w-full rounded-lg py-2.5 pl-9 pr-12 text-base sm:text-sm font-medium transition-[color,background-color,box-shadow] outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 bg-accent/5 text-foreground placeholder:text-muted-foreground/40 focus:bg-accent/10 focus:ring-2 focus:ring-foreground/15 group-hover:bg-accent/10 sm:py-3 sm:pl-11 sm:pr-14"
                         style={{ caretColor: 'hsl(var(--primary))' }}
                       />
                       <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:right-2">
