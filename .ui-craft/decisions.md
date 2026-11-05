@@ -1,5 +1,14 @@
 # Design Decisions
 
+### 2026-11-05 — Shared REST-Redis (Upstash) for caches and rate limits; Aiven Kafka/Valkey rejected
+
+**Status**: accepted
+
+All four cache/rate-limit paths (semantic answer cache, search-context cache, suggestion cache, per-IP rate limiting) go through one Upstash Redis REST client — edge-safe over HTTPS — when `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` are set, and fall back to per-instance in-memory otherwise (PR #26). Alternatives considered:
+- Aiven Valkey over TCP from `runtime = 'nodejs'` via ioredis — rejected: Edge can't open sockets, so this would force a Node-runtime rewrite plus manual JSON serialization and serverless connection pooling; no capability gained that REST-Redis doesn't already provide.
+- Aiven Kafka — rejected: no event backbone exists in the app; the service created on Aiven sits idle and was never part of the plan. Decommission it at console.aiven.io (Service settings → Delete service).
+- Aiven PostgreSQL — rejected for now: the app has no relational storage need today.
+
 ### 2026-11-04 — Violet/indigo aurora removed; AI presence is monochrome light only
 
 **Status**: accepted
