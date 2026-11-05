@@ -127,7 +127,7 @@ export async function checkRateLimit(
         return { allowed: false, remaining: 0, resetAt }
       }
       return { allowed: true, remaining: Math.max(0, config.maxRequests - count), resetAt }
-    })
+    }, 'write')
     if (outcome) {
       return outcome
     }

@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
         void redisTry('suggest set', async (r) => {
           await r.set(redisKeys.suggestions(cacheKey), entry, { ex: Math.floor(SUGGESTIONS_CACHE_TTL / 1000) })
           return true
-        })
+        }, 'write')
       } else {
         suggestionsCache.set(cacheKey, entry)
 

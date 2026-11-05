@@ -102,7 +102,7 @@ export async function setCachedAnswer(
       await r.set(redisKeys.answer(key), { ...answer, cachedAt: now, originalQuery: query }, { ex: TTL_SECONDS })
       await r.incr(redisKeys.stats.answerWrites)
       return true
-    })
+    }, 'write')
     if (write) {
       logger.debug(`Cached answer for: "${query.slice(0, 50)}"`)
     }
@@ -228,7 +228,7 @@ export async function clearCache(): Promise<void> {
       }
       await r.del(redisKeys.stats.answerHits, redisKeys.stats.answerMisses, redisKeys.stats.answerWrites)
       return true
-    })
+    }, 'write')
     logger.debug('Cache cleared')
     return
   }

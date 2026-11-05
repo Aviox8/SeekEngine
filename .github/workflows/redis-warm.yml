@@ -1,0 +1,38 @@
+name: Keep Redis warm
+
+# Pings /api/cron/redis-warm every 10 minutes so the Layerbase (fallback) Redis
+# instance never reaches its 15-minute idle sleep threshold.
+#
+# Required GitHub repository secrets:
+#   APP_URL      — production base URL, e.g. https://seekengine.vercel.app
+#   CRON_SECRET  — bearer sent to the endpoint (match Vercel CRON_SECRET)
+#
+# Manual trigger: Actions tab -> "Keep Redis warm" -> Run workflow.
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  warm-redis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Ping warm endpoint
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "APP_URL or CRON_SECRET secret is not configured"
+            exit 1
+          fi
+          status=$(curl -s -o /tmp/warm.json -w "%{http_code}" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$APP_URL/api/cron/redis-warm")
+          echo "HTTP $status"
+          cat /tmp/warm.json
+          if [ "$status" != "200" ]; then
+            exit 1
+          fi

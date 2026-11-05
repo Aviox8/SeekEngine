@@ -276,7 +276,7 @@ export async function getSearchContext(
         void redisTry('ctx set', async (r) => {
           await r.set(redisKeys.searchContext(cacheKey), value, { ex: Math.floor(SEARCH_CONTEXT_TTL_MS / 1000) })
           return true
-        })
+        }, 'write')
       } else {
         resultCache.set(cacheKey, {
           value,
