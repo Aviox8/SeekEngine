@@ -64,7 +64,9 @@ export default function ResultsClient() {
   const [retryToken, setRetryToken] = useState(0)
 
   const [followUpQuery, setFollowUpQuery] = useState('')
+  const [groundedQuery, setGroundedQuery] = useState(query)
   const followUpInputRef = useRef<HTMLInputElement>(null)
+  const aiCardRef = useRef<HTMLDivElement>(null)
   const searchAbortRef = useRef<AbortController | null>(null)
   const copyResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const shareResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -108,6 +110,7 @@ export default function ResultsClient() {
     setResults([])
     setAiAnswer('')
     setFollowUpQuery('')
+    setGroundedQuery(query)
     setCopied(false)
     setShareCopied(false)
     if (copyResetTimerRef.current) clearTimeout(copyResetTimerRef.current)
@@ -161,6 +164,20 @@ export default function ResultsClient() {
     return () => { controller.abort() }
   }, [query, timeFilter, retryToken])
 
+  // Stream must not start from an empty grounding set: if the search layer
+  // errored out or matched nothing, an answer would be pure invention.
+  const answerBlocked = !resultsLoading && (resultsError !== '' || results.length === 0)
+
+  const runFollowUp = (text: string) => {
+    const trimmed = text.trim()
+    if (!trimmed || answerBlocked) return
+    setFollowUpQuery('')
+    addEntry(trimmed)
+    setAiAnswer('')
+    setGroundedQuery(trimmed)
+    aiCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   const copyTextToClipboard = async (text: string): Promise<boolean> => {
     if (!text.trim()) return false
     try {
@@ -203,20 +220,8 @@ export default function ResultsClient() {
     }
   }
 
-  const handleSearch = (searchQuery: string) => {
-    const trimmedQuery = searchQuery.trim()
-    if (!trimmedQuery) return
-
-    const params = new URLSearchParams({ q: trimmedQuery })
-    if (timeFilter) {
-      params.set('time', timeFilter)
-    }
-
-    router.push(`/results?${params.toString()}`)
-  }
-
   function handleFollowUp() {
-    if (followUpQuery.trim()) handleSearch(followUpQuery)
+    runFollowUp(followUpQuery)
   }
 
   if (!query) {
@@ -242,10 +247,10 @@ export default function ResultsClient() {
 
         {/* Compact header — share + action buttons */}
         <header className="mb-3 flex items-center justify-end gap-2 py-2 sm:mb-5 sm:py-4">
-          <button 
+          <button
             type="button"
             onClick={shareResults}
-            className="px-3 py-1.5 rounded-lg text-[11px] font-medium transition-[color,background-color,border-color,transform] active:scale-95 border border-foreground/[0.08] text-muted-foreground hover:text-foreground hover:border-foreground/15 hover:bg-foreground/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:px-3.5 sm:py-2 sm:rounded-xl sm:text-xs"
+            className="px-3 py-1.5 rounded-lg text-[11px] font-medium transition-[color,background-color,transform] active:scale-95 bg-foreground/[0.04] text-muted-foreground hover:text-foreground hover:bg-foreground/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:px-3.5 sm:py-2 sm:rounded-xl sm:text-xs"
           >
             {shareCopied ? 'Link Copied' : 'Share'}
           </button>
@@ -254,7 +259,7 @@ export default function ResultsClient() {
         {/* Query Title — fluid, responsive */}
         <div className="mb-6 animate-fade-in-up sm:mb-8 lg:mb-10">
           <h1 className="font-display break-words text-[clamp(1.5rem,5vw,3.5rem)] leading-[1.08] tracking-tight text-foreground">
-            {query}
+            {groundedQuery}
           </h1>
         </div>
 
@@ -262,15 +267,15 @@ export default function ResultsClient() {
         <div className="flex flex-col gap-6 lg:flex-row lg:gap-10">
             
           {/* LEFT COLUMN: Synthesis — sticky on desktop */}
-          <div className="w-full min-w-0 lg:w-[63%] animate-fade-in-up lg:sticky lg:top-24 lg:self-start">
-            <div className="relative overflow-hidden rounded-xl p-4 group bg-foreground/[0.02] sm:rounded-2xl sm:p-6 md:p-8">
+          <div ref={aiCardRef} className="w-full min-w-0 lg:w-[63%] animate-fade-in-up lg:sticky lg:top-24 lg:self-start scroll-mt-24">
+            <div className="relative overflow-hidden rounded-xl p-4 group bg-foreground/[0.02] sm:rounded-2xl sm:p-5 md:p-6">
                
               {/* Top accent line with gradient */}
               <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
                
               {/* Header: icon + title + copy */}
               <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-foreground/5 sm:gap-3 sm:mb-6 sm:pb-4">
-                <LivingIcon color="#6F6F6F" size="w-2.5 h-2.5" />
+                <LivingIcon size="w-2.5 h-2.5" />
                 <h2 className="text-xs font-semibold tracking-wide text-foreground/70 sm:text-sm">
                   Synthesis
                 </h2>
@@ -280,7 +285,7 @@ export default function ResultsClient() {
                     onClick={copyToClipboard}
                     disabled={!aiAnswer.trim()}
                     aria-label={copied ? 'Copied to clipboard' : 'Copy answer to clipboard'}
-                    className="flex items-center gap-1 text-[10px] sm:text-xs font-semibold uppercase tracking-wide transition-[color,background-color,transform] px-2 py-1.5 rounded-md text-muted-foreground/70 hover:text-foreground hover:bg-accent/10 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:gap-1.5 sm:px-2.5 sm:rounded-lg"
+                    className="flex items-center gap-1 text-[10px] sm:text-xs font-semibold transition-[color,background-color,transform] px-2 py-1.5 rounded-md text-muted-foreground/70 hover:text-foreground hover:bg-accent/10 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:gap-1.5 sm:px-2.5 sm:rounded-lg"
                   >
                     {copied ? (
                       <>
@@ -303,16 +308,39 @@ export default function ResultsClient() {
               </div>
 
               {/* Streaming answer — responsive text sizing */}
-              <StreamingAnswer 
-                query={query} 
-                timeRange={timeFilter || undefined}
-                context={results}
-                waitForContext
-                contextReady={!resultsLoading}
-                onComplete={setAiAnswer}
-                onRegenerate={() => setAiAnswer('')}
-                className="text-[15px] leading-relaxed sm:text-base"
-              />
+              {answerBlocked ? (
+                <div className="flex flex-col items-center gap-3 py-8 text-center sm:py-12">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-destructive/10">
+                    <svg className="h-5 w-5 text-destructive/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4v2m0-10a8 8 0 100 16 8 8 0 000-16z" />
+                    </svg>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-foreground">No grounded answer possible</p>
+                    <p className="mx-auto max-w-sm text-[11px] leading-relaxed text-muted-foreground/70 sm:text-xs">
+                      The search layer returned nothing for &ldquo;{query}&rdquo;, so there is no source to ground an answer on. Fix the search first — retrying reloads the web results.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setRetryToken(t => t + 1)}
+                    className="rounded-lg bg-foreground px-4 py-2 text-[11px] font-semibold text-background transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-xs"
+                  >
+                    Retry search
+                  </button>
+                </div>
+              ) : (
+                <StreamingAnswer
+                  query={groundedQuery}
+                  timeRange={timeFilter || undefined}
+                  context={results}
+                  waitForContext
+                  contextReady={!resultsLoading}
+                  onComplete={setAiAnswer}
+                  onRegenerate={() => setAiAnswer('')}
+                  className="text-[15px] leading-relaxed sm:text-base"
+                />
+              )}
 
               {/* Suggestion chips — show when answer is complete */}
               <AnimatePresence>
@@ -332,11 +360,8 @@ export default function ResultsClient() {
                         <motion.button
                           key={suggestion}
                           type="button"
-                          onClick={() => {
-                            setFollowUpQuery(suggestion)
-                            handleSearch(suggestion)
-                          }}
-                          className="px-3 py-1.5 text-[11px] font-medium rounded-full border border-foreground/10 text-muted-foreground hover:text-foreground hover:border-foreground/20 hover:bg-foreground/[0.02] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-xs"
+                          onClick={() => runFollowUp(suggestion)}
+                          className="px-3 py-1.5 text-[11px] font-medium rounded-full bg-foreground/[0.04] text-muted-foreground hover:text-foreground hover:bg-foreground/[0.07] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-xs"
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                         >
@@ -356,8 +381,8 @@ export default function ResultsClient() {
                     animate={{ opacity: 1, height: 'auto' }}
                     className="mt-4 pt-4 border-t border-foreground/5 sm:mt-6 sm:pt-5"
                   >
-                    <label htmlFor="follow-up-question" className="block text-[10px] sm:text-xs font-bold uppercase tracking-wide text-muted-foreground/60 mb-2 sm:text-sm sm:mb-3">
-                      Follow-up Question
+                    <label htmlFor="follow-up-question" className="block text-[10px] sm:text-xs font-semibold text-muted-foreground/60 mb-2 sm:text-sm sm:mb-3">
+                      Follow-up question
                     </label>
                     <div className="relative group">
                       <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/40 group-focus-within:text-primary transition-colors sm:left-4 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -374,7 +399,7 @@ export default function ResultsClient() {
                           if (e.key === 'Escape') followUpInputRef.current?.blur()
                         }}
                         placeholder="Ask a follow-up…"
-                        className="w-full rounded-lg py-2.5 pl-9 pr-12 text-base sm:text-sm font-medium transition-[border-color,box-shadow,background-color] outline-none bg-accent/5 border border-border/50 text-foreground placeholder:text-muted-foreground/40 focus:border-primary focus:ring-2 focus:ring-primary/20 focus-visible:ring-primary/40 group-hover:border-border/80 sm:py-3 sm:pl-11 sm:pr-14"
+                        className="w-full rounded-lg py-2.5 pl-9 pr-12 text-base sm:text-sm font-medium transition-[color,background-color,box-shadow] outline-none bg-accent/5 text-foreground placeholder:text-muted-foreground/40 focus:bg-accent/10 focus:ring-2 focus:ring-foreground/15 group-hover:bg-accent/10 sm:py-3 sm:pl-11 sm:pr-14"
                         style={{ caretColor: 'hsl(var(--primary))' }}
                       />
                       <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:right-2">
@@ -402,8 +427,11 @@ export default function ResultsClient() {
 
           {/* RIGHT COLUMN: Web Sources — sticky on desktop so it stays in view on long answers */}
           <div className="w-full min-w-0 lg:w-[37%] animate-fade-in-up animate-delay-100 lg:sticky lg:top-24 lg:self-start">
-            <h3 className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.15em] mb-3 text-muted-foreground/40 sm:text-sm sm:tracking-[0.2em] sm:mb-4">
+            <h3 className="mb-3 flex items-baseline gap-2 text-xs font-semibold tracking-wide text-foreground/70 sm:mb-4 sm:text-sm">
               Web Sources
+              {!resultsLoading && results.length > 0 && (
+                <span className="text-[10px] font-medium tabular-nums text-muted-foreground/50 sm:text-[11px]">{results.length}</span>
+              )}
             </h3>
 
             {/* Time Filter — pill design with sliding indicator and fade edge */}
@@ -425,7 +453,7 @@ export default function ResultsClient() {
                       router.push(`/results?${params.toString()}`, { scroll: false })
                     }}
                     aria-pressed={timeFilter === opt.value}
-                    className={`relative shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium transition-[color,background-color,border-color] duration-200 border whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 ${
+                    className={`relative shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium transition-[color,background-color] duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 ${
                       timeFilter === opt.value
                         ? 'bg-foreground text-background shadow-sm'
                         : 'bg-foreground/[0.04] text-muted-foreground hover:bg-foreground/[0.07] hover:text-foreground'
@@ -442,7 +470,7 @@ export default function ResultsClient() {
             </div>
              
             {/* Results list — scrollable on large screens */}
-            <div className="space-y-2.5 sm:space-y-3 lg:max-h-[70vh] lg:overflow-y-auto lg:scroll-fade-y lg:pr-1">
+            <div className="space-y-3 overscroll-contain lg:max-h-[72vh] lg:overflow-y-auto lg:scroll-fade-y lg:pr-1" data-lenis-prevent="true">
               {resultsLoading ? (
                 Array.from({ length: 4 }).map((_, i) => <ResultCardSkeleton key={i} />)
               ) : resultsError ? (
@@ -459,7 +487,7 @@ export default function ResultsClient() {
                   <motion.button
                     type="button"
                     onClick={() => setRetryToken(t => t + 1)}
-                    className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-xs"
+                    className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide rounded-lg bg-destructive/[0.06] text-destructive hover:bg-destructive/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-xs"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
@@ -491,7 +519,7 @@ export default function ResultsClient() {
                           params.delete('time')
                           router.push(`/results?${params.toString()}`, { scroll: false })
                         }}
-                        className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide rounded-full border border-foreground/10 text-muted-foreground hover:text-foreground hover:border-foreground/20 hover:bg-foreground/[0.02] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-[11px]"
+                        className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide rounded-full bg-foreground/[0.04] text-muted-foreground hover:text-foreground hover:bg-foreground/[0.07] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-[11px]"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.97 }}
                       >
@@ -501,7 +529,7 @@ export default function ResultsClient() {
                     <motion.button
                       type="button"
                       onClick={() => setRetryToken(t => t + 1)}
-                      className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide rounded-full border border-foreground/10 text-muted-foreground hover:text-foreground hover:border-foreground/20 hover:bg-foreground/[0.02] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-[11px]"
+                      className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide rounded-full bg-foreground/[0.04] text-muted-foreground hover:text-foreground hover:bg-foreground/[0.07] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 sm:text-[11px]"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.97 }}
                     >

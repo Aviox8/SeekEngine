@@ -87,9 +87,12 @@ export default function DynamicCanvasCrowd() {
             <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3 sm:gap-8">
               {[
                 { label: 'About', href: '/about' },
+                { label: 'Docs', href: '/docs' },
+                { label: 'API', href: '/api' },
+                { label: 'Developer', href: '/developer' },
                 { label: 'Terms', href: '/tos' },
                 { label: 'Privacy', href: '/privacy' },
-                { label: 'Developer', href: 'https://archduke.is-a.dev/about', external: true },
+                { label: 'Legal', href: '/legal' },
                 { label: 'Source', href: 'https://github.com/archduke1337/SeekEngine', external: true },
               ].map((link) => {
                 const className = 'text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/55 transition-colors duration-300 hover:text-foreground/85 focus-visible:text-foreground/85 sm:tracking-[0.15em]'

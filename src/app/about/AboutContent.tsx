@@ -30,7 +30,7 @@ const features = [
       </svg>
     ),
     title: 'Inspectable by design',
-    desc: 'A diagnostic terminal exposes the request trace: query, retrieval log, verification pass, model prompt, streamed tokens, and the final synthesis — all on one screen.',
+    desc: 'The code is public. Every provider hop — retrieval, fallback, synthesis — is logged server-side with model, latency and attempts, and the whole lifecycle is short enough to read in one sitting.',
   },
 ]
 
@@ -40,24 +40,24 @@ const researchPhases = [
     desc: 'Every language model ships as a sealed container — trained on a frozen snapshot of the public web, with no native connection to anything new. The first experiment was to study exactly where this shows up. The conclusion was uncomfortable: a model that answers without retrieval is not broken, it is doing exactly what it was trained to do. The fix has to be structural, not parametric.',
   },
   {
-    title: 'Retrieval as bootstrap',
-    desc: 'Google Custom Search is not the most elegant retrieval engine, but it is public, predictable, well documented, and ships with a generous free tier. We use it as a bootstrap node — a reliable first stop for grounding. The choice is deliberate. The point of the project is not to compete with retrieval; it is to learn how to make retrieval and reasoning work together without one swallowing the other.',
+    title: 'Retrieval as fan-out',
+    desc: 'SerpAPI, Google Custom Search, Exa and DuckDuckGo are queried in parallel on every search, results are merged with deduplication, and Exa leads as the neural retrieval path. No single index is trusted. The point of the project is not to compete with retrieval; it is to learn how retrieval and reasoning work together without one swallowing the other.',
   },
   {
     title: 'Parallel orchestration',
     desc: 'Search and inference are run in parallel. While the retriever fans out queries against the web, the language model is held in a waiting state, accumulating context rather than hallucinating. When both finish, results are fused: ranked sources, deduplicated text, normalized timestamps — and only then handed to the model for synthesis. Truth is not produced by either node alone. It is produced by their coordination.',
   },
   {
-    title: 'Verification as protocol',
-    desc: 'Grounded answers are not just sourced answers. Before any output reaches the user, it passes through a verification gate: the cited URL must resolve, the snippet must be consistent with the page, the freshness window must be respected, and source credibility has to clear a baseline. If any check fails, the answer is rewritten or refused outright. This is the part most retrieval demos skip. We treat it as non-negotiable.',
+    title: 'Grounding as protocol',
+    desc: 'Grounded answers are not the same as verified answers, and we do not pretend they are. Before anything is generated, the system retrieves from the live web and constrains the model to write from that context: no context, no claim. Every cited URL is real and clickable, and every claim carries the passage it came from. What we do not do yet is post-hoc checking of the synthesis itself. The answer inherits whatever the sources say, and it says so honestly.',
   },
   {
     title: 'Security and the adversarial surface',
-    desc: 'Two boundaries need to be defended. The external boundary: the open web is adversarial. Pages lie, SEO farms game keywords, and click-bait content can drown out genuine sources. The internal boundary: even with perfect retrieval, the model can drift, paraphrase a source incorrectly, or invent intermediate steps that were never in the evidence. SeekEngine assumes zero trust at both surfaces and verifies continuously rather than only at the end.',
+    desc: 'Two boundaries need to be defended. The external boundary: the open web is adversarial. Pages lie, SEO farms game keywords, and click-bait content can drown out genuine sources. The internal boundary: even with good retrieval, the model can drift or paraphrase a source incorrectly. SeekEngine does not claim to detect all of this automatically. What it does instead: it keeps every source one click away, so a reader can judge for themselves in seconds. Auditing the evidence is always easier than trusting the model.',
   },
   {
     title: 'Observability and diagnostics',
-    desc: 'You cannot debug a distributed system with intuition. SeekEngine ships with a built-in diagnostic terminal that exposes the full request lifecycle: the original query, the retrieval trace, the verification log, the model prompt, the streamed tokens, and the final synthesis. Every step is visible. Observability is not just a debugging tool here; it is the only honest way to audit whether the system is actually being honest.',
+    desc: 'You cannot debug a system you strictly trust. SeekEngine is open source, so the honest audit is reading the code. Every provider hop, retrieval and synthesis is logged server-side with model, latency and attempt counts. No hidden chain of thought, no marketing wrapper around a black box.',
   },
   {
     title: 'Partial failures and silent errors',
@@ -132,7 +132,7 @@ export default function AboutContent() {
           </h1>
           <div className="space-y-4 text-prose text-[15px] sm:text-base">
             <p>
-              SeekEngine is a small, independent research project that rethinks how a search engine talks to a language model. Instead of letting a model answer questions from memory alone, the system retrieves fresh, verifiable context from the public web, runs it through a verification gate, and only then asks the model to synthesize an answer grounded in what was actually found.
+              SeekEngine is a small, independent research project that rethinks how a search engine talks to a language model. Instead of letting a model answer questions from memory alone, the system retrieves fresh context from the live web, constrains the model to write only from it, and streams an answer whose sources stay one click away.
             </p>
             <p className="text-foreground/55">
               The result is a search interface that behaves less like a chatbot and more like a careful researcher. It shows its sources, signals uncertainty, and refuses to invent. Built solo, on free-tier APIs, with the conviction that the next generation of search has to be auditable, not magical.
@@ -315,7 +315,7 @@ export default function AboutContent() {
               SeekEngine is not a product. It is a research artifact. The goal is to make the cost of grounding visible, to make hallucination inspectable, and to keep the door open for anyone who wants to run, fork, or stress-test the ideas.
             </p>
             <p className="text-foreground/55">
-              If something here interests you — the verification gate, the parallel orchestration, the observability model, or the limits — the code is public and the maintainer is reachable. Pull requests, critiques, and bug reports all welcome.
+              If something here interests you — the retrieval fan-out, the provider fallback chain, the local synthesis path, or the limits — the code is public and the maintainer is reachable. Pull requests, critiques, and bug reports all welcome.
             </p>
           </div>
         </motion.section>

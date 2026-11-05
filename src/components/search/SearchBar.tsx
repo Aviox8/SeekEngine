@@ -163,7 +163,7 @@ export default memo(function SearchBar({
                   {isLoading ? (
                     <Loader2 className="w-4 h-4 text-primary/60 animate-spin" />
                   ) : (
-                    <LivingIcon size="w-4 h-4" color="#6F6F6F" />
+                    <LivingIcon size="w-4 h-4" />
                   )}
                 </motion.div>
               )}
