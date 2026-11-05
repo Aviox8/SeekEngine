@@ -20,7 +20,6 @@ const envSchema = z.object({
   OLLAMA_BASE_URL: z.string().url().optional(),
   OLLAMA_MODEL: z.string().optional(),
   EXA_API_KEY: z.string().optional(),
-  EXA_ANSWER_MODEL: z.string().optional(),
   GOOGLE_SEARCH_API_KEY: z.string().optional(),
   GOOGLE_SEARCH_CX: z.string().optional(),
   SERPAPI_KEY: z.string().optional(),
@@ -65,7 +64,6 @@ function validateEnv(): EnvType {
     OLLAMA_BASE_URL: process.env.OLLAMA_BASE_URL,
     OLLAMA_MODEL: process.env.OLLAMA_MODEL,
     EXA_API_KEY: process.env.EXA_API_KEY,
-    EXA_ANSWER_MODEL: process.env.EXA_ANSWER_MODEL,
     GOOGLE_SEARCH_API_KEY: process.env.GOOGLE_SEARCH_API_KEY,
     GOOGLE_SEARCH_CX: process.env.GOOGLE_SEARCH_CX,
     SERPAPI_KEY: process.env.SERPAPI_KEY,
@@ -85,12 +83,11 @@ function validateEnv(): EnvType {
   const llmProviders = [
     configuredKeys.length > 0,
     !!env.data?.OLLAMA_API_KEY,
-    !!env.data?.EXA_API_KEY,
   ]
   if (llmProviders.every(configured => !configured)) {
-    logger.warn('No LLM provider configured (OPENROUTER_API_KEY, OLLAMA_API_KEY or EXA_API_KEY); answers will be synthesized from search results only')
+    logger.warn('No LLM provider configured (OPENROUTER_API_KEY or OLLAMA_API_KEY); answers will be synthesized from search results only')
     if (process.env.NODE_ENV === 'production') {
-      logger.error('Production environment validation failure', 'OPENROUTER_API_KEY, OLLAMA_API_KEY, EXA_API_KEY')
+      logger.error('Production environment validation failure', 'OPENROUTER_API_KEY, OLLAMA_API_KEY')
     }
   }
 
@@ -115,22 +112,17 @@ export const hasGoogleSearch = () => !!ENV.GOOGLE_SEARCH_API_KEY && !!ENV.GOOGLE
 export const hasSerpAPI = () => !!ENV.SERPAPI_KEY
 
 export const OLLAMA_BASE_URL = (process.env.OLLAMA_BASE_URL || 'https://ollama.com/v1').replace(/\/+$/, '')
-export const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'gemma4:31b'
+export const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'beam:cloud'
 export const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'openrouter/free'
-export const EXA_ANSWER_MODEL = process.env.EXA_ANSWER_MODEL || 'exa-fast'
 
 export function hasOllama(): boolean {
   return !!process.env.OLLAMA_API_KEY
 }
 
-export function hasExa(): boolean {
-  return !!process.env.EXA_API_KEY
-}
-
 /**
  * True when at least one LLM answer provider is configured
- * (OpenRouter keys, Ollama Cloud key, or Exa key).
+ * (OpenRouter keys or Ollama Cloud key).
  */
 export function hasAnyAnswerProvider(): boolean {
-  return getOpenRouterApiKeys().length > 0 || hasOllama() || hasExa()
+  return getOpenRouterApiKeys().length > 0 || hasOllama()
 }

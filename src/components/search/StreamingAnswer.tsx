@@ -181,14 +181,7 @@ function ModelBadge({
       </span>
 
       <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground/50 uppercase tracking-wide ml-auto flex items-center gap-1.5 sm:text-xs">
-        {cached ? (
-          <>
-            <svg className="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-            </svg>
-            <span>Instant</span>
-          </>
-        ) : (
+        {!cached && (
           <>
             <svg className="w-3 h-3 text-muted-foreground/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -332,7 +325,6 @@ export function StreamingAnswer({
       case 'done':
         return (
           <div className="w-full animate-fade-in">
-            <PhaseIndicator phase="done" sourceCount={sourceCount} />
             {sources && sources.length > 0 && (
               <Sources sources={sources} className="mb-6" />
             )}
@@ -414,7 +406,7 @@ export function StreamingAnswer({
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-x-hidden ${className}`}
+      className={`relative ${className}`}
       style={style}
       aria-busy={state === 'thinking' || state === 'streaming'}
     >

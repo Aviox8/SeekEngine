@@ -1,8 +1,7 @@
 /**
  * Exa Integration
- * Neural web search + citation-backed answer generation.
- * Used as (a) a search/grounding provider and (b) a last-resort LLM answer
- * provider when OpenRouter and Ollama Cloud are unavailable.
+ * Neural web search. Used as the search/grounding provider when
+ * SerpAPI and Google CSE return no results.
  */
 
 import { fetchWithTimeout } from './http-utils'
@@ -11,7 +10,6 @@ import { Errors, SeekEngineError } from './errors'
 import { logger } from './logger'
 
 const EXA_SEARCH_URL = 'https://api.exa.ai/search'
-const EXA_ANSWER_URL = 'https://api.exa.ai/answer'
 
 export interface ExaResult {
   title: string
@@ -31,16 +29,6 @@ interface ExaSearchItem {
 
 interface ExaSearchResponse {
   results?: ExaSearchItem[]
-}
-
-export interface ExaAnswerResult {
-  answer: string
-  citations: Array<{ title: string; url: string; publishedDate?: string | null }>
-}
-
-interface ExaAnswerResponse {
-  answer?: string
-  citations?: Array<{ title?: string | null; url?: string; publishedDate?: string | null }>
 }
 
 function exaKey(): string {
@@ -113,67 +101,3 @@ export async function getExaResults(
   }
 }
 
-/**
- * Ask Exa's answer API for a citation-backed answer.
- * Non-streaming; callers should treat this as one large token.
- */
-export async function getExaAnswer(
-  query: string,
-  systemPrompt?: string,
-  signal?: AbortSignal
-): Promise<ExaAnswerResult> {
-  const apiKey = exaKey()
-  const model = process.env.EXA_ANSWER_MODEL || 'exa-fast'
-
-  try {
-    const response = await fetchWithTimeout(
-      EXA_ANSWER_URL,
-      30_000,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-        },
-        body: JSON.stringify({
-          query,
-          model,
-          ...(systemPrompt ? { systemPrompt } : {}),
-        }),
-        signal,
-      }
-    )
-
-    if (!response.ok) {
-      logger.warn('Exa answer request failed', { status: response.status })
-      throw Errors.externalApiFailed('Exa', response.status)
-    }
-
-    const data = (await response.json()) as ExaAnswerResponse
-    if (!data.answer || !data.answer.trim()) {
-      throw Errors.externalApiFailed('Exa')
-    }
-
-    return {
-      answer: data.answer.trim(),
-      citations: (data.citations ?? [])
-        .filter((c): c is { title?: string | null; url: string; publishedDate?: string | null } =>
-          typeof c.url === 'string' && c.url.length > 0
-        )
-        .map((c) => ({
-          title: c.title?.trim() || c.url,
-          url: c.url,
-          publishedDate: c.publishedDate ?? null,
-        })),
-    }
-  } catch (error) {
-    if (signal?.aborted) throw error
-    if (error instanceof SeekEngineError) throw error
-    if ((error as Error).name === 'AbortError') {
-      throw Errors.timeout('Exa', 30_000)
-    }
-
-    logger.error('Exa answer failed', error instanceof Error ? error : String(error))
-    throw Errors.externalApiFailed('Exa')
-  }
-}

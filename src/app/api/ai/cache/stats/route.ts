@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
 
   // Rate limiting
   const ip = getClientIP(request)
-  const rl = checkRateLimit(`cache-stats:${ip}`, {
+  const rl = await checkRateLimit(`cache-stats:${ip}`, {
     maxRequests: 10,
     windowMs: 60_000,
   })
@@ -45,10 +45,10 @@ export async function GET(request: NextRequest) {
   }
 
   // Clean up expired entries first
-  const cleared = clearExpiredEntries()
+  const cleared = await clearExpiredEntries()
   
   // Get current stats
-  const stats = getCacheStats()
+  const stats = await getCacheStats()
   
   return NextResponse.json({
     ...stats,
