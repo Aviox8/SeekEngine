@@ -97,6 +97,7 @@ npm run dev`}</pre>
         <p><strong>/api/ai/cache/stats returns 401.</strong> The Bearer token must match <code>CACHE_STATS_SECRET</code> (or <code>ADMIN_SECRET</code>). A mismatched or absent secret returns 500 <code>SERVER_MISCONFIGURED</code>, not 401. check the server logs first.</p>
         <p><strong>Layerbase keeps sleeping.</strong> The warm workflow must be on the default branch to run on schedule, and <code>LAYERBASE_REDIS_URL</code> must be set as a repository secret. Manual trigger: Actions → Keep Redis warm → Run workflow; expect <code>PONG</code>.</p>
         <p><strong>Answers arrive when they should not.</strong> They cannot: the answer stream only starts after the grounding set is ready, and if retrieval fails or returns nothing, no answer is generated at all.</p>
+        <p>Maintained by <a href="https://github.com/Aviox8" className="underline underline-offset-2 hover:text-foreground focus-visible:text-foreground" target="_blank" rel="noopener noreferrer">Aviox8</a>, originally developed by <a href="https://github.com/archduke1337" className="underline underline-offset-2 hover:text-foreground focus-visible:text-foreground" target="_blank" rel="noopener noreferrer">archduke1337</a>.</p>
       </LegalSection>
     </LegalPageShell>
   )

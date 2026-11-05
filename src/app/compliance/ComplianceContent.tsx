@@ -59,7 +59,7 @@ export default function ComplianceContent() {
           <li>Deletion requests: there is nothing to delete. Queries are not retained against any identity.</li>
           <li>Portability: nothing to export.</li>
           <li>Objection: use the service anonymously, as designed. Self-host for complete control.</li>
-          <li>Questions: open a GitHub issue or contact the maintainer via <a className="underline underline-offset-2 decoration-foreground/20 hover:decoration-foreground/60 focus-visible:decoration-foreground/60" href="https://archduke.is-a.dev" target="_blank" rel="noopener noreferrer">archduke.is-a.dev</a>.</li>
+          <li>Questions: open a GitHub issue or contact the maintainers via <a className="underline underline-offset-2 decoration-foreground/20 hover:decoration-foreground/60 focus-visible:decoration-foreground/60" href="https://github.com/archduke1337" target="_blank" rel="noopener noreferrer">archduke1337</a> or <a className="underline underline-offset-2 decoration-foreground/20 hover:decoration-foreground/60 focus-visible:decoration-foreground/60" href="https://github.com/Aviox8" target="_blank" rel="noopener noreferrer">Aviox8</a>.</li>
         </ul>
         <p>The hosted demo is a hobby project, not a data controller you can sue usefully. but the architecture that makes this easy is the same one that makes it honest.</p>
       </LegalSection>

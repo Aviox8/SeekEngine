@@ -102,9 +102,9 @@ export default function ApiContent() {
           <li><code>EXTERNAL_API_FAILED</code>. an upstream provider broke. 502.</li>
           <li><code>MODEL_UNAVAILABLE</code>. the model pool is exhausted or rate-limited. 503.</li>
           <li><code>TIMEOUT</code>. an upstream call exceeded its budget. 504.</li>
-          <li><code>INTERNAL_ERROR</code>. everything else; retry once, then report.</li>
+        <li><code>INTERNAL_ERROR</code>. everything else; retry once, then report.</li>
         </ul>
-        <p>Per-IP limits: search 30/min, stream 20/min, suggest 60/min, cache-stats 10/min. Rate limiting fails open: if the limiter itself is down, requests are allowed. never blocked by your own infrastructure.</p>
+        <p>Maintained by <a href="https://github.com/Aviox8" className="underline underline-offset-2 hover:text-foreground focus-visible:text-foreground" target="_blank" rel="noopener noreferrer">Aviox8</a>, originally developed by <a href="https://github.com/archduke1337" className="underline underline-offset-2 hover:text-foreground focus-visible:text-foreground" target="_blank" rel="noopener noreferrer">archduke1337</a>.</p>
       </LegalSection>
     </LegalPageShell>
   )

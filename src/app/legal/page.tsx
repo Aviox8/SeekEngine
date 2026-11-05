@@ -108,9 +108,13 @@ export default function LegalPage() {
           <a href="https://github.com/archduke1337/SeekEngine" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
             GitHub
           </a>{' '}
-          or write to the maintainer at{' '}
-          <a href="https://archduke.is-a.dev" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
-            archduke.is-a.dev
+          or write to the maintainers at{' '}
+          <a href="https://github.com/archduke1337" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
+            archduke1337 (original developer)
+          </a>{' '}
+          and{' '}
+          <a href="https://github.com/Aviox8" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
+            Aviox8 (maintainer)
           </a>.
         </p>
       </div>

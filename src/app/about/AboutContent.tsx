@@ -335,15 +335,19 @@ export default function AboutContent() {
               </p>
               <div className="space-y-2">
                 <p className="text-sm">
-                  <span className="text-foreground/45">Researcher:</span>{' '}
-                  <span className="font-medium text-foreground">Gaurav Yadav</span>
+                  <span className="text-foreground/45">Developed by:</span>{' '}
+                  <span className="font-medium text-foreground">archduke1337</span>
+                </p>
+                <p className="text-sm">
+                  <span className="text-foreground/45">Maintained by:</span>{' '}
+                  <span className="font-medium text-foreground">Aviox8</span>
                 </p>
                 <p className="text-sm">
                   <a
-                    href="mailto:gauravramyadav@gmail.com"
+                    href="https://github.com/archduke1337/SeekEngine"
                     className="text-foreground/65 hover:text-foreground focus-visible:text-foreground underline underline-offset-4 decoration-foreground/15 hover:decoration-foreground/30 transition-colors font-medium"
                   >
-                    gauravramyadav@gmail.com
+                    View on GitHub
                   </a>
                 </p>
               </div>
@@ -357,11 +361,11 @@ export default function AboutContent() {
                 <Link href="https://github.com/archduke1337/SeekEngine" target="_blank" className="text-foreground/55 hover:text-foreground focus-visible:text-foreground transition-colors">
                   GitHub →
                 </Link>
-                <Link href="https://archduke.is-a.dev/research/seekengine" target="_blank" className="text-foreground/55 hover:text-foreground focus-visible:text-foreground transition-colors">
-                  Research paper →
+                <Link href="https://github.com/archduke1337/SeekEngine/actions" target="_blank" className="text-foreground/55 hover:text-foreground focus-visible:text-foreground transition-colors">
+                  CI/CD →
                 </Link>
-                <Link href="https://archduke.is-a.dev" target="_blank" className="text-foreground/55 hover:text-foreground focus-visible:text-foreground transition-colors">
-                  Portfolio →
+                <Link href="https://github.com/Aviox8" target="_blank" className="text-foreground/55 hover:text-foreground focus-visible:text-foreground transition-colors">
+                  Maintainer →
                 </Link>
                 <Link href="/tos" className="text-foreground/55 hover:text-foreground focus-visible:text-foreground transition-colors">
                   Terms →

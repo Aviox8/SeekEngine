@@ -47,7 +47,7 @@ const sections = [
   <li>License: MIT</li>
   <li>Homepage: <code>https://seekengine.vercel.app</code></li>
   <li>Source: <code>https://github.com/archduke1337/SeekEngine</code></li>
-  <li>Maintainer: <a href="https://archduke.is-a.dev" className="underline underline-offset-2 hover:text-foreground focus-visible:text-foreground">archduke.is-a.dev</a></li>
+  <li>Maintainer: <a href="https://github.com/Aviox8" className="underline underline-offset-2 hover:text-foreground focus-visible:text-foreground" target="_blank" rel="noopener noreferrer">Aviox8</a> (originally developed by <a href="https://github.com/archduke1337" className="underline underline-offset-2 hover:text-foreground focus-visible:text-foreground" target="_blank" rel="noopener noreferrer">archduke1337</a>)</li>
 </ul>
 `
   },
