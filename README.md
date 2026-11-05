@@ -23,7 +23,7 @@ cp .env.example .env.local
 
 **Optional**:
 - `OLLAMA_API_KEY` - [Ollama Cloud](https://ollama.com) key (answer provider #2, default model `beam:cloud` — Reflection's Beam, zero data retention, free on Ollama Cloud for a limited time)
-- `EXA_API_KEY` - [Exa](https://exa.ai) key (search provider; neural grounding when SerpAPI and Google CSE fail or return nothing; not used for answers)
+- `EXA_API_KEY` - [Exa](https://exa.ai) key (neural search grounding; leads the parallel fan-out, OSINT-oriented; not used for answers)
 - `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` - [Upstash Redis](https://console.upstash.com) (optional — shared answer/search/suggestion caches and rate limiting across edge instances; falls back to in-memory when unset)
 - `LAYERBASE_REDIS_REST_URL` + `LAYERBASE_REDIS_REST_TOKEN` - Fallback/warm Redis (any Upstash-compatible REST endpoint such as Layerbase; written to best-effort alongside the primary; `/api/cron/redis-warm` is pinged every 10 min by GitHub Actions to keep it from sleeping)
 - `CRON_SECRET` - Bearer token protecting the warm endpoint (see `.github/workflows/redis-warm.yml`)
@@ -32,7 +32,7 @@ cp .env.example .env.local
 
 **Resilient provider chains** (last-resort paths need no keys):
 - AI answers: OpenRouter → Ollama Cloud → local synthesis of sources (no LLM key required)
-- Web search: SerpAPI → Google Custom Search → Exa → DuckDuckGo (keyless scrape)
+- Web search: SerpAPI + Google Custom Search + Exa (neural, leads the merge) + DuckDuckGo → fanned out in parallel, merged and deduped
 
 See [.env.example](./.env.example) for detailed setup instructions.
 
@@ -149,7 +149,7 @@ npm test -- models
 
 ## Performance
 
-- **Search Results**: <500ms (SerpAPI direct)
+- **Search Results**: fast when warm (15s Redis context cache); cold path bounded by the slowest provider
 - **AI Answer**: <2-3s (model racing + streaming)
 - **Suggestions**: <1s (cached)
 - **Cache Hits**: <50ms (instant)
@@ -176,7 +176,7 @@ MIT - See [LICENSE](./LICENSE) for details.
 - Restart `npm run dev`
 
 **Search returning no results**
-- All providers are tried in order (SerpAPI → Google CSE → Exa → DuckDuckGo) before giving up
+- All providers are queried in parallel; results are merged and deduped (Exa leads); only if every provider fails does the endpoint error
 - Check the dev server console — each provider logs a warning with its failure reason
 - Check that rate limit not exceeded
 
