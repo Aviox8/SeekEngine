@@ -125,7 +125,7 @@ async function handleRequest(request: NextRequest) {
 
   // Rate limiting
   const ip = getClientIP(request)
-  const rl = checkRateLimit(`stream:${ip}`, RATE_LIMITS.stream)
+  const rl = await checkRateLimit(`stream:${ip}`, RATE_LIMITS.stream)
   if (!rl.allowed) return rateLimitResponse(rl)
 
   try {
@@ -138,7 +138,7 @@ async function handleRequest(request: NextRequest) {
     })
 
     // 1. Semantic Cache check
-    const cached = getCachedAnswer(query, cacheTask)
+    const cached = await getCachedAnswer(query, cacheTask)
     if (cached) {
       logger.info('Stream cache hit', { query: query.slice(0, 40) })
       const encoder = new TextEncoder()
@@ -219,6 +219,7 @@ async function handleRequest(request: NextRequest) {
     const modelInfo = { model: '', modelHuman: '' }
     let cacheWritten = false
     let streamBuffer = ''
+    const pendingCacheWrites: Promise<void>[] = []
 
     const processEventBlock = (block: string) => {
       for (const line of block.split('\n')) {
@@ -260,7 +261,13 @@ async function handleRequest(request: NextRequest) {
                 cachedAt: Date.now(),
                 originalQuery: query,
               }
-              setCachedAnswer(query, entry, cacheTask)
+              pendingCacheWrites.push(
+                setCachedAnswer(query, entry, cacheTask).catch((error) => {
+                  logger.warn('Failed to cache streamed answer', {
+                    reason: error instanceof Error ? error.message : String(error),
+                  })
+                })
+              )
               logger.info('Stream answer cached', {
                 length: finalAnswer.length,
                 queryLen: query.length,
@@ -289,10 +296,13 @@ async function handleRequest(request: NextRequest) {
           logger.debug('Error in cache transform', { error: e instanceof Error ? e.message : 'Unknown' })
         }
       },
-      flush() {
+      async flush() {
         const trailingBlock = streamBuffer.trim()
         if (trailingBlock) {
           processEventBlock(trailingBlock)
+        }
+        if (pendingCacheWrites.length > 0) {
+          await Promise.allSettled(pendingCacheWrites)
         }
       },
     })

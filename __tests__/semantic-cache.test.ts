@@ -60,31 +60,31 @@ describe('cache operations', () => {
     originalQuery: 'test query',
   }
 
-  beforeEach(() => {
-    clearCache()
+  beforeEach(async () => {
+    await clearCache()
   })
 
-  it('returns null for cache miss', () => {
-    expect(getCachedAnswer('nonexistent')).toBeNull()
+  it('returns null for cache miss', async () => {
+    expect(await getCachedAnswer('nonexistent')).toBeNull()
   })
 
-  it('stores and retrieves cached answer', () => {
-    setCachedAnswer('test query', mockEntry)
-    const result = getCachedAnswer('test query')
+  it('stores and retrieves cached answer', async () => {
+    await setCachedAnswer('test query', mockEntry)
+    const result = await getCachedAnswer('test query')
     expect(result).not.toBeNull()
     expect(result!.answer).toBe('Test answer')
   })
 
-  it('matches normalized queries', () => {
-    setCachedAnswer('Hello World', mockEntry)
-    const result = getCachedAnswer('  hello   world  ')
+  it('matches normalized queries', async () => {
+    await setCachedAnswer('Hello World', mockEntry)
+    const result = await getCachedAnswer('  hello   world  ')
     expect(result).not.toBeNull()
   })
 
-  it('tracks cache stats', () => {
-    setCachedAnswer('q1', mockEntry)
-    setCachedAnswer('q2', mockEntry)
-    const stats = getCacheStats()
+  it('tracks cache stats', async () => {
+    await setCachedAnswer('q1', mockEntry)
+    await setCachedAnswer('q2', mockEntry)
+    const stats = await getCacheStats()
     expect(stats.size).toBe(2)
   })
 })

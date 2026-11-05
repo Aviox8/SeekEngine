@@ -10,6 +10,8 @@
  */
 
 import { RATE_LIMIT_MAX_ENTRIES } from './constants'
+import { isRedisConfigured, redisKeys, redisTry } from './redis'
+import { logger } from './logger'
 
 interface RateLimitEntry {
   count: number
@@ -107,10 +109,33 @@ export interface RateLimitResult {
  * @param config - Rate limit configuration
  * @returns Result indicating if request is allowed and reset time
  */
-export function checkRateLimit(
+export async function checkRateLimit(
   key: string,
   config: RateLimitConfig
-): RateLimitResult {
+): Promise<RateLimitResult> {
+  if (isRedisConfigured()) {
+    const outcome = await redisTry<RateLimitResult>('rate limit', async (r) => {
+      const redisKey = redisKeys.rateLimit(key)
+      const count = await r.incr(redisKey)
+      if (count === 1) {
+        await r.expire(redisKey, Math.ceil(config.windowMs / 1000))
+      }
+      const pttl = await r.pttl(redisKey)
+      const ttlMs = pttl > 0 ? pttl : config.windowMs
+      const resetAt = Date.now() + ttlMs
+      if (count > config.maxRequests) {
+        return { allowed: false, remaining: 0, resetAt }
+      }
+      return { allowed: true, remaining: Math.max(0, config.maxRequests - count), resetAt }
+    })
+    if (outcome) {
+      return outcome
+    }
+    // Redis unreachable: fail open (allow) and log; local in-memory path is also unavailable
+    logger.warn('Rate limit backend unavailable; allowing request', { key: key.split(':')[0] })
+    return { allowed: true, remaining: config.maxRequests - 1, resetAt: Date.now() + config.windowMs }
+  }
+
   cleanup()
 
   const now = Date.now()

@@ -24,6 +24,7 @@ cp .env.example .env.local
 **Optional**:
 - `OLLAMA_API_KEY` - [Ollama Cloud](https://ollama.com) key (answer provider #2)
 - `EXA_API_KEY` - [Exa](https://exa.ai) key (search provider, and answer provider #3 when LLMs are down)
+- `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` - [Upstash Redis](https://console.upstash.com) (optional — shared answer/search/suggestion caches and rate limiting across edge instances; falls back to in-memory when unset)
 - `SERPAPI_KEY` - For real-time Google search
 - `GOOGLE_SEARCH_API_KEY` + `GOOGLE_SEARCH_CX` - Alternative search provider
 

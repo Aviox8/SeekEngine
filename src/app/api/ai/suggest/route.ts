@@ -9,14 +9,17 @@ import { checkRateLimit, getClientIP, RATE_LIMITS, rateLimitResponse } from '@/l
 import { createErrorResponse } from '@/lib/errors'
 import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
+import { isRedisConfigured, redisKeys, redisTry } from '@/lib/redis'
 
-// Simple in-memory cache for suggestions (shorter TTL)
-const suggestionsCache = new Map<string, {
+type SuggestionsCacheEntry = {
   suggestions: string[]
   model: string
   modelHuman: string
   cachedAt: number
-}>()
+}
+
+// In-memory fallback cache (used only when Redis is not configured)
+const suggestionsCache = new Map<string, SuggestionsCacheEntry>()
 
 const SUGGESTIONS_CACHE_TTL = 1000 * 60 * 10 // 10 minutes
 
@@ -31,7 +34,7 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: NextRequest) {
   // Rate limiting
   const ip = getClientIP(request)
-  const rl = checkRateLimit(`suggest:${ip}`, RATE_LIMITS.suggest)
+  const rl = await checkRateLimit(`suggest:${ip}`, RATE_LIMITS.suggest)
   if (!rl.allowed) return rateLimitResponse(rl)
 
   const { searchParams } = new URL(request.url)
@@ -50,26 +53,52 @@ export async function GET(request: NextRequest) {
   const cacheKey = normalizeForCache(query)
 
   try {
-    // Check cache first
-    const cached = suggestionsCache.get(cacheKey)
-    if (cached && Date.now() - cached.cachedAt < SUGGESTIONS_CACHE_TTL) {
-      logger.debug('Suggestions cache hit', { query: query.slice(0, 30), cacheKey })
-      return NextResponse.json(
-        {
-          suggestions: cached.suggestions,
-          model: cached.model,
-          modelHuman: cached.modelHuman,
-          latencyMs: 0,
-          attempts: 0,
-          cached: true,
-        },
-        {
-          headers: {
-            'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
-            'X-Cache': 'HIT',
+    // Check cache first (shared Redis when configured, in-memory otherwise)
+    if (isRedisConfigured()) {
+      const cached = await redisTry<SuggestionsCacheEntry | null>('suggest get', async (r) => {
+        const raw = await r.get<SuggestionsCacheEntry>(redisKeys.suggestions(cacheKey))
+        return raw ?? null
+      })
+      if (cached) {
+        logger.debug('Suggestions cache hit', { query: query.slice(0, 30), cacheKey })
+        return NextResponse.json(
+          {
+            suggestions: cached.suggestions,
+            model: cached.model,
+            modelHuman: cached.modelHuman,
+            latencyMs: 0,
+            attempts: 0,
+            cached: true,
           },
-        }
-      )
+          {
+            headers: {
+              'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+              'X-Cache': 'HIT',
+            },
+          }
+        )
+      }
+    } else {
+      const cached = suggestionsCache.get(cacheKey)
+      if (cached && Date.now() - cached.cachedAt < SUGGESTIONS_CACHE_TTL) {
+        logger.debug('Suggestions cache hit', { query: query.slice(0, 30), cacheKey })
+        return NextResponse.json(
+          {
+            suggestions: cached.suggestions,
+            model: cached.model,
+            modelHuman: cached.modelHuman,
+            latencyMs: 0,
+            attempts: 0,
+            cached: true,
+          },
+          {
+            headers: {
+              'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+              'X-Cache': 'HIT',
+            },
+          }
+        )
+      }
     }
 
     // Cache miss - generate new suggestions
@@ -77,23 +106,32 @@ export async function GET(request: NextRequest) {
     
     // Cache the result
     if (result.suggestions.length > 0 && result.model !== 'fallback') {
-      suggestionsCache.set(cacheKey, {
+      const entry: SuggestionsCacheEntry = {
         suggestions: result.suggestions,
         model: result.model,
         modelHuman: result.modelHuman,
         cachedAt: Date.now(),
-      })
-      
-      // Evict the oldest entries in one pass once the cap is exceeded
-      const MAX_CACHE_SIZE = 200
-      if (suggestionsCache.size > MAX_CACHE_SIZE) {
-        const overflow = suggestionsCache.size - MAX_CACHE_SIZE
-        const byOldest = [...suggestionsCache.entries()].sort(
-          (a, b) => a[1].cachedAt - b[1].cachedAt
-        )
-        for (let i = 0; i < overflow; i++) {
-          const oldest = byOldest[i]
-          if (oldest) suggestionsCache.delete(oldest[0])
+      }
+
+      if (isRedisConfigured()) {
+        void redisTry('suggest set', async (r) => {
+          await r.set(redisKeys.suggestions(cacheKey), entry, { ex: Math.floor(SUGGESTIONS_CACHE_TTL / 1000) })
+          return true
+        })
+      } else {
+        suggestionsCache.set(cacheKey, entry)
+
+        // Evict the oldest entries in one pass once the cap is exceeded
+        const MAX_CACHE_SIZE = 200
+        if (suggestionsCache.size > MAX_CACHE_SIZE) {
+          const overflow = suggestionsCache.size - MAX_CACHE_SIZE
+          const byOldest = [...suggestionsCache.entries()].sort(
+            (a, b) => a[1].cachedAt - b[1].cachedAt
+          )
+          for (let i = 0; i < overflow; i++) {
+            const oldest = byOldest[i]
+            if (oldest) suggestionsCache.delete(oldest[0])
+          }
         }
       }
     }

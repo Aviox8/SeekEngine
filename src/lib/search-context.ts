@@ -4,6 +4,7 @@ import { getSerpResults } from './serpapi'
 import { getExaResults } from './exa'
 import { getDuckDuckGoResults } from './duckduckgo'
 import { logger } from './logger'
+import { isRedisConfigured, redisKeys, redisTry } from './redis'
 
 const SEARCH_CONTEXT_TTL_MS = 15_000
 const MAX_SEARCH_CACHE_ENTRIES = 100
@@ -247,13 +248,21 @@ export async function getSearchContext(
   timeRange?: TimeRangeCode,
   signal?: AbortSignal
 ): Promise<SearchContextResult> {
-  cleanupSearchCache()
-
   const cacheKey = buildCacheKey(query, timeRange)
   const now = Date.now()
-  const cached = resultCache.get(cacheKey)
-  if (cached && cached.expiresAt > now) {
-    return { ...cached.value, cached: true }
+
+  if (isRedisConfigured()) {
+    const cached = await redisTry<SearchContextResult | null>('ctx get', async (r) => {
+      const raw = await r.get<SearchContextResult>(redisKeys.searchContext(cacheKey))
+      return raw ? { ...raw, cached: true } : null
+    })
+    if (cached) return cached
+  } else {
+    cleanupSearchCache()
+    const cached = resultCache.get(cacheKey)
+    if (cached && cached.expiresAt > now) {
+      return { ...cached.value, cached: true }
+    }
   }
 
   const inflight = inflightRequests.get(cacheKey)
@@ -263,10 +272,17 @@ export async function getSearchContext(
 
   const request = loadSearchContext(query, timeRange, signal)
     .then((value) => {
-      resultCache.set(cacheKey, {
-        value,
-        expiresAt: Date.now() + SEARCH_CONTEXT_TTL_MS,
-      })
+      if (isRedisConfigured()) {
+        void redisTry('ctx set', async (r) => {
+          await r.set(redisKeys.searchContext(cacheKey), value, { ex: Math.floor(SEARCH_CONTEXT_TTL_MS / 1000) })
+          return true
+        })
+      } else {
+        resultCache.set(cacheKey, {
+          value,
+          expiresAt: Date.now() + SEARCH_CONTEXT_TTL_MS,
+        })
+      }
       return { ...value, cached: false }
     })
     .finally(() => {
