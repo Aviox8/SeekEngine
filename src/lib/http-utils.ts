@@ -39,6 +39,9 @@ export async function fetchWithTimeout(
       ...options,
       signal: controller.signal,
     })
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status} ${response.statusText}`)
+    }
     return response
   } finally {
     if (externalSignal) {
